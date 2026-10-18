@@ -17,6 +17,8 @@ test('AC6.1 after the first load, tasks can be created, completed and reloaded o
   await addTask(page, 'Offline task', 'Morning')
   await blockArea(page, 'Morning')
   await page.getByRole('button', { name: 'Status: To Do. Change to In Progress' }).click()
+  // The label updates from the database, so the change is saved before reloading.
+  await expect(page.getByRole('article', { name: 'Offline task, In Progress' })).toBeVisible()
 
   await page.reload()
   await blockArea(page, 'Morning')

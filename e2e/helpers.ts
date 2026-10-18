@@ -50,3 +50,17 @@ export async function expectNoHorizontalScroll(page: Page): Promise<void> {
   )
   expect(overflow).toBe(false)
 }
+
+/** Clipboard text with line endings normalized (Windows returns CRLF). */
+export async function readClipboard(page: Page): Promise<string> {
+  const text = await page.evaluate(() => navigator.clipboard.readText())
+  return text.replace(/\r\n/g, '\n')
+}
+
+/** Cycles a note's status from To Do to Done. */
+export async function markDone(page: Page, title: string): Promise<void> {
+  const note = page.getByRole('article', { name: new RegExp(`^${title}`) })
+  await note.getByRole('button', { name: /^Status: To Do/ }).click()
+  await note.getByRole('button', { name: /^Status: In Progress/ }).click()
+  await expect(note.getByRole('button', { name: /^Status: Done/ })).toBeVisible()
+}

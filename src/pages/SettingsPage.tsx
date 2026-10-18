@@ -5,12 +5,14 @@ import { AppShell } from '@/components/layout/AppShell'
 import { AiSecuritySection } from '@/components/settings/AiSecuritySection'
 import { CompaniesSection } from '@/components/settings/CompaniesSection'
 import { SettingsNav } from '@/components/settings/SettingsNav'
+import { StatsSection } from '@/components/settings/StatsSection'
 import { Button } from '@/components/ui/button'
 
-// More sections (Integrations, Backup, Voice, Stats, About) join this map in later tasks.
+// More sections (Integrations, Backup, Voice, About) join this map in later tasks.
 const SECTIONS = {
   companies: { label: 'Companies', Component: CompaniesSection },
   'ai-security': { label: 'AI & Security', Component: AiSecuritySection },
+  stats: { label: 'Stats', Component: StatsSection },
 } as const
 
 const NAV_ITEMS = Object.entries(SECTIONS).map(([id, s]) => ({ id, label: s.label }))

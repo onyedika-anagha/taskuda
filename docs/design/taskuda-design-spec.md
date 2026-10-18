@@ -70,9 +70,9 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 3. *Alt:* note menu → "Set status" → pick any of the three directly.
 
 ### F5 — End-of-day closeout
-1. User presses **Close out day** (app bar) → **S5 Closeout**, timer start saved (M3).
-2. **Step 1 Unfinished tasks:** each non-Done task has two options: "Carry over" / "Delete". A bulk button "Carry over all" sets every undecided task. "Next" is disabled until every task has an outcome, and a counter shows how many still need a decision. *Alt:* zero unfinished tasks → step shows "Everything's done. Nice." and Next is enabled.
-3. **Step 2 Reflect:** rating 1–5 (required), reflection text (optional). Next is disabled until a rating is picked.
+1. User presses **Close out day** (app bar) → **S5 Closeout**, timer start saved (M3). Available on today and on past days that were never closed out (a forgotten day still gets its carryover, to the day after it); not on future days. *Changed during build.*
+2. **Step 1 Unfinished tasks:** each non-Done task has two options: "Carry over" / "Delete". A bulk button "Carry over all" sets every undecided task. "Next" stays enabled but doesn't advance until every task has an outcome; a counter shows how many still need a decision and turns into an error after pressing Next. *Changed during build (disabled buttons hide why).* *Alt:* zero unfinished tasks → step shows "Everything's done. Nice." and Next is enabled.
+3. **Step 2 Reflect:** rating 1–5 (required), reflection text (optional). Pressing Next without a rating shows "Pick a rating to continue." and stays on the step.
 4. **Step 3 AI recommendations:**
    - First time only: disclosure panel listing what will be sent → "Send to <provider>" / "Skip AI today".
    - Loading → recommendations shown.
@@ -296,6 +296,7 @@ Target: **WCAG 2.1 AA**.
   - Note: `aria-label="Client call, Acme, 2:00 PM, In Progress"`.
   - Calendar-sourced and carried-over icons have text labels ("From Google Calendar", "Carried over twice").
   - Color swatches: color name as label ("Teal").
+- **Toasts** appear at the top center, so they never cover the phone bottom action bar (changed during build).
 - **Live regions:** status changes, task moves, "Copied", sync errors, and step changes in S5 are announced through a polite `aria-live` region.
 - **Audio equivalents:** every spoken voice alert has a matching on-screen toast.
 - **Touch targets:** ≥ 44×44 px (StatusToggle, note menu, tabs, FAB, swatches).

@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import 'fake-indexeddb/auto'
-import { cleanup } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { afterEach, vi } from 'vitest'
 import { setViewportTabletUp } from './viewport'
 
@@ -15,6 +15,9 @@ Element.prototype.scrollIntoView ??= vi.fn<() => void>()
 Element.prototype.hasPointerCapture ??= () => false
 Element.prototype.releasePointerCapture ??= vi.fn<(pointerId: number) => void>()
 Element.prototype.setPointerCapture ??= vi.fn<(pointerId: number) => void>()
+
+// PBKDF2 (600k iterations) competes for CPU when test files run in parallel; give findBy* room.
+configure({ asyncUtilTimeout: 4000 })
 
 setViewportTabletUp(true)
 

@@ -141,16 +141,16 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 4.5 SecretField showing only the last 4 characters after save (DAC14); "Change passphrase" and "Reset secrets"
   - [x] 4.6 Unit tests: encrypt/decrypt round trip, wrong passphrase fails, stored data contains no plaintext key (AC12.3), reset removes secrets
 
-- [ ] 5.0 Build the EOD closeout, carryover, report builder, and local stats
-  - [ ] 5.1 `closeoutStore` and `useCloseout`: step state, outcomes per task, rating, reflection, draft saved so the closeout can be resumed (DAC13), start timestamp
-  - [ ] 5.2 UnfinishedStep with OutcomeChooser, "Carry over all", and the "still need a decision" counter; Next disabled until every task has an outcome (AC10.1)
-  - [ ] 5.3 ReflectStep with RatingInput (required) and reflection text (AC10.2)
-  - [ ] 5.4 Finish: apply carryover (copy to the next day, same block, keep status, increase `carriedOverCount`), apply deletes, save the closeout log (AC10.3, AC11.1, AC11.2); "Day closed" banner; "Close out again" replaces the day's entry
-  - [ ] 5.5 `utils/reportFormatters.ts`: Slack, Teams, Jira, and Email text with Done / In progress / Carried to tomorrow sections, per company or all (AC14.1, AC14.2, AC14.4)
-  - [ ] 5.6 ReportBuilder, FormatSwitcher, ReportPreview shared by closeout step 4 and S6; `utils/clipboard.ts` with the manual-copy fallback; save copy time for M3 (AC14.3, DAC5)
-  - [ ] 5.7 `utils/metrics.ts` (M1 silently-dropped count, M2 streak over working days, M3 median minutes) and StatsSection with MetricTiles (FR17)
-  - [ ] 5.8 Leave-closeout confirmation and the "already closed" state
-  - [ ] 5.9 Tests: unit tests for formatters and metrics; e2e `closeout.spec.ts` (AC10.x, AC11.x, DAC4, DAC13) and `report.spec.ts` (AC14.x, DAC5)
+- [x] 5.0 Build the EOD closeout, carryover, report builder, and local stats
+  - [x] 5.1 `closeoutStore` and `useCloseout`: step state, outcomes per task, rating, reflection, draft saved so the closeout can be resumed (DAC13), start timestamp
+  - [x] 5.2 UnfinishedStep with OutcomeChooser, "Carry over all", and the "still need a decision" counter; Next disabled until every task has an outcome (AC10.1)
+  - [x] 5.3 ReflectStep with RatingInput (required) and reflection text (AC10.2)
+  - [x] 5.4 Finish: apply carryover (copy to the next day, same block, keep status, increase `carriedOverCount`), apply deletes, save the closeout log (AC10.3, AC11.1, AC11.2); "Day closed" banner; "Close out again" replaces the day's entry
+  - [x] 5.5 `utils/reportFormatters.ts`: Slack, Teams, Jira, and Email text with Done / In progress / Carried to tomorrow sections, per company or all (AC14.1, AC14.2, AC14.4)
+  - [x] 5.6 ReportBuilder, FormatSwitcher, ReportPreview shared by closeout step 4 and S6; `utils/clipboard.ts` with the manual-copy fallback; save copy time for M3 (AC14.3, DAC5)
+  - [x] 5.7 `utils/metrics.ts` (M1 silently-dropped count, M2 streak over working days, M3 median minutes) and StatsSection with MetricTiles (FR17)
+  - [x] 5.8 Leave-closeout confirmation and the "already closed" state
+  - [x] 5.9 Tests: unit tests for formatters and metrics; e2e `closeout.spec.ts` (AC10.x, AC11.x, DAC4, DAC13) and `report.spec.ts` (AC14.x, DAC5)
 
 - [ ] 6.0 Build AI recommendations with the user's own key
   - [ ] 6.1 AI & Security settings section: provider (Gemini / OpenRouter), API key (SecretField, triggers D6 on first secret), model with a preset default, Test key, Remove key, spending-limit tip (AC12.1, AC12.2)

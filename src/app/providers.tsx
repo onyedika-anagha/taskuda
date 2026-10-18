@@ -10,7 +10,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <TooltipProvider>
         {children}
-        <Toaster />
+        {/* Top, so toasts never cover the phone bottom action bar. */}
+        <Toaster position="top-center" />
         <LiveAnnouncer />
         <VaultPrompts />
       </TooltipProvider>
