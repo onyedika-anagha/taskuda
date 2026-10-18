@@ -109,19 +109,19 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 1.10 Set up routing (`src/app/router.tsx`) with placeholder pages for the routes in design spec Section 4
   - [x] 1.11 Light and dark theme tokens as CSS variables, following the system setting (design spec Section 10)
 
-- [ ] 2.0 Build the local data layer
-  - [ ] 2.1 Define types in `src/types/`: Task (id, title, notes, companyId, dayKey, block, order, startTime, durationMinutes, status, carriedOverCount, source, jiraIssue, timestamps), Company, Closeout, ActivityEvent, Settings
-  - [ ] 2.2 Create the Dexie schema in `services/db/database.ts` with indexes on `dayKey`, `companyId`, and `[dayKey+block+order]`; version the schema so later migrations are possible
-  - [ ] 2.3 Write repositories for tasks, companies, closeouts, settings, and calendar mappings; each write also appends an ActivityEvent (created, status changed, moved, carried over, deleted)
-  - [ ] 2.4 Write `utils/timeBlocks.ts` (block for a time; ranges 05:00–11:59, 12:00–16:59, 17:00–04:59) and `utils/dates.ts` (day keys, working days) with unit tests
-  - [ ] 2.5 Create Zustand stores (`taskStore`, `companyStore`, `settingsStore`) that update the UI and write through the repositories immediately (NFR2)
-  - [ ] 2.6 Detect when storage is unavailable (private mode or blocked) and expose a `storageError` flag for the S2 error state
-  - [ ] 2.7 Unit tests: repository CRUD, activity events written for each change, reorder logic, storage-error detection
+- [x] 2.0 Build the local data layer
+  - [x] 2.1 Define types in `src/types/`: Task (id, title, notes, companyId, dayKey, block, order, startTime, durationMinutes, status, carriedOverCount, source, jiraIssue, timestamps), Company, Closeout, ActivityEvent, Settings
+  - [x] 2.2 Create the Dexie schema in `services/db/database.ts` with indexes on `dayKey`, `companyId`, and `[dayKey+block+order]`; version the schema so later migrations are possible
+  - [x] 2.3 Write repositories for tasks, companies, closeouts, settings, and calendar mappings; each write also appends an ActivityEvent (created, status changed, moved, carried over, deleted)
+  - [x] 2.4 Write `utils/timeBlocks.ts` (block for a time; ranges 05:00–11:59, 12:00–16:59, 17:00–04:59) and `utils/dates.ts` (day keys, working days) with unit tests
+  - [x] 2.5 Reads use Dexie live queries (`useTasksForDay`, `useCompanies`) so background sync updates the UI; writes go through repositories immediately (NFR2); Zustand holds UI state only (`appStatusStore`)
+  - [x] 2.6 Detect when storage is unavailable (private mode or blocked) and expose a `storageError` flag for the S2 error state
+  - [x] 2.7 Unit tests: repository CRUD, activity events written for each change, reorder logic, storage-error detection
 
 - [ ] 3.0 Build the Today canvas
   - [ ] 3.1 AppShell and AppBar (desktop layout, plus mobile floating Add button and bottom action bar)
   - [ ] 3.2 DayNavigator with prev / next / Today; past days read-only with banner; `/day/:date` route
-  - [ ] 3.3 `utils/companyPalette.ts` with the 10 colors and light/dark tokens; a unit test that checks ≥ 4.5:1 text contrast for each (DAC11)
+  - [x] 3.3 `utils/companyPalette.ts` with the 10 colors and light/dark tokens; a unit test that checks ≥ 4.5:1 text contrast for each (DAC11) (done early, with the data layer)
   - [ ] 3.4 CompanyChip, ColorSwatchPicker, and the Companies settings section (add, rename, recolor, delete with D3; duplicate-name error) — FR5
   - [ ] 3.5 TimeBlockColumn (desktop/tablet), TimeBlockTabs with task counts (mobile < 768px), and EmptyBlockState with "Add a task" link — FR1
   - [ ] 3.6 StickyNote with company tint, carried-over marker, calendar icon, Jira key, and a full screen-reader label
