@@ -118,20 +118,20 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 2.6 Detect when storage is unavailable (private mode or blocked) and expose a `storageError` flag for the S2 error state
   - [x] 2.7 Unit tests: repository CRUD, activity events written for each change, reorder logic, storage-error detection
 
-- [ ] 3.0 Build the Today canvas
-  - [ ] 3.1 AppShell and AppBar (desktop layout, plus mobile floating Add button and bottom action bar)
-  - [ ] 3.2 DayNavigator with prev / next / Today; past days read-only with banner; `/day/:date` route
+- [x] 3.0 Build the Today canvas
+  - [x] 3.1 AppShell and AppBar (desktop layout, plus mobile floating Add button and bottom action bar)
+  - [x] 3.2 DayNavigator with prev / next / Today; past days read-only with banner; `/day/:date` route
   - [x] 3.3 `utils/companyPalette.ts` with the 10 colors and light/dark tokens; a unit test that checks ≥ 4.5:1 text contrast for each (DAC11) (done early, with the data layer)
-  - [ ] 3.4 CompanyChip, ColorSwatchPicker, and the Companies settings section (add, rename, recolor, delete with D3; duplicate-name error) — FR5
-  - [ ] 3.5 TimeBlockColumn (desktop/tablet), TimeBlockTabs with task counts (mobile < 768px), and EmptyBlockState with "Add a task" link — FR1
-  - [ ] 3.6 StickyNote with company tint, carried-over marker, calendar icon, Jira key, and a full screen-reader label
-  - [ ] 3.7 StatusToggle cycling To Do → In Progress → Done → To Do, icon + label, aria-label — FR4, DAC2
-  - [ ] 3.8 TaskEditor (Dialog ≥ 768px, Sheet < 768px) using React Hook Form + Zod: title required, block defaults to current time, start time sets the block — FR2
-  - [ ] 3.9 TaskMenu: edit, set status, move to block, move up/down, delete (D1)
-  - [ ] 3.10 Drag-and-drop with @dnd-kit: within and across blocks, keyboard sensor with announcements, 200 ms touch long-press, drop onto a tab on mobile; D2 when a timed task is dropped in the wrong block — FR3
-  - [ ] 3.11 Keyboard shortcuts `N`, `T`, `[`, `]`, `?` (ignored while typing in a field)
-  - [ ] 3.12 OfflineBanner, storage-error Alert, Skeleton loading state, toasts — NFR1
-  - [ ] 3.13 Component tests for StatusToggle, TaskEditor validation, StickyNote labels, Companies section; e2e `tasks.spec.ts` covering AC1.x–AC5.x, DAC1, DAC3, DAC6, DAC9; `offline.spec.ts` for AC6.1–AC6.2
+  - [x] 3.4 CompanyChip, ColorSwatchPicker, and the Companies settings section (add, rename, recolor, delete with D3; duplicate-name error) — FR5
+  - [x] 3.5 TimeBlockColumn (desktop/tablet), TimeBlockTabs with task counts (mobile < 768px), and EmptyBlockState with "Add a task" link — FR1
+  - [x] 3.6 StickyNote with company tint, carried-over marker, calendar icon, Jira key, and a full screen-reader label
+  - [x] 3.7 StatusToggle cycling To Do → In Progress → Done → To Do, icon + label, aria-label — FR4, DAC2
+  - [x] 3.8 TaskEditor (Dialog ≥ 768px, Sheet < 768px) using React Hook Form + Zod: title required, block defaults to current time, start time sets the block — FR2
+  - [x] 3.9 TaskMenu: edit, set status, move to block, move up/down, delete (D1)
+  - [x] 3.10 Drag-and-drop with @dnd-kit: within and across blocks, keyboard sensor with announcements, drag from the note handle on all devices, drop onto a tab on mobile; D2 when a timed task is dropped in the wrong block — FR3
+  - [x] 3.11 Keyboard shortcuts `N`, `T`, `[`, `]`, `?` (ignored while typing in a field)
+  - [x] 3.12 OfflineBanner, storage-error Alert, Skeleton loading state, toasts — NFR1
+  - [x] 3.13 Component tests for StatusToggle, TaskEditor validation, StickyNote labels, Companies section; e2e `tasks.spec.ts` covering AC1.x–AC5.x, DAC1, DAC3, DAC6, DAC9; `offline.spec.ts` for AC6.1–AC6.2
 
 - [ ] 4.0 Build secret storage
   - [ ] 4.1 `services/crypto/secretVault.ts`: derive a key from the passphrase with PBKDF2 (SHA-256, high iteration count) and a random salt; encrypt secrets with AES-GCM

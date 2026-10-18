@@ -56,7 +56,7 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 2. **S3 Task Editor** opens with the title focused. Block defaults to the current time of day (Morning 05:00–11:59, Afternoon 12:00–16:59, Evening 17:00–04:59).
 3. User types a title → Enter (or "Save") → note appears in the block, with a toast "Task added".
 4. *Alt:* user adds notes, company, start time, duration, Jira link before saving. Setting a start time sets the block to match.
-5. *Failure:* empty title → inline "Give the task a title." Save stays disabled. *Failure:* local save fails (storage full or blocked) → error toast with "Try again", and the editor stays open with the input kept.
+5. *Failure:* empty title → inline "Give the task a title." on submit or blur, and nothing is saved (Save stays enabled so the error can be discovered; changed during build). *Failure:* local save fails (storage full or blocked) → error toast with "Try again", and the editor stays open with the input kept.
 
 ### F3 — Move a task
 1. User drags a note to another position or block → it drops there and the order is saved.
@@ -66,7 +66,7 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 
 ### F4 — Change status
 1. User taps the StatusToggle on a note → To Do → In Progress → Done → To Do.
-2. Done: note is dimmed with a check icon and a "Done" label; if voice is on, the completion cheer plays (F11).
+2. Done: note color is desaturated, the title is struck through, with a check icon and a "Done" label; if voice is on, the completion cheer plays (F11).
 3. *Alt:* note menu → "Set status" → pick any of the three directly.
 
 ### F5 — End-of-day closeout
@@ -276,7 +276,7 @@ App shell
 
 - **Installed PWA:** standalone window; app bar respects safe areas (`env(safe-area-inset-*)`) on phones.
 - **Android Chrome:** full support target. **iOS Safari:** best effort; voice and install may be limited, so show the unsupported messages instead of broken controls.
-- **Touch:** dragging starts after a 200 ms long-press on the note (prevents accidental drags while scrolling); the drag handle starts dragging immediately.
+- **Drag start (all devices):** dragging starts from the note's drag handle (grip icon), so the note body scrolls normally on touch and keeps no nested controls inside a draggable element. Changed during build from "long-press on the note".
 - Minimum supported width: 320px with no horizontal scrolling.
 
 ---
@@ -287,7 +287,7 @@ Target: **WCAG 2.1 AA**.
 
 - **Contrast:** text ≥ 4.5:1 against its background, including text on every company-tinted note; large text and UI parts (borders, icons, focus ring) ≥ 3:1. The 10-color palette must be validated for both light and dark themes before build.
 - **Not color alone:** company is shown by color **and** name (CompanyChip); status by icon **and** label (○ To Do, ◐ In Progress, ✓ Done).
-- **Focus order on S2:** app bar left to right → Morning notes top to bottom → Afternoon → Evening. Within a note: StatusToggle → title (opens editor) → menu.
+- **Focus order on S2:** app bar left to right → Morning notes top to bottom → Afternoon → Evening. Within a note: title (opens editor) → StatusToggle → menu → drag handle (title first so the note reads naturally; changed during build).
 - **Focus visible:** 2px ring with 2px offset, ≥ 3:1 contrast, on every interactive element.
 - **Overlays:** focus moves into the overlay on open, is trapped inside, and goes back to the triggering element on close.
 - **Drag-and-drop alternatives:** keyboard dragging (Space/arrows/Space/Esc) with spoken instructions and announcements ("Picked up Client call. Morning, position 2 of 4."), plus the "Move to…" menu.
@@ -442,7 +442,7 @@ Target: **WCAG 2.1 AA**.
 - **Feel:** a calm desk with paper notes, not a dashboard. Warm off-white canvas (dark theme: deep warm charcoal), notes as soft-tinted paper cards with a subtle shadow and a company-color top edge.
 - **Type:** one readable sans for UI; note titles slightly larger and heavier than metadata. Tabular numbers for times and stats.
 - **Company palette:** 10 fixed hues (for example teal, coral, amber, violet, sky, rose, lime, indigo, orange, slate), each with a light note tint, a strong edge color, and dark-theme variants, all passing DAC11.
-- **Status:** Done notes dim to ~60% opacity with a check; In Progress notes get a stronger edge and a ◐ icon.
+- **Status:** Done notes are desaturated with a struck-through title and a check (not dimmed with opacity, which would break text contrast); In Progress notes get a thicker top edge and a ◉ icon.
 - **Light and dark themes,** following the system setting.
 - Visual craft (exact tokens, spacing scale) is finalized during build with the `frontend-design` / `ui-ux-pro-max` skills, within the constraints above.
 

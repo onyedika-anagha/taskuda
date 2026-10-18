@@ -82,6 +82,12 @@ export const COMPANY_PALETTE: readonly PaletteColor[] = [
   },
 ]
 
+/** Plain paper note for tasks with no company. */
+export const NO_COMPANY_SHADES: Pick<PaletteColor, 'light' | 'dark'> = {
+  light: { tint: '#fffaf0', edge: '#78716c', text: '#2b2620' },
+  dark: { tint: '#2a2622', edge: '#a8a29e', text: '#f3efe8' },
+}
+
 export const DEFAULT_COMPANY_COLOR_ID = COMPANY_PALETTE[0].id
 
 const FALLBACK_COLOR = COMPANY_PALETTE[COMPANY_PALETTE.length - 1]
