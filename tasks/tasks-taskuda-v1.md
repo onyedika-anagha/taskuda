@@ -65,7 +65,7 @@ Order follows PRD priorities: all Must work (tasks 1.0–8.0) comes before Shoul
 - `api/jira.ts` - Vercel function: Jira proxy (allow-list, origin check, rate limit, no logging of bodies).
 
 ### Config
-- `vite.config.ts`, `tsconfig.json`, `eslint.config.js`, `tailwind.config.ts` (or CSS config), `components.json`, `vercel.json`, `playwright.config.ts`, `vitest.config.ts`, `.env.example`.
+- `vite.config.ts`, `tsconfig.json`, `.oxlintrc.json`, `src/index.css` (Tailwind v4 CSS config), `components.json`, `vercel.json`, `playwright.config.ts`, `vitest.config.ts`, `.env.example`.
 
 ### Tests
 - Unit/component tests sit next to the file they test as `*.test.ts(x)` (for example `src/utils/timeBlocks.test.ts`, `src/components/task/StatusToggle.test.tsx`).
@@ -87,27 +87,27 @@ Order follows PRD priorities: all Must work (tasks 1.0–8.0) comes before Shoul
 **IMPORTANT:** As you complete each task, you must check it off in this markdown file by changing `- [ ]` to `- [x]`. This helps track progress and ensures you don't skip any steps.
 
 Example:
-- `- [ ] 1.1 Read file` → `- [x] 1.1 Read file` (after completing)
+- `- [x] 1.1 Read file` → `- [x] 1.1 Read file` (after completing)
 
 Update the file after completing each sub-task, not just after completing an entire parent task.
 
 ## Tasks
 
-- [ ] 0.0 Create feature branch
-  - [ ] 0.1 Create and check out a new branch: `git checkout -b feature/taskuda-v1`
+- [x] 0.0 Create feature branch
+  - [x] 0.1 Create and check out a new branch: `git checkout -b feature/taskuda-v1`
 
-- [ ] 1.0 Scaffold the project and tooling
+- [x] 1.0 Scaffold the project and tooling
   - [ ] 1.1 Create a Vite React + TypeScript project in the repo root (strict TypeScript on)
-  - [ ] 1.2 Add Tailwind CSS and initialize shadcn/ui; add the [REUSE] components from the design spec Section 5
-  - [ ] 1.3 Set up the folder structure from "Relevant Files" (`components/`, `pages/`, `hooks/`, `stores/`, `services/`, `utils/`, `types/`, `schemas/`)
-  - [ ] 1.4 Add ESLint (with the jsx-a11y plugin) and Prettier; add `lint`, `typecheck`, `test`, `e2e`, `build` scripts
-  - [ ] 1.5 Set up Vitest + React Testing Library with jsdom and `fake-indexeddb`; add one passing sample test
-  - [ ] 1.6 Set up Playwright with desktop (1280px), tablet (768px), and mobile (320px) projects; add `@axe-core/playwright`
-  - [ ] 1.7 Add `vite-plugin-pwa` (Workbox): app-shell caching, web manifest, icons, prompt-to-update mode
-  - [ ] 1.8 Add `vercel.json`: single-page-app fallback to `index.html`, no-cache on `sw.js`, and security headers (Content Security Policy allowing only Google, Gemini, OpenRouter, and the app's own `/api`; `X-Content-Type-Options`; `Referrer-Policy`; `frame-ancestors 'none'`)
-  - [ ] 1.9 Add `.env.example` with `VITE_GOOGLE_CLIENT_ID` and `ALLOWED_ORIGIN`; confirm `.env*` (except the example) is in `.gitignore`
-  - [ ] 1.10 Set up routing (`src/app/router.tsx`) with placeholder pages for the routes in design spec Section 4
-  - [ ] 1.11 Light and dark theme tokens as CSS variables, following the system setting (design spec Section 10)
+  - [x] 1.2 Add Tailwind CSS and initialize shadcn/ui; add the [REUSE] components from the design spec Section 5
+  - [x] 1.3 Set up the folder structure from "Relevant Files" (`components/`, `pages/`, `hooks/`, `stores/`, `services/`, `utils/`, `types/`, `schemas/`)
+  - [x] 1.4 Add oxlint (the Vite template linter, with the jsx-a11y plugin) and Prettier; add `lint`, `typecheck`, `test`, `e2e`, `build` scripts
+  - [x] 1.5 Set up Vitest + React Testing Library with jsdom and `fake-indexeddb`; add one passing sample test
+  - [x] 1.6 Set up Playwright with desktop (1280px), tablet (768px), and mobile (320px) projects; add `@axe-core/playwright`
+  - [x] 1.7 Add `vite-plugin-pwa` (Workbox): app-shell caching, web manifest, icons, prompt-to-update mode
+  - [x] 1.8 Add `vercel.json`: single-page-app fallback to `index.html`, no-cache on `sw.js`, and security headers (Content Security Policy allowing only Google, Gemini, OpenRouter, and the app's own `/api`; `X-Content-Type-Options`; `Referrer-Policy`; `frame-ancestors 'none'`)
+  - [x] 1.9 Add `.env.example` with `VITE_GOOGLE_CLIENT_ID` and `ALLOWED_ORIGIN`; confirm `.env*` (except the example) is in `.gitignore`
+  - [x] 1.10 Set up routing (`src/app/router.tsx`) with placeholder pages for the routes in design spec Section 4
+  - [x] 1.11 Light and dark theme tokens as CSS variables, following the system setting (design spec Section 10)
 
 - [ ] 2.0 Build the local data layer
   - [ ] 2.1 Define types in `src/types/`: Task (id, title, notes, companyId, dayKey, block, order, startTime, durationMinutes, status, carriedOverCount, source, jiraIssue, timestamps), Company, Closeout, ActivityEvent, Settings
