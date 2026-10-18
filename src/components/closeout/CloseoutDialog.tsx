@@ -14,7 +14,7 @@ interface CloseoutDialogProps {
   companiesById: Map<string, Company>
 }
 
-/** S5 Closeout: full screen on phones, a large dialog from 640px up. */
+/** S5 Closeout: full screen below 768px, a large dialog from tablet width up. */
 export function CloseoutDialog({ tasks, companies, companiesById }: CloseoutDialogProps) {
   const view = useCloseoutStore((s) => s.view)
   const close = useCloseoutStore((s) => s.close)
@@ -38,7 +38,7 @@ export function CloseoutDialog({ tasks, companies, companiesById }: CloseoutDial
       >
         <DialogContent
           aria-describedby={undefined}
-          className="flex h-dvh max-h-dvh w-full max-w-none flex-col overflow-y-auto rounded-none sm:h-auto sm:max-h-[90dvh] sm:max-w-[720px] sm:rounded-xl"
+          className="flex h-dvh max-h-dvh w-full max-w-none flex-col overflow-y-auto rounded-none md:h-auto md:max-h-[90dvh] md:max-w-[720px] md:rounded-xl"
         >
           <DialogHeader>
             <DialogTitle className="text-lg">{title}</DialogTitle>
