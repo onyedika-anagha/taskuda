@@ -4,7 +4,17 @@ export interface RecordedRequest {
   url: string
   method: string
   headers: Record<string, string>
+  /** Parsed JSON body, when the body is JSON. */
   body: unknown
+  rawBody: string | undefined
+}
+
+function tryParseJson(text: string): unknown {
+  try {
+    return JSON.parse(text)
+  } catch {
+    return undefined
+  }
 }
 
 type Responder = (request: RecordedRequest) => Response | Promise<Response>
@@ -18,7 +28,8 @@ export function mockFetch(respond: Responder) {
       url: String(input),
       method: init?.method ?? 'GET',
       headers,
-      body: typeof init?.body === 'string' ? JSON.parse(init.body) : undefined,
+      body: typeof init?.body === 'string' ? tryParseJson(init.body) : undefined,
+      rawBody: typeof init?.body === 'string' ? init.body : undefined,
     }
     requests.push(request)
     return respond(request)

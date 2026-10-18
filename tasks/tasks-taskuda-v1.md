@@ -159,14 +159,14 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 6.4 RecommendationsStep: first-time disclosure (AC13.3), loading, results, no-key, offline, provider error with Try again; Skip always available (AC13.1, AC13.2)
   - [x] 6.5 Tests: prompt builder unit test, client error mapping with mocked fetch, network check that the key goes only to the provider (AC12.6)
 
-- [ ] 7.0 Build Google sign-in and Drive backup/restore
-  - [ ] 7.1 `googleAuth.ts` using Google Identity Services token client; request scopes only when the feature is turned on (`drive.appdata` for backup); silent renewal before expiry; "Reconnect Google" state when renewal fails
-  - [ ] 7.2 Define the backup file format with a Zod schema (version, device name, created time, data, encrypted secrets)
-  - [ ] 7.3 `driveBackup.ts`: automatic backup after changes (debounced, online only), keep previous versions, list versions, restore one
-  - [ ] 7.4 BackupSection with status, Back up now, Restore from Drive, BackupVersionList, RestoreConfirmDialog (D4) with the different-device warning, then D5 if secrets are present (AC7.1–AC7.4)
-  - [ ] 7.5 SyncStatusIndicator states: saved locally, backed up, backing up, offline, reconnect, failed
-  - [ ] 7.6 Export to file / Import from file using the same backup format (CR2)
-  - [ ] 7.7 Tests: backup schema validation, restore replaces data, unreadable backup error, consent scope check (AC7.3) with mocked Google APIs
+- [x] 7.0 Build Google sign-in and Drive backup/restore
+  - [x] 7.1 `googleAuth.ts` using Google Identity Services token client; request scopes only when the feature is turned on (`drive.appdata` for backup); silent renewal before expiry; "Reconnect Google" state when renewal fails
+  - [x] 7.2 Define the backup file format with a Zod schema (version, device name, created time, data, encrypted secrets)
+  - [x] 7.3 `driveBackup.ts`: automatic backup after changes (debounced, online only), keep previous versions, list versions, restore one
+  - [x] 7.4 BackupSection with status, Back up now, Restore from Drive, BackupVersionList, RestoreConfirmDialog (D4) with the different-device warning, then D5 if secrets are present (AC7.1–AC7.4)
+  - [x] 7.5 SyncStatusIndicator states: saved locally, backed up, backing up, offline, reconnect, failed
+  - [x] 7.6 Export to file / Import from file using the same backup format (CR2)
+  - [x] 7.7 Tests: backup schema validation, restore replaces data, unreadable backup error, consent scope check (AC7.3) with mocked Google APIs
 
 - [ ] 8.0 Build first-run onboarding, settings shell, and PWA prompts
   - [ ] 8.1 SettingsPage with side nav (≥ 1024px) and list → subpage (smaller screens); AboutSection with version and privacy text

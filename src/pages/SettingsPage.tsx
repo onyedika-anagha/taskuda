@@ -3,14 +3,16 @@ import { Link, Navigate, useParams } from 'react-router'
 import { AppBar } from '@/components/layout/AppBar'
 import { AppShell } from '@/components/layout/AppShell'
 import { AiSecuritySection } from '@/components/settings/AiSecuritySection'
+import { BackupSection } from '@/components/settings/BackupSection'
 import { CompaniesSection } from '@/components/settings/CompaniesSection'
 import { SettingsNav } from '@/components/settings/SettingsNav'
 import { StatsSection } from '@/components/settings/StatsSection'
 import { Button } from '@/components/ui/button'
 
-// More sections (Integrations, Backup, Voice, About) join this map in later tasks.
+// More sections (Integrations, Voice, About) join this map in later tasks.
 const SECTIONS = {
   companies: { label: 'Companies', Component: CompaniesSection },
+  backup: { label: 'Backup', Component: BackupSection },
   'ai-security': { label: 'AI & Security', Component: AiSecuritySection },
   stats: { label: 'Stats', Component: StatsSection },
 } as const

@@ -1,6 +1,7 @@
 import { SettingsIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router'
+import { SyncStatusIndicator } from '@/components/backup/SyncStatusIndicator'
 import { Button } from '@/components/ui/button'
 
 interface AppBarProps {
@@ -22,6 +23,7 @@ export function AppBar({ children, actions }: AppBarProps) {
         </Link>
         <div className="flex min-w-0 flex-1 justify-start lg:justify-center">{children}</div>
         {actions ? <div className="hidden items-center gap-2 md:flex">{actions}</div> : null}
+        <SyncStatusIndicator />
         <Button asChild variant="ghost" size="icon" className="size-11">
           <Link to="/settings" aria-label="Settings">
             <SettingsIcon aria-hidden="true" />

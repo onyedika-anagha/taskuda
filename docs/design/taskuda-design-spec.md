@@ -464,5 +464,5 @@ Target: **WCAG 2.1 AA**.
 These are engineering decisions the design depends on. They are noted here, not decided:
 - Default model for each AI provider (S7d preset). **Decided:** Gemini `gemini-3.5-flash-lite` (Google's recommendation for new projects, Oct 2026); OpenRouter `openrouter/auto`. The model is a text field so users can change it without an app update.
 - Which side wins when a task and its calendar event are both edited between syncs (PRD RK6).
-- How many Drive backup versions to keep (PRD RK7).
+- How many Drive backup versions to keep (PRD RK7). **Decided:** the newest 10, one file each in the hidden app-data folder. Google access tokens stay in memory only (no refresh token in a browser-only app): after a reload or after about an hour, backups resume silently when Google allows it, otherwise the indicator shows "Reconnect Google" and one click resumes them.
 - Whether "Close out again" replaces or appends the day's closeout log entry for M2/M3 (design assumes replace). **Decided:** replace, keeping the first closeout's start/copy times for M3.

@@ -36,6 +36,13 @@ export async function noteTitles(area: Locator): Promise<string[]> {
 }
 
 export async function expectNoA11yViolations(page: Page): Promise<void> {
+  // Fading dialogs and toasts give mid-animation colors; scan the settled page.
+  // Infinite ones (loading pulses) never settle, so they're ignored.
+  await page.waitForFunction(() =>
+    document
+      .getAnimations()
+      .every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity),
+  )
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze()

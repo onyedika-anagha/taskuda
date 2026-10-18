@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { ThemeProvider } from 'next-themes'
+import { BackupScheduler } from '@/components/backup/BackupScheduler'
 import { LiveAnnouncer } from '@/components/common/LiveAnnouncer'
 import { VaultPrompts } from '@/components/security/VaultPrompts'
 import { Toaster } from '@/components/ui/sonner'
@@ -14,6 +15,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <Toaster position="top-center" />
         <LiveAnnouncer />
         <VaultPrompts />
+        <BackupScheduler />
       </TooltipProvider>
     </ThemeProvider>
   )

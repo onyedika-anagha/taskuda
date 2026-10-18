@@ -20,5 +20,7 @@ export default defineConfig({
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    // A placeholder client ID so Google sign-in is 'configured'; e2e tests serve a fake Google script.
+    env: { VITE_GOOGLE_CLIENT_ID: 'e2e-client.apps.googleusercontent.com' },
   },
 })

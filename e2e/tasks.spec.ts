@@ -147,7 +147,7 @@ test('DAC10 editor and menu have no accessibility violations', async ({ page }) 
 })
 
 test('companies color-code tasks (AC5.1, AC5.2)', async ({ page }) => {
-  await page.getByRole('link', { name: 'Settings' }).click()
+  await page.getByRole('link', { name: 'Settings', exact: true }).click()
   await page.getByRole('button', { name: 'Add company' }).click()
   const dialog = page.getByRole('dialog', { name: 'Add company' })
   await dialog.getByLabel('Name').fill('Acme')
