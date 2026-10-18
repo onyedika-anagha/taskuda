@@ -1,5 +1,6 @@
 import { ReportBuilder } from '@/components/report/ReportBuilder'
 import { useCloseoutFlow } from '@/hooks/useCloseoutFlow'
+import { useRecommendationsStep } from '@/hooks/useRecommendationsStep'
 import { useCloseoutStore } from '@/stores/closeoutStore'
 import type { CloseoutDraft } from '@/types/closeoutDraft'
 import type { Company } from '@/types/company'
@@ -17,16 +18,12 @@ interface CloseoutStepsProps {
   companiesById: Map<string, Company>
 }
 
-const NEXT_LABELS = {
-  unfinished: 'Next',
-  reflect: 'Next',
-  recommendations: 'Skip',
-  report: 'Finish day',
-} as const
+const NEXT_LABELS = { unfinished: 'Next', reflect: 'Next', report: 'Finish day' } as const
 
 /** The four closeout steps and their Back / Next footer. */
 export function CloseoutSteps({ draft, tasks, companies, companiesById }: CloseoutStepsProps) {
   const flow = useCloseoutFlow(draft, tasks)
+  const recommendations = useRecommendationsStep(draft, tasks, companiesById)
   const setOutcome = useCloseoutStore((s) => s.setOutcome)
   const carryOverAll = useCloseoutStore((s) => s.carryOverAll)
   const setRating = useCloseoutStore((s) => s.setRating)
@@ -58,7 +55,14 @@ export function CloseoutSteps({ draft, tasks, companies, companiesById }: Closeo
             onReflection={setReflection}
           />
         ) : null}
-        {draft.step === 'recommendations' ? <RecommendationsStep /> : null}
+        {draft.step === 'recommendations' ? (
+          <RecommendationsStep
+            view={recommendations.view}
+            onSend={() => void recommendations.send()}
+            onRetry={recommendations.retry}
+            onUnlock={() => void recommendations.unlockAndRetry()}
+          />
+        ) : null}
         {draft.step === 'report' ? (
           <div className="grid gap-3">
             <h3 className="font-semibold">Your report</h3>
@@ -80,7 +84,13 @@ export function CloseoutSteps({ draft, tasks, companies, companiesById }: Closeo
           </Button>
         ) : null}
         <Button size="lg" onClick={flow.next} disabled={flow.finishing}>
-          {flow.finishing ? 'Closing out…' : NEXT_LABELS[draft.step]}
+          {flow.finishing
+            ? 'Closing out…'
+            : draft.step === 'recommendations'
+              ? recommendations.view.state === 'results'
+                ? 'Next'
+                : 'Skip'
+              : NEXT_LABELS[draft.step]}
         </Button>
       </div>
     </div>

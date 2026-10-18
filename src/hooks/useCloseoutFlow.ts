@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { ValidationError } from '@/services/db/errors'
 import { useCloseoutStore } from '@/stores/closeoutStore'
+import { useRecommendationsStore } from '@/stores/recommendationsStore'
 import type { CloseoutDraft, CloseoutStep } from '@/types/closeoutDraft'
 import { CLOSEOUT_STEPS } from '@/types/closeoutDraft'
 import type { Task } from '@/types/task'
@@ -16,6 +17,7 @@ function finishedMessage(carried: number): string {
 export function useCloseoutFlow(draft: CloseoutDraft, tasks: Task[]) {
   const goTo = useCloseoutStore((s) => s.goTo)
   const finishCloseout = useCloseoutStore((s) => s.finish)
+  const resetRecommendations = useRecommendationsStore((s) => s.reset)
   const [errorStep, setErrorStep] = useState<CloseoutStep | null>(null)
   const [finishing, setFinishing] = useState(false)
 
@@ -51,12 +53,15 @@ export function useCloseoutFlow(draft: CloseoutDraft, tasks: Task[]) {
       return
     }
     setErrorStep(null)
+    // A failed request is retried on the next visit to step 3.
+    if (draft.step === 'recommendations') resetRecommendations()
     if (draft.step === 'report') void finish()
     else goTo(CLOSEOUT_STEPS[index + 1])
   }
 
   function back() {
     setErrorStep(null)
+    if (draft.step === 'recommendations') resetRecommendations()
     if (index > 0) goTo(CLOSEOUT_STEPS[index - 1])
   }
 

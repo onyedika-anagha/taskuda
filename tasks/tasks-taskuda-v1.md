@@ -152,12 +152,12 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 5.8 Leave-closeout confirmation and the "already closed" state
   - [x] 5.9 Tests: unit tests for formatters and metrics; e2e `closeout.spec.ts` (AC10.x, AC11.x, DAC4, DAC13) and `report.spec.ts` (AC14.x, DAC5)
 
-- [ ] 6.0 Build AI recommendations with the user's own key
-  - [ ] 6.1 AI & Security settings section: provider (Gemini / OpenRouter), API key (SecretField, triggers D6 on first secret), model with a preset default, Test key, Remove key, spending-limit tip (AC12.1, AC12.2)
-  - [ ] 6.2 `geminiClient.ts` and `openRouterClient.ts` behind one `aiProvider.ts` interface; send the key only to that provider's domain (AC12.6); timeout and clear error reasons (rejected key, rate limit, timeout)
-  - [ ] 6.3 `buildRecommendationPrompt.ts`: today's task titles, statuses, companies, carryovers, rating, and reflection only
-  - [ ] 6.4 RecommendationsStep: first-time disclosure (AC13.3), loading, results, no-key, offline, provider error with Try again; Skip always available (AC13.1, AC13.2)
-  - [ ] 6.5 Tests: prompt builder unit test, client error mapping with mocked fetch, network check that the key goes only to the provider (AC12.6)
+- [x] 6.0 Build AI recommendations with the user's own key
+  - [x] 6.1 AI & Security settings section: provider (Gemini / OpenRouter), API key (SecretField, triggers D6 on first secret), model with a preset default, Test key, Remove key, spending-limit tip (AC12.1, AC12.2)
+  - [x] 6.2 `geminiClient.ts` and `openRouterClient.ts` behind one `aiProvider.ts` interface; send the key only to that provider's domain (AC12.6); timeout and clear error reasons (rejected key, rate limit, timeout)
+  - [x] 6.3 `buildRecommendationPrompt.ts`: today's task titles, statuses, companies, carryovers, rating, and reflection only
+  - [x] 6.4 RecommendationsStep: first-time disclosure (AC13.3), loading, results, no-key, offline, provider error with Try again; Skip always available (AC13.1, AC13.2)
+  - [x] 6.5 Tests: prompt builder unit test, client error mapping with mocked fetch, network check that the key goes only to the provider (AC12.6)
 
 - [ ] 7.0 Build Google sign-in and Drive backup/restore
   - [ ] 7.1 `googleAuth.ts` using Google Identity Services token client; request scopes only when the feature is turned on (`drive.appdata` for backup); silent renewal before expiry; "Reconnect Google" state when renewal fails

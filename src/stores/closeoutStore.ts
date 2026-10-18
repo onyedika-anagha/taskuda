@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import * as service from '@/services/closeout/closeoutService'
 import { getCloseout } from '@/services/db/closeoutRepository'
+import type { Recommendation } from '@/types/ai'
 import type { TaskOutcome } from '@/types/closeout'
 import type { CloseoutDraft, CloseoutStep } from '@/types/closeoutDraft'
 import type { Task } from '@/types/task'
@@ -25,6 +26,7 @@ interface CloseoutState {
   setReflection: (reflection: string) => void
   goTo: (step: CloseoutStep) => void
   markReportCopied: (at?: number) => void
+  setRecommendations: (recommendations: Recommendation[]) => void
   finish: () => Promise<service.FinishResult>
 }
 
@@ -70,6 +72,7 @@ export const useCloseoutStore = create<CloseoutState>((set, get) => {
     setReflection: (reflection) => update((d) => ({ ...d, reflection })),
     goTo: (step) => update((d) => ({ ...d, step })),
     markReportCopied: (at = Date.now()) => update((d) => ({ ...d, reportCopiedAt: d.reportCopiedAt ?? at })),
+    setRecommendations: (recommendations) => update((d) => ({ ...d, recommendations })),
 
     finish: async () => {
       const { view } = get()

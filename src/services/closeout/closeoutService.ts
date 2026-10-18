@@ -19,6 +19,7 @@ export function newDraft(dayKey: string, now = Date.now()): CloseoutDraft {
     rating: null,
     reflection: '',
     reportCopiedAt: null,
+    recommendations: null,
   }
 }
 

@@ -76,7 +76,7 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 4. **Step 3 AI recommendations:**
    - First time only: disclosure panel listing what will be sent → "Send to <provider>" / "Skip AI today".
    - Loading → recommendations shown.
-   - *Alt:* no key → "Add an AI key in Settings to get recommendations." + "Skip". *Alt:* offline → offline message + "Skip". *Failure:* provider error → message with reason + "Try again" / "Skip".
+   - *Alt:* no key → "Add an AI key in Settings to get recommendations." + "Skip". *Alt (added during build):* key saved but locked on this device → "Unlock your keys to get recommendations." + Unlock. *Alt:* offline → offline message + "Skip". *Failure:* provider error → message with reason + "Try again" / "Skip".
 5. **Step 4 Report:** scope (All companies / one company), format tabs (Slack, Teams, Jira, Email), preview, **Copy report** (copy time saved for M3). *Failure:* clipboard blocked → "Couldn't copy automatically. Select the text and copy it manually." and the preview text is selected.
 6. **Finish day** → carryover applied, closeout log saved → S2 shows the "Day closed" banner.
 7. *Exit:* "Close" (X) at any step → confirm "Leave closeout? Your choices so far will be kept." → choices saved as a draft; reopening resumes at the same step.
@@ -462,7 +462,7 @@ Target: **WCAG 2.1 AA**.
 
 ### Notes for the Software Engineer stage
 These are engineering decisions the design depends on. They are noted here, not decided:
-- Default model for each AI provider (S7d preset).
+- Default model for each AI provider (S7d preset). **Decided:** Gemini `gemini-3.5-flash-lite` (Google's recommendation for new projects, Oct 2026); OpenRouter `openrouter/auto`. The model is a text field so users can change it without an app update.
 - Which side wins when a task and its calendar event are both edited between syncs (PRD RK6).
 - How many Drive backup versions to keep (PRD RK7).
-- Whether "Close out again" replaces or appends the day's closeout log entry for M2/M3 (design assumes replace).
+- Whether "Close out again" replaces or appends the day's closeout log entry for M2/M3 (design assumes replace). **Decided:** replace, keeping the first closeout's start/copy times for M3.

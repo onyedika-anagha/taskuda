@@ -1,3 +1,4 @@
+import type { Recommendation } from './ai'
 import type { TaskOutcome } from './closeout'
 
 export const CLOSEOUT_STEPS = ['unfinished', 'reflect', 'recommendations', 'report'] as const
@@ -14,4 +15,6 @@ export interface CloseoutDraft {
   reflection: string
   /** First copy of the report during this closeout, for M3. */
   reportCopiedAt: number | null
+  /** Kept so going back and forth doesn't ask the AI again. */
+  recommendations: Recommendation[] | null
 }
