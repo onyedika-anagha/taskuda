@@ -133,13 +133,13 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 3.12 OfflineBanner, storage-error Alert, Skeleton loading state, toasts — NFR1
   - [x] 3.13 Component tests for StatusToggle, TaskEditor validation, StickyNote labels, Companies section; e2e `tasks.spec.ts` covering AC1.x–AC5.x, DAC1, DAC3, DAC6, DAC9; `offline.spec.ts` for AC6.1–AC6.2
 
-- [ ] 4.0 Build secret storage
-  - [ ] 4.1 `services/crypto/secretVault.ts`: derive a key from the passphrase with PBKDF2 (SHA-256, high iteration count) and a random salt; encrypt secrets with AES-GCM
-  - [ ] 4.2 Device unlock: after the passphrase is entered once, store a non-extractable AES-GCM `CryptoKey` in IndexedDB that unlocks secrets on this device without the passphrase (AC12.4)
-  - [ ] 4.3 Keep secrets encrypted at rest; decrypted values live only in memory and are never written to logs, the activity log, or exported files
-  - [ ] 4.4 SetPassphraseDialog (D6: min 8 characters, confirm match) and UnlockDialog (D5: wrong-passphrase error, "Restore without keys")
-  - [ ] 4.5 SecretField showing only the last 4 characters after save (DAC14); "Change passphrase" and "Reset secrets"
-  - [ ] 4.6 Unit tests: encrypt/decrypt round trip, wrong passphrase fails, stored data contains no plaintext key (AC12.3), reset removes secrets
+- [x] 4.0 Build secret storage
+  - [x] 4.1 `services/crypto/secretVault.ts`: derive a key from the passphrase with PBKDF2 (SHA-256, high iteration count) and a random salt; encrypt secrets with AES-GCM
+  - [x] 4.2 Device unlock: after the passphrase is entered once, store a non-extractable AES-GCM `CryptoKey` in IndexedDB that unlocks secrets on this device without the passphrase (AC12.4); the vault stores an encrypted key-check value so a device key from an older vault is rejected
+  - [x] 4.3 Keep secrets encrypted at rest; decrypted values live only in memory and are never written to logs, the activity log, or exported files
+  - [x] 4.4 SetPassphraseDialog (D6: min 8 characters, confirm match) and UnlockDialog (D5: wrong-passphrase error, "Restore without keys")
+  - [x] 4.5 SecretField showing only the last 4 characters after save (DAC14); "Change passphrase" and "Reset secrets"
+  - [x] 4.6 Unit tests: encrypt/decrypt round trip, wrong passphrase fails, stored data contains no plaintext key (AC12.3), reset removes secrets
 
 - [ ] 5.0 Build the EOD closeout, carryover, report builder, and local stats
   - [ ] 5.1 `closeoutStore` and `useCloseout`: step state, outcomes per task, rating, reflection, draft saved so the closeout can be resumed (DAC13), start timestamp

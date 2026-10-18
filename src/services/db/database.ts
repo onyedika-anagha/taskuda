@@ -5,6 +5,7 @@ import type { Closeout } from '@/types/closeout'
 import type { Company } from '@/types/company'
 import type { SettingRecord } from '@/types/settings'
 import type { Task } from '@/types/task'
+import type { DeviceKeyRecord, VaultRecord } from '@/types/vault'
 
 export const DATABASE_NAME = 'taskuda'
 
@@ -15,11 +16,13 @@ export type TaskudaDatabase = Dexie & {
   activityLog: EntityTable<ActivityEvent, 'id'>
   settings: EntityTable<SettingRecord, 'key'>
   calendarMappings: EntityTable<CalendarMapping, 'taskId'>
+  vault: EntityTable<VaultRecord, 'id'>
+  deviceKeys: EntityTable<DeviceKeyRecord, 'id'>
 }
 
 export const db = new Dexie(DATABASE_NAME) as TaskudaDatabase
 
-// Add new versions below instead of editing this one, so existing data migrates.
+// Add new versions below instead of editing old ones, so existing data migrates.
 db.version(1).stores({
   tasks: 'id, dayKey, companyId, [dayKey+block], carriedFromTaskId',
   companies: 'id',
@@ -27,4 +30,10 @@ db.version(1).stores({
   activityLog: '++id, at, type, taskId, dayKey',
   settings: 'key',
   calendarMappings: 'taskId, &eventId',
+})
+
+// v2: encrypted secrets. `vault` goes into backups; `deviceKeys` never does.
+db.version(2).stores({
+  vault: 'id',
+  deviceKeys: 'id',
 })

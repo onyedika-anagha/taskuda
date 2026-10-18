@@ -2,13 +2,18 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { Link, Navigate, useParams } from 'react-router'
 import { AppBar } from '@/components/layout/AppBar'
 import { AppShell } from '@/components/layout/AppShell'
+import { AiSecuritySection } from '@/components/settings/AiSecuritySection'
 import { CompaniesSection } from '@/components/settings/CompaniesSection'
+import { SettingsNav } from '@/components/settings/SettingsNav'
 import { Button } from '@/components/ui/button'
 
-// More sections (Integrations, Backup, AI & Security, Voice, Stats, About) join this map in later tasks.
+// More sections (Integrations, Backup, Voice, Stats, About) join this map in later tasks.
 const SECTIONS = {
-  companies: CompaniesSection,
+  companies: { label: 'Companies', Component: CompaniesSection },
+  'ai-security': { label: 'AI & Security', Component: AiSecuritySection },
 } as const
+
+const NAV_ITEMS = Object.entries(SECTIONS).map(([id, s]) => ({ id, label: s.label }))
 
 type SectionId = keyof typeof SECTIONS
 
@@ -20,7 +25,7 @@ function isSectionId(value: string | undefined): value is SectionId {
 export function SettingsPage() {
   const { section } = useParams()
   if (!isSectionId(section)) return <Navigate to="/settings/companies" replace />
-  const Section = SECTIONS[section]
+  const Section = SECTIONS[section].Component
 
   return (
     <AppShell
@@ -38,6 +43,7 @@ export function SettingsPage() {
       }
     >
       <div className="mx-auto w-full max-w-2xl">
+        <SettingsNav items={NAV_ITEMS} />
         <Section />
       </div>
     </AppShell>
