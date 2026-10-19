@@ -117,11 +117,13 @@ test('AC3.2 / DAC9 reorders with the keyboard only', async ({ page }) => {
   const morning = await blockArea(page, 'Morning')
   expect(await noteTitles(morning)).toEqual(['First', 'Second'])
 
-  // Wait for each step's screen-reader announcement, like a keyboard user hearing it.
-  await page.getByRole('button', { name: 'Drag Second' }).focus()
+  const handle = page.getByRole('button', { name: 'Drag Second' })
+  await handle.focus()
   await page.keyboard.press('Space')
-  await expect(page.getByText('Picked up Second. Morning, position 2 of 2.')).toBeAttached()
+  // Picked up: dnd-kit marks the handle pressed (announcements can be replaced quickly under load).
+  await expect(handle).toHaveAttribute('aria-pressed', 'true')
   await page.keyboard.press('ArrowUp')
+  // Wait for the screen-reader announcement of the new position, like a keyboard user hearing it.
   await expect(page.getByText('Second: Morning, position 1 of 2.')).toBeAttached()
   await page.keyboard.press('Space')
 

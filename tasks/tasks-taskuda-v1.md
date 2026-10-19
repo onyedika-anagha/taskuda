@@ -174,14 +174,14 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 8.3 InstallPrompt (dismiss hides it for 30 days) and update toast with Reload (AC16.1, AC16.2)
   - [x] 8.4 Tests: onboarding skip and complete paths; update toast appears when a new service worker is waiting
 
-- [ ] 9.0 Build Google Calendar two-way sync (Should)
-  - [ ] 9.1 Calendar card in IntegrationsSection: connect (events scope plus calendar list), choose calendar, turn sync off (keeps tasks)
-  - [ ] 9.2 `calendarMappingRepository`: stable task id ↔ event id mapping
-  - [ ] 9.3 Push: timed tasks create/update/delete their mapped event (AC8.1, AC8.2, AC8.4)
-  - [ ] 9.4 Pull: incremental sync with sync tokens while the app is open (on open, on focus, and every few minutes); events become calendar-sourced tasks on the right day and block (AC8.3); handle expired sync tokens with a full resync
-  - [ ] 9.5 Decide and document the conflict rule (which side wins when both changed) in the implementation notes; implement it
-  - [ ] 9.6 "Calendar sync paused" error state; optional "Use your own Google client ID" (CR1)
-  - [ ] 9.7 Tests with a mocked Calendar API: no duplicates on repeated sync (AC8.5), update and delete both ways, conflict rule
+- [x] 9.0 Build Google Calendar two-way sync (Should)
+  - [x] 9.1 Calendar card in IntegrationsSection: connect (events scope plus calendar list), choose calendar, turn sync off (keeps tasks)
+  - [x] 9.2 `calendarMappingRepository`: stable task id ↔ event id mapping
+  - [x] 9.3 Push: timed tasks create/update/delete their mapped event (AC8.1, AC8.2, AC8.4)
+  - [x] 9.4 Pull: incremental sync with sync tokens while the app is open (on open, on focus, and every few minutes); events become calendar-sourced tasks on the right day and block (AC8.3); handle expired sync tokens with a full resync
+  - [x] 9.5 Decide and document the conflict rule (which side wins when both changed) in the implementation notes; implement it
+  - [x] 9.6 "Calendar sync paused" error state; optional "Use your own Google client ID" (CR1)
+  - [x] 9.7 Tests with a mocked Calendar API: no duplicates on repeated sync (AC8.5), update and delete both ways, conflict rule
 
 - [ ] 10.0 Build the voice engine and reminder catch-up (Should)
   - [ ] 10.1 `speechService.ts`: support detection, voice list, speak, cancel

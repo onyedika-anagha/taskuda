@@ -22,18 +22,62 @@ interface StoredFile {
 }
 
 /**
- * Fake Google sign-in plus an in-memory Drive app-data folder. Share one instance between
- * browser contexts to act out "back up on device A, restore on device B".
+ * Fake Google sign-in plus an in-memory Drive app-data folder and Calendar. Share one instance
+ * between browser contexts to act out "back up on device A, restore on device B".
  */
 export function createFakeGoogle() {
   const files: StoredFile[] = []
   let counter = 0
+  /** In-memory Google Calendar: event id → event, plus a change counter for sync tokens. */
+  const events = new Map<string, Record<string, unknown> & { id: string; seq: number; status: string }>()
+  let seq = 0
 
-  async function handleDrive(route: Route) {
+  function stamp(event: Record<string, unknown> & { id: string; status: string }) {
+    seq++
+    const stored = { ...event, seq, updated: new Date(Date.now() + seq).toISOString(), etag: `"${seq}"` }
+    events.set(event.id, stored)
+    return stored
+  }
+
+  async function handleCalendar(route: Route) {
+    const request = route.request()
+    const url = new URL(request.url())
+    if (url.pathname.endsWith('/users/me/calendarList')) {
+      return route.fulfill({ json: { items: [{ id: 'primary-id', summary: 'Me', primary: true }] } })
+    }
+    const eventId = /\/events\/([^/]+)$/.exec(url.pathname)?.[1]
+    if (request.method() === 'GET') {
+      const token = url.searchParams.get('syncToken')
+      const since = token ? Number(token.slice(1)) : null
+      const items = [...events.values()]
+        .filter((e) => (since === null ? e.status !== 'cancelled' : e.seq > since))
+        .map(({ seq: _seq, ...e }) => e)
+      return route.fulfill({ json: { items, nextSyncToken: `s${seq}` } })
+    }
+    if (request.method() === 'POST') {
+      const { seq: _seq, ...created } = stamp({
+        ...request.postDataJSON(),
+        id: `evt-${++counter}`,
+        status: 'confirmed',
+      })
+      return route.fulfill({ json: created })
+    }
+    const existing = eventId ? events.get(decodeURIComponent(eventId)) : undefined
+    if (!existing) return route.fulfill({ status: 404, json: {} })
+    if (request.method() === 'PATCH') {
+      const { seq: _seq, ...patched } = stamp({ ...existing, ...request.postDataJSON() })
+      return route.fulfill({ json: patched })
+    }
+    stamp({ ...existing, status: 'cancelled' })
+    return route.fulfill({ status: 204, body: '' })
+  }
+
+  async function handleGoogleApis(route: Route) {
     const request = route.request()
     const url = new URL(request.url())
     if (request.headers().authorization !== 'Bearer e2e-token')
       return route.fulfill({ status: 401, json: {} })
+    if (url.pathname.startsWith('/calendar/')) return handleCalendar(route)
 
     if (url.pathname === '/upload/drive/v3/files' && request.method() === 'POST') {
       const body = request.postData() ?? ''
@@ -71,11 +115,23 @@ export function createFakeGoogle() {
 
   return {
     files,
+    /** Live calendar events. */
+    calendarEvents: () => [...events.values()].filter((e) => e.status !== 'cancelled'),
+    /** Someone adds an event in Google Calendar. */
+    addCalendarEvent(summary: string, start: Date, minutes = 30) {
+      stamp({
+        id: `remote-${++counter}`,
+        status: 'confirmed',
+        summary,
+        start: { dateTime: start.toISOString() },
+        end: { dateTime: new Date(start.getTime() + minutes * 60_000).toISOString() },
+      })
+    },
     async install(context: BrowserContext) {
       await context.route('https://accounts.google.com/gsi/client', (route) =>
         route.fulfill({ contentType: 'text/javascript', body: FAKE_GIS_SCRIPT }),
       )
-      await context.route('https://www.googleapis.com/**', handleDrive)
+      await context.route('https://www.googleapis.com/**', handleGoogleApis)
     },
   }
 }

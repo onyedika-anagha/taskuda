@@ -157,10 +157,13 @@ describe('taskRepository', () => {
         calendarId: 'primary',
         etag: null,
         updatedAt: 1,
+        taskUpdatedAt: 1,
+        eventUpdatedAt: 1,
       })
       await deleteTask(a.id)
       expect(await getTask(a.id)).toBeUndefined()
-      expect(await db.calendarMappings.get(a.id)).toBeUndefined()
+      // AC8.4: the link stays as a tombstone so the next calendar sync deletes the event.
+      expect(await db.calendarMappings.get(a.id)).toMatchObject({ eventId: 'evt', taskDeleted: true })
       expect((await listActivityForTask(a.id)).at(-1)).toMatchObject({
         type: 'task_deleted',
         data: { title: 'A' },

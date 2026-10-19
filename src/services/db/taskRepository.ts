@@ -1,7 +1,7 @@
 import type { NewTaskInput, Task, TaskPatch, TaskStatus, TimeBlock } from '@/types/task'
 import { TIME_BLOCKS } from '@/types/task'
 import { isValidDayKey } from '@/utils/dates'
-import { isValidTime } from '@/utils/timeBlocks'
+import { blockForTime, isValidTime } from '@/utils/timeBlocks'
 import { appendActivity } from './activityLogRepository'
 import { db } from './database'
 import { RecordNotFoundError, ValidationError } from './errors'
@@ -151,12 +151,59 @@ export async function moveTask(
   })
 }
 
+/**
+ * Deletes a task. If it's linked to a calendar event, the link is kept as a tombstone so the next
+ * calendar sync can delete the event too (PRD AC8.4).
+ */
 export async function deleteTask(id: string): Promise<void> {
   await db.transaction('rw', db.tasks, db.activityLog, db.calendarMappings, async () => {
     const task = await getTaskOrThrow(id)
     await db.tasks.delete(id)
-    await db.calendarMappings.delete(id)
+    const mapping = await db.calendarMappings.get(id)
+    if (mapping) await db.calendarMappings.put({ ...mapping, taskDeleted: true, updatedAt: Date.now() })
     await appendActivity('task_deleted', id, task.dayKey, { title: task.title })
+  })
+}
+
+/** The event was deleted in Google Calendar: remove the task and its link (no tombstone). */
+export async function deleteTaskForRemovedEvent(id: string): Promise<void> {
+  await db.transaction('rw', db.tasks, db.activityLog, db.calendarMappings, async () => {
+    const task = await db.tasks.get(id)
+    await db.calendarMappings.delete(id)
+    if (!task) return
+    await db.tasks.delete(id)
+    await appendActivity('task_deleted', id, task.dayKey, { title: task.title, source: 'calendar' })
+  })
+}
+
+export interface CalendarTaskChange {
+  title: string
+  dayKey: string
+  startTime: string
+  durationMinutes: number | null
+}
+
+/** Applies an edit made in Google Calendar; a new day or time moves the task to the matching block. */
+export async function applyCalendarChange(id: string, change: CalendarTaskChange): Promise<Task> {
+  if (!isValidDayKey(change.dayKey)) throw new ValidationError('Invalid day.')
+  checkStartTime(change.startTime)
+  return db.transaction('rw', db.tasks, db.activityLog, async () => {
+    const task = await getTaskOrThrow(id)
+    const block = blockForTime(change.startTime)
+    const moved = block !== task.block || change.dayKey !== task.dayKey
+    const updated: Task = {
+      ...task,
+      title: cleanTitle(change.title),
+      dayKey: change.dayKey,
+      block,
+      startTime: change.startTime,
+      durationMinutes: change.durationMinutes,
+      order: moved ? await nextOrder(change.dayKey, block) : task.order,
+      updatedAt: Date.now(),
+    }
+    await db.tasks.put(updated)
+    await appendActivity('task_updated', id, updated.dayKey, { source: 'calendar' })
+    return updated
   })
 }
 
