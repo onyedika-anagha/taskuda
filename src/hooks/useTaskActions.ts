@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { ValidationError } from '@/services/db/errors'
 import * as tasks from '@/services/db/taskRepository'
 import { announce } from '@/stores/announcerStore'
+import { cheer } from '@/services/voice/voiceAlerts'
 import { useCanvasUiStore } from '@/stores/canvasUiStore'
 import type { NewTaskInput, Task, TaskPatch, TaskStatus, TimeBlock } from '@/types/task'
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
@@ -43,6 +44,8 @@ export function useTaskActions(): TaskActions {
       try {
         await tasks.setTaskStatus(task.id, status)
         announce(`${task.title}: ${STATUS_LABELS[status]}`)
+        // Completion cheer (PRD AC9.2), only with voice on.
+        if (status === 'done' && task.status !== 'done') void cheer()
       } catch (error) {
         reportFailure(error, () => void setStatus(task, status))
       }

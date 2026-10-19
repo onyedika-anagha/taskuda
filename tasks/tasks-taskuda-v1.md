@@ -183,13 +183,13 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 9.6 "Calendar sync paused" error state; optional "Use your own Google client ID" (CR1)
   - [x] 9.7 Tests with a mocked Calendar API: no duplicates on repeated sync (AC8.5), update and delete both ways, conflict rule
 
-- [ ] 10.0 Build the voice engine and reminder catch-up (Should)
-  - [ ] 10.1 `speechService.ts`: support detection, voice list, speak, cancel
-  - [ ] 10.2 VoiceSection: on/off, lead time (Off/5/10/15, default 5), voice choice, Play test, unsupported state (AC9.3, AC9.4)
-  - [ ] 10.3 `reminderScheduler.ts`: schedule "up next" and "starting now" for today's timed tasks; reschedule on task changes; completion cheer on Done (AC9.1, AC9.2)
-  - [ ] 10.4 On return from background, detect reminders that were missed and show ReminderCatchup (AC9.5)
-  - [ ] 10.5 Every spoken alert also shows a toast (DAC12)
-  - [ ] 10.6 Tests with fake timers and mocked speech: timing, catch-up, toasts
+- [x] 10.0 Build the voice engine and reminder catch-up (Should)
+  - [x] 10.1 `speechService.ts`: support detection, voice list, speak, cancel
+  - [x] 10.2 VoiceSection: on/off, lead time (Off/5/10/15, default 5), voice choice, Play test, unsupported state (AC9.3, AC9.4)
+  - [x] 10.3 `reminderScheduler.ts`: schedule "up next" and "starting now" for today's timed tasks; reschedule on task changes; completion cheer on Done (AC9.1, AC9.2)
+  - [x] 10.4 On return from background, detect reminders that were missed and show ReminderCatchup (AC9.5)
+  - [x] 10.5 Every spoken alert also shows a toast (DAC12)
+  - [x] 10.6 Tests with fake timers and mocked speech: timing, catch-up, toasts
 
 - [ ] 11.0 Build the Jira proxy function and Jira integration (Should)
   - [ ] 11.1 `api/jira.ts` Vercel function: forward only to `https://<site>.atlassian.net/rest/...`; reject other hosts; require the `Origin` to equal `ALLOWED_ORIGIN`; rate limit per client; never log request bodies, headers, or tokens (NFR6, AC15.4)

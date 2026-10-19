@@ -5,7 +5,7 @@ import { renderWithApp } from '@/test/renderWithApp'
 import { resetDatabase } from '@/test/resetDatabase'
 import { setViewport } from '@/test/viewport'
 
-const SECTION_LABELS = ['Companies', 'Integrations', 'Backup', 'AI & Security', 'Stats', 'About']
+const SECTION_LABELS = ['Companies', 'Integrations', 'Backup', 'AI & Security', 'Voice', 'Stats', 'About']
 
 describe('Settings layout (S7, design spec Section 6)', () => {
   beforeEach(async () => {

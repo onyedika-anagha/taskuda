@@ -401,7 +401,7 @@ Target: **WCAG 2.1 AA**.
 | Spending hint | Tip: set a monthly spending limit in your Gemini or OpenRouter account. |
 | Security | Change passphrase · Reset secrets (removes your AI key and Jira token from this device and your backup) |
 | Voice | Spoken reminders · Remind me before a task starts: Off / 5 / 10 / 15 minutes · Voice · Play test. Unsupported: Your browser can't speak reminders. You'll still see them on screen. |
-| Voice lines | "Up next at 2:00: Client call." · "Starting now: Client call." · Cheers (random): "Nice work." / "Done. On to the next." / "That's one off the list." |
+| Voice lines | "Up next at 2:00 PM: Client call." (time includes AM/PM, changed during build) · "Starting now: Client call." · Cheers (random): "Nice work." / "Done. On to the next." / "That's one off the list." |
 | Stats | Tasks dropped without a decision · Closeout streak (working days) · Median time to report. Empty: Your stats appear after your first closeout. |
 | About | Install Taskuda · Version (number) · Your data stays on your device and in your own Google Drive. Taskuda has no server that stores your tasks or keys. |
 | Update toast | Taskuda updated. Reload to get the latest version. — Reload |

@@ -5,6 +5,7 @@ import { BackupSection } from '@/components/settings/BackupSection'
 import { CompaniesSection } from '@/components/settings/CompaniesSection'
 import { IntegrationsSection } from '@/components/settings/IntegrationsSection'
 import { StatsSection } from '@/components/settings/StatsSection'
+import { VoiceSection } from '@/components/settings/VoiceSection'
 
 export interface SettingsSectionDef {
   id: string
@@ -12,12 +13,13 @@ export interface SettingsSectionDef {
   Component: ComponentType
 }
 
-/** S7 sections in design order. Voice (task 10) joins this list later. */
+/** S7 sections in design order. */
 export const SETTINGS_SECTIONS: readonly SettingsSectionDef[] = [
   { id: 'companies', label: 'Companies', Component: CompaniesSection },
   { id: 'integrations', label: 'Integrations', Component: IntegrationsSection },
   { id: 'backup', label: 'Backup', Component: BackupSection },
   { id: 'ai-security', label: 'AI & Security', Component: AiSecuritySection },
+  { id: 'voice', label: 'Voice', Component: VoiceSection },
   { id: 'stats', label: 'Stats', Component: StatsSection },
   { id: 'about', label: 'About', Component: AboutSection },
 ]

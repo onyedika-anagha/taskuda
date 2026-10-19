@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import 'fake-indexeddb/auto'
 import { cleanup, configure } from '@testing-library/react'
+import { toast } from 'sonner'
 import { afterEach, beforeEach, vi } from 'vitest'
 import { setViewportTabletUp } from './viewport'
 
@@ -28,5 +29,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup()
+  // Sonner keeps toasts in a module-level store; clear them so tests don't see each other's.
+  toast.dismiss()
   setViewportTabletUp(true)
 })

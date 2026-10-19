@@ -3,6 +3,7 @@ import { ThemeProvider } from 'next-themes'
 import { BackupScheduler } from '@/components/backup/BackupScheduler'
 import { CalendarSyncScheduler } from '@/components/calendar/CalendarSyncScheduler'
 import { LiveAnnouncer } from '@/components/common/LiveAnnouncer'
+import { ReminderScheduler } from '@/components/reminders/ReminderScheduler'
 import { VaultPrompts } from '@/components/security/VaultPrompts'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -18,6 +19,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <VaultPrompts />
         <BackupScheduler />
         <CalendarSyncScheduler />
+        <ReminderScheduler />
       </TooltipProvider>
     </ThemeProvider>
   )
