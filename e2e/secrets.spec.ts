@@ -1,4 +1,5 @@
-import { expect, test, type Request } from '@playwright/test'
+import type { Request } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { addTask, expectNoA11yViolations } from './helpers'
 
 const KEY = 'AIzaE2E-not-a-real-key-WXYZ'

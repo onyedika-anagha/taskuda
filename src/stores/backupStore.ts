@@ -28,7 +28,8 @@ interface BackupState {
   connected: boolean
   init: () => Promise<void>
   /** From a click: may open Google's consent popup. */
-  connect: () => Promise<void>
+  /** `backupNow: false` (first run): connect first, so an existing backup can be found before ours replaces it as newest. */
+  connect: (options?: { backupNow?: boolean }) => Promise<void>
   disconnect: () => Promise<void>
   backupNow: (options?: { interactive?: boolean }) => Promise<void>
   /** Called after local changes; backs up after a short pause when connected and online. */
@@ -62,11 +63,12 @@ export const useBackupStore = create<BackupState>((set, get) => ({
     set({ connected, status: connected ? { state: 'idle', lastBackupAt } : { state: 'not-connected' } })
   },
 
-  connect: async () => {
+  connect: async ({ backupNow = true } = {}) => {
     await getAccessToken([DRIVE_APPDATA_SCOPE], { interactive: true })
     await setSetting(DRIVE_CONNECTED_KEY, true)
-    set({ connected: true })
-    await get().backupNow()
+    const lastBackupAt = await getSetting<number | null>(LAST_BACKUP_KEY, null)
+    set({ connected: true, status: { state: 'idle', lastBackupAt } })
+    if (backupNow) await get().backupNow()
   },
 
   disconnect: async () => {

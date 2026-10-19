@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { addTask, blockArea } from './helpers'
 
 test('AC6.1 after the first load, tasks can be created, completed and reloaded offline', async ({

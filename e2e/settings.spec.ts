@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 import { expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
 
 test('AI & Security section is reachable and accessible', async ({ page }) => {

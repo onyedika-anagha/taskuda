@@ -13,9 +13,16 @@ interface CompanyFormProps {
   onSubmit: (values: CompanyFormValues) => Promise<void>
   onCancel: () => void
   submitLabel?: string
+  cancelLabel?: string
 }
 
-export function CompanyForm({ defaultValues, onSubmit, onCancel, submitLabel = 'Save' }: CompanyFormProps) {
+export function CompanyForm({
+  defaultValues,
+  onSubmit,
+  onCancel,
+  submitLabel = 'Save',
+  cancelLabel = 'Cancel',
+}: CompanyFormProps) {
   const {
     register,
     control,
@@ -68,7 +75,7 @@ export function CompanyForm({ defaultValues, onSubmit, onCancel, submitLabel = '
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" size="lg" onClick={onCancel}>
-          Cancel
+          {cancelLabel}
         </Button>
         <Button type="submit" size="lg" disabled={isSubmitting}>
           {submitLabel}

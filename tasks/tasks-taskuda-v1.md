@@ -168,11 +168,11 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 7.6 Export to file / Import from file using the same backup format (CR2)
   - [x] 7.7 Tests: backup schema validation, restore replaces data, unreadable backup error, consent scope check (AC7.3) with mocked Google APIs
 
-- [ ] 8.0 Build first-run onboarding, settings shell, and PWA prompts
-  - [ ] 8.1 SettingsPage with side nav (≥ 1024px) and list → subpage (smaller screens); AboutSection with version and privacy text
-  - [ ] 8.2 WelcomePage (S1): intro, first company, connect Drive, restore-if-found; skip paths; redirect to `/` afterwards
-  - [ ] 8.3 InstallPrompt (dismiss hides it for 30 days) and update toast with Reload (AC16.1, AC16.2)
-  - [ ] 8.4 Tests: onboarding skip and complete paths; update toast appears when a new service worker is waiting
+- [x] 8.0 Build first-run onboarding, settings shell, and PWA prompts
+  - [x] 8.1 SettingsPage with side nav (≥ 1024px) and list → subpage (smaller screens); AboutSection with version and privacy text
+  - [x] 8.2 WelcomePage (S1): intro, first company, connect Drive, restore-if-found; skip paths; redirect to `/` afterwards
+  - [x] 8.3 InstallPrompt (dismiss hides it for 30 days) and update toast with Reload (AC16.1, AC16.2)
+  - [x] 8.4 Tests: onboarding skip and complete paths; update toast appears when a new service worker is waiting
 
 - [ ] 9.0 Build Google Calendar two-way sync (Should)
   - [ ] 9.1 Calendar card in IntegrationsSection: connect (events scope plus calendar list), choose calendar, turn sync off (keeps tasks)

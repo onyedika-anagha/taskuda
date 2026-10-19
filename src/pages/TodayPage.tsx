@@ -6,6 +6,7 @@ import { DayNavigator } from '@/components/canvas/DayNavigator'
 import { TaskCanvas } from '@/components/canvas/TaskCanvas'
 import { CloseoutDialog } from '@/components/closeout/CloseoutDialog'
 import { AddTaskFab } from '@/components/layout/AddTaskFab'
+import { InstallPrompt } from '@/components/layout/InstallPrompt'
 import { AppBar } from '@/components/layout/AppBar'
 import { AppShell } from '@/components/layout/AppShell'
 import { ShortcutsDialog } from '@/components/layout/ShortcutsDialog'
@@ -16,11 +17,13 @@ import { useCanvasShortcuts } from '@/hooks/useCanvasShortcuts'
 import { useCompanies } from '@/hooks/useCompanies'
 import { useDayCloseout } from '@/hooks/useDayCloseout'
 import { useDayNavigation } from '@/hooks/useDayNavigation'
+import { useFirstRun } from '@/hooks/useFirstRun'
 import { TABLET_UP, useMediaQuery } from '@/hooks/useMediaQuery'
 import { useTasksForDay } from '@/hooks/useTasksForDay'
 import { useAppStatusStore } from '@/stores/appStatusStore'
 import { useCanvasUiStore } from '@/stores/canvasUiStore'
 import { useCloseoutStore } from '@/stores/closeoutStore'
+import { Navigate } from 'react-router'
 
 /** S2 Today: composes the canvas and its overlays. */
 export function TodayPage() {
@@ -42,6 +45,9 @@ export function TodayPage() {
   const onCloseOut = canCloseOut ? () => void openCloseout(nav.dayKey) : undefined
   const onAddTask = readOnly ? undefined : () => openCreate()
   useCanvasShortcuts(nav, readOnly)
+  const firstRun = useFirstRun()
+
+  if (firstRun === 'show-welcome') return <Navigate to="/welcome" replace />
 
   return (
     <AppShell
@@ -57,6 +63,7 @@ export function TodayPage() {
         </AppBar>
       }
     >
+      <InstallPrompt />
       {storageBlocked ? <StorageErrorNotice /> : null}
       {nav.isPast ? <PastDayNotice dayKey={nav.dayKey} /> : null}
       {closeout ? <DayClosedBanner dayKey={nav.dayKey} finishedAt={closeout.finishedAt} /> : null}

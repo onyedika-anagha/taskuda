@@ -47,7 +47,7 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 ### F1 — First run
 1. User opens Taskuda for the first time → **S1 Welcome**.
 2. Step 1 "Add your first company": name + color → Continue. *Alt:* "Skip for now". Tasks can exist with no company.
-3. Step 2 "Back up to Google Drive" → Connect (Google consent) → connected. *Alt:* "Not now", so data stays on this device only and S2 shows a "Not backed up" indicator. *Failure:* consent cancelled or denied → inline error, retry or skip.
+3. Step 2 "Back up to Google Drive" → Connect (Google consent) → connected. *Build note:* connecting here looks for an existing backup before making the first one, so a fresh empty backup never becomes the "newest" over the real one. *Alt:* "Not now", so data stays on this device only and S2 shows a "Not backed up" indicator. *Failure:* consent cancelled or denied → inline error, retry or skip.
 4. Step 3 "Restore existing data?" (only shown if a Drive backup is found) → F8.
 5. → **S2 Today** with empty states.
 

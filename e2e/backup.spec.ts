@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { expect, test } from '@playwright/test'
+import { expect, skipWelcome, test } from './fixtures'
 import { createFakeGoogle } from './fakeGoogle'
 import { addTask, blockArea, expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
 
@@ -7,6 +7,7 @@ test('F7 / F8 back up on one device and restore on another (AC7.1, AC7.2, AC7.4)
   const google = createFakeGoogle()
 
   const deviceA = await browser.newContext()
+  await skipWelcome(deviceA)
   await google.install(deviceA)
   const a = await deviceA.newPage()
   await a.goto('/settings/backup')
@@ -23,6 +24,7 @@ test('F7 / F8 back up on one device and restore on another (AC7.1, AC7.2, AC7.4)
   await deviceA.close()
 
   const deviceB = await browser.newContext()
+  await skipWelcome(deviceB)
   await google.install(deviceB)
   const b = await deviceB.newPage()
   await b.goto('/settings/backup')

@@ -22,7 +22,7 @@ describe('AI & Security settings: Security panel', () => {
     expect(
       await screen.findByText('No passphrase yet. You’ll set one when you save your first key.'),
     ).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'AI & Security' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByRole('heading', { level: 1, name: 'AI & Security' })).toBeInTheDocument()
   })
 
   it('changes the passphrase after checking the current one', async () => {

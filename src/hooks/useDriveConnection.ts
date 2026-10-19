@@ -28,14 +28,17 @@ export function useDriveConnection() {
   return {
     connecting,
     error,
-    async connect() {
+    /** Resolves true once connected; on failure shows the reason and resolves false. */
+    async connect(options?: { backupNow?: boolean }): Promise<boolean> {
       setConnecting(true)
       setError(null)
       try {
-        await connect()
+        await connect(options)
         toast.success('Google Drive connected')
+        return true
       } catch (cause) {
         setError(connectErrorMessage(cause))
+        return false
       } finally {
         setConnecting(false)
       }

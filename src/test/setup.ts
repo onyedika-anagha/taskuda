@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import 'fake-indexeddb/auto'
 import { cleanup, configure } from '@testing-library/react'
-import { afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
 import { setViewportTabletUp } from './viewport'
 
 // jsdom gaps that Radix UI and our hooks rely on.
@@ -20,6 +20,11 @@ Element.prototype.setPointerCapture ??= vi.fn<(pointerId: number) => void>()
 configure({ asyncUtilTimeout: 4000 })
 
 setViewportTabletUp(true)
+
+// Tests start past the first-run welcome unless they clear this (see WelcomePage tests).
+beforeEach(() => {
+  window.localStorage.setItem('taskuda.welcomeDone', '1')
+})
 
 afterEach(() => {
   cleanup()

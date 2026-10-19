@@ -2,34 +2,25 @@ import { ArrowLeftIcon } from 'lucide-react'
 import { Link, Navigate, useParams } from 'react-router'
 import { AppBar } from '@/components/layout/AppBar'
 import { AppShell } from '@/components/layout/AppShell'
-import { AiSecuritySection } from '@/components/settings/AiSecuritySection'
-import { BackupSection } from '@/components/settings/BackupSection'
-import { CompaniesSection } from '@/components/settings/CompaniesSection'
-import { SettingsNav } from '@/components/settings/SettingsNav'
-import { StatsSection } from '@/components/settings/StatsSection'
+import { SettingsList, SettingsSideNav } from '@/components/settings/SettingsNav'
 import { Button } from '@/components/ui/button'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { SETTINGS_SECTIONS, findSection } from './settingsSections'
 
-// More sections (Integrations, Voice, About) join this map in later tasks.
-const SECTIONS = {
-  companies: { label: 'Companies', Component: CompaniesSection },
-  backup: { label: 'Backup', Component: BackupSection },
-  'ai-security': { label: 'AI & Security', Component: AiSecuritySection },
-  stats: { label: 'Stats', Component: StatsSection },
-} as const
+const DESKTOP = '(min-width: 1024px)'
 
-const NAV_ITEMS = Object.entries(SECTIONS).map(([id, s]) => ({ id, label: s.label }))
-
-type SectionId = keyof typeof SECTIONS
-
-function isSectionId(value: string | undefined): value is SectionId {
-  return !!value && value in SECTIONS
-}
-
-/** S7 Settings. */
+/** S7 Settings: side nav on desktop; list → subpage on smaller screens (design spec Section 6). */
 export function SettingsPage() {
-  const { section } = useParams()
-  if (!isSectionId(section)) return <Navigate to="/settings/companies" replace />
-  const Section = SECTIONS[section].Component
+  const { section: sectionId } = useParams()
+  const isDesktop = useMediaQuery(DESKTOP)
+  const section = findSection(sectionId)
+
+  if (sectionId && !section) return <Navigate to="/settings" replace />
+  if (!section && isDesktop) return <Navigate to={`/settings/${SETTINGS_SECTIONS[0].id}`} replace />
+
+  // On phones a section page goes back to the list; everywhere else back goes to today.
+  const backToList = !isDesktop && !!section
+  const Section = section?.Component
 
   return (
     <AppShell
@@ -37,19 +28,28 @@ export function SettingsPage() {
         <AppBar>
           <div className="flex items-center gap-1">
             <Button asChild variant="ghost" size="icon" className="size-11">
-              <Link to="/" aria-label="Back to today">
+              <Link
+                to={backToList ? '/settings' : '/'}
+                aria-label={backToList ? 'Back to settings' : 'Back to today'}
+              >
                 <ArrowLeftIcon aria-hidden="true" />
               </Link>
             </Button>
-            <h1 className="text-lg font-semibold">Settings</h1>
+            <h1 className="text-lg font-semibold">{backToList && section ? section.label : 'Settings'}</h1>
           </div>
         </AppBar>
       }
     >
-      <div className="mx-auto w-full max-w-2xl">
-        <SettingsNav items={NAV_ITEMS} />
-        <Section />
-      </div>
+      {isDesktop ? (
+        <div className="mx-auto flex w-full max-w-5xl gap-8">
+          <SettingsSideNav items={SETTINGS_SECTIONS} />
+          <div className="min-w-0 flex-1">{Section ? <Section /> : null}</div>
+        </div>
+      ) : (
+        <div className="mx-auto w-full max-w-2xl">
+          {Section ? <Section /> : <SettingsList items={SETTINGS_SECTIONS} />}
+        </div>
+      )}
     </AppShell>
   )
 }

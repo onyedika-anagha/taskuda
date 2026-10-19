@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 import {
   addTask,
   blockArea,
@@ -148,6 +148,10 @@ test('DAC10 editor and menu have no accessibility violations', async ({ page }) 
 
 test('companies color-code tasks (AC5.1, AC5.2)', async ({ page }) => {
   await page.getByRole('link', { name: 'Settings', exact: true }).click()
+  // Desktop opens on Companies; smaller screens show the section list first.
+  if (!(await page.getByRole('button', { name: 'Add company' }).isVisible())) {
+    await page.getByRole('link', { name: 'Companies' }).click()
+  }
   await page.getByRole('button', { name: 'Add company' }).click()
   const dialog = page.getByRole('dialog', { name: 'Add company' })
   await dialog.getByLabel('Name').fill('Acme')
@@ -157,7 +161,7 @@ test('companies color-code tasks (AC5.1, AC5.2)', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Edit Acme' })).toBeVisible()
   await expectNoA11yViolations(page)
 
-  await page.getByRole('link', { name: 'Back to today' }).click()
+  await page.goto('/')
   await expect(page.getByRole('heading', { level: 1, name: /, today$/ })).toBeVisible()
   await page.keyboard.press('n')
   const editor = page.getByRole('dialog', { name: 'New task' })
