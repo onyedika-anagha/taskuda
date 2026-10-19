@@ -1,16 +1,23 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router'
-import { ReportPage } from '@/pages/ReportPage'
-import { SettingsPage } from '@/pages/SettingsPage'
 import { TodayPage } from '@/pages/TodayPage'
-import { WelcomePage } from '@/pages/WelcomePage'
 
+/**
+ * Today loads with the app; the other pages are split out and loaded when first opened (NFR3),
+ * then cached by the service worker for offline use.
+ */
 export const routes: RouteObject[] = [
   { path: '/', element: <TodayPage /> },
   { path: '/day/:date', element: <TodayPage /> },
-  { path: '/report', element: <ReportPage /> },
-  { path: '/settings', element: <SettingsPage /> },
-  { path: '/settings/:section', element: <SettingsPage /> },
-  { path: '/welcome', element: <WelcomePage /> },
+  { path: '/report', lazy: async () => ({ Component: (await import('@/pages/ReportPage')).ReportPage }) },
+  {
+    path: '/settings',
+    lazy: async () => ({ Component: (await import('@/pages/SettingsPage')).SettingsPage }),
+  },
+  {
+    path: '/settings/:section',
+    lazy: async () => ({ Component: (await import('@/pages/SettingsPage')).SettingsPage }),
+  },
+  { path: '/welcome', lazy: async () => ({ Component: (await import('@/pages/WelcomePage')).WelcomePage }) },
   { path: '*', element: <Navigate to="/" replace /> },
 ]
 

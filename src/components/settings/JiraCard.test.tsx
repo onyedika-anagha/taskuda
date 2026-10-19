@@ -36,7 +36,8 @@ describe('Jira (PRD FR15, design F12)', () => {
     expect(
       await screen.findByText(
         (_content, element) =>
-          element?.tagName === 'P' && element.textContent === 'Connected to acme.atlassian.net as Ada Lovelace.',
+          element?.tagName === 'P' &&
+          element.textContent === 'Connected to acme.atlassian.net as Ada Lovelace.',
       ),
     ).toBeInTheDocument()
     expect(await listSecretNames()).toEqual(['jira'])

@@ -5,7 +5,7 @@ import { DayClosedBanner } from '@/components/canvas/DayClosedBanner'
 import { DayNavigator } from '@/components/canvas/DayNavigator'
 import { ReminderCatchup } from '@/components/canvas/ReminderCatchup'
 import { TaskCanvas } from '@/components/canvas/TaskCanvas'
-import { CloseoutDialog } from '@/components/closeout/CloseoutDialog'
+import { LazyCloseoutDialog } from '@/components/closeout/LazyCloseoutDialog'
 import { AddTaskFab } from '@/components/layout/AddTaskFab'
 import { InstallPrompt } from '@/components/layout/InstallPrompt'
 import { AppBar } from '@/components/layout/AppBar'
@@ -87,7 +87,7 @@ export function TodayPage() {
       <TaskEditor dayKey={nav.dayKey} tasks={tasks ?? []} />
       <DeleteTaskDialog tasks={tasks ?? []} />
       <TimedTaskMoveDialog tasks={tasks ?? []} />
-      <CloseoutDialog tasks={tasks ?? []} companies={companies ?? []} companiesById={companiesById} />
+      <LazyCloseoutDialog tasks={tasks ?? []} companies={companies ?? []} companiesById={companiesById} />
       <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </AppShell>
   )

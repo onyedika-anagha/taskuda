@@ -39,6 +39,21 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Libraries change less often than app code; separate chunks stay cached across releases.
+        codeSplitting: {
+          groups: [
+            // Module ids use forward slashes on every OS.
+            { name: 'react', test: /node_modules\/(react|react-dom|react-router|scheduler)\// },
+            { name: 'ui', test: /node_modules\/(radix-ui|@radix-ui|@dnd-kit|sonner|lucide-react)\// },
+            { name: 'data', test: /node_modules\/(dexie|dexie-react-hooks|zod|date-fns|zustand)\// },
+          ],
+        },
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

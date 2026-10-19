@@ -98,7 +98,7 @@
     --muted-foreground: oklch(0.708 0.008 75);
     --accent: oklch(0.269 0.008 75);
     --accent-foreground: oklch(0.985 0.008 75);
-    --destructive: oklch(0.704 0.191 22.216);
+    --destructive: oklch(0.8 0.13 22);
     --border: oklch(1 0.008 75 / 10%);
     --input: oklch(1 0.008 75 / 15%);
     --ring: oklch(0.78 0.03 75);
@@ -127,4 +127,13 @@
   html {
     @apply font-sans;
     }
+}
+/*
+ * Visible focus for every interactive element (design spec Section 7: 2px ring, 2px offset, ≥ 3:1).
+ * Unlayered on purpose: it wins over the `outline-none` utilities shadcn components use, whose
+ * own 50%-opacity rings can fall under 3:1 on the paper background.
+ */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }

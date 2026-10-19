@@ -26,9 +26,9 @@ test('DAC12 a reminder is spoken and shown on screen at the right time', async (
 
   await page.clock.fastForward('01:20')
   await expect(page.getByText('Up next at 2:00 PM: Client call.')).toBeVisible()
-  expect(await page.evaluate(() => (window as unknown as { taskudaSpoken: string[] }).taskudaSpoken)).toEqual([
-    'Up next at 2:00 PM: Client call.',
-  ])
+  expect(await page.evaluate(() => (window as unknown as { taskudaSpoken: string[] }).taskudaSpoken)).toEqual(
+    ['Up next at 2:00 PM: Client call.'],
+  )
 })
 
 test('Voice settings are accessible', async ({ page }) => {

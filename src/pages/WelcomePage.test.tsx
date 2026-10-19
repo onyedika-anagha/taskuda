@@ -41,7 +41,7 @@ describe('Welcome (S1)', () => {
 
   it('F1.2 adds the first company, then F1.3 “Not now” finishes on an empty today', async () => {
     const { user, router } = renderWithApp('/welcome')
-    expect(screen.getByText('Step 1 of 3')).toBeInTheDocument()
+    expect(await screen.findByText('Step 1 of 3')).toBeInTheDocument()
     await user.type(await screen.findByLabelText('Name'), 'Acme')
     await user.click(screen.getByRole('button', { name: 'Continue' }))
 
