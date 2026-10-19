@@ -26,6 +26,8 @@ export const taskFormSchema = z.object({
       .refine((v) => Number(v) > 0 && Number(v) <= 24 * 60, 'Enter between 1 and 1440 minutes.'),
   ]),
   notes: z.string().max(2000, 'Keep notes under 2,000 characters.'),
+  /** Set from the Link Jira issue dialog (D7), never typed. */
+  jiraIssue: z.object({ key: z.string(), title: z.string(), status: z.string() }).nullable(),
 })
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>

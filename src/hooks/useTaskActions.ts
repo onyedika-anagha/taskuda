@@ -3,12 +3,27 @@ import { toast } from 'sonner'
 import { ValidationError } from '@/services/db/errors'
 import * as tasks from '@/services/db/taskRepository'
 import { announce } from '@/stores/announcerStore'
+import { syncTaskStatusToJira } from '@/services/jira/jiraService'
 import { cheer } from '@/services/voice/voiceAlerts'
+import { jiraErrorMessage } from '@/utils/jiraErrorMessages'
 import { useCanvasUiStore } from '@/stores/canvasUiStore'
 import type { NewTaskInput, Task, TaskPatch, TaskStatus, TimeBlock } from '@/types/task'
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
 import { STATUS_LABELS, nextStatus } from '@/utils/taskStatus'
 import { isTimeInBlock } from '@/utils/timeBlocks'
+
+/** AC15.3: move the linked issue to the mapped status; problems show as a toast, never block the task. */
+async function pushStatusToJira(task: Task, status: TaskStatus): Promise<void> {
+  const key = task.jiraIssue?.key
+  try {
+    const result = await syncTaskStatusToJira({ ...task, status }, status)
+    if (result === 'no-transition') {
+      toast(`${key} can’t move to that status from where it is in Jira. Update it in Jira.`)
+    }
+  } catch (error) {
+    toast.error(`Couldn’t update ${key} in Jira.`, { description: jiraErrorMessage(error, { key }) })
+  }
+}
 
 const GENERIC_SAVE_ERROR = 'Couldn’t save your change.'
 
@@ -46,6 +61,7 @@ export function useTaskActions(): TaskActions {
         announce(`${task.title}: ${STATUS_LABELS[status]}`)
         // Completion cheer (PRD AC9.2), only with voice on.
         if (status === 'done' && task.status !== 'done') void cheer()
+        if (task.jiraIssue) void pushStatusToJira(task, status)
       } catch (error) {
         reportFailure(error, () => void setStatus(task, status))
       }

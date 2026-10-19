@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { NO_COMPANY, taskFormSchema, type TaskFormValues } from '@/schemas/taskForm'
 import type { Company } from '@/types/company'
 import { TIME_BLOCKS } from '@/types/task'
+import { JiraIssueField } from './JiraIssueField'
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
 import { fieldDescribedBy } from '@/utils/formAria'
 import { blockForTime, isValidTime } from '@/utils/timeBlocks'
@@ -139,6 +140,12 @@ export function TaskEditorForm({
           {...register('notes')}
         />
       </FormField>
+
+      <Controller
+        control={control}
+        name="jiraIssue"
+        render={({ field }) => <JiraIssueField value={field.value} onChange={field.onChange} />}
+      />
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
         {isEdit && onDelete ? (

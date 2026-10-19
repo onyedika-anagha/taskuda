@@ -2,7 +2,15 @@ import { NO_COMPANY, type TaskFormValues } from '@/schemas/taskForm'
 import type { NewTaskInput, Task, TaskPatch, TimeBlock } from '@/types/task'
 
 export function emptyTaskForm(block: TimeBlock): TaskFormValues {
-  return { title: '', companyId: NO_COMPANY, block, startTime: '', durationMinutes: '', notes: '' }
+  return {
+    title: '',
+    companyId: NO_COMPANY,
+    block,
+    startTime: '',
+    durationMinutes: '',
+    notes: '',
+    jiraIssue: null,
+  }
 }
 
 export function taskToForm(task: Task): TaskFormValues {
@@ -13,6 +21,7 @@ export function taskToForm(task: Task): TaskFormValues {
     startTime: task.startTime ?? '',
     durationMinutes: task.durationMinutes ? String(task.durationMinutes) : '',
     notes: task.notes,
+    jiraIssue: task.jiraIssue,
   }
 }
 
@@ -23,6 +32,7 @@ export function formToPatch(values: TaskFormValues): TaskPatch {
     startTime: values.startTime || null,
     durationMinutes: values.durationMinutes ? Number(values.durationMinutes) : null,
     notes: values.notes,
+    jiraIssue: values.jiraIssue,
   }
 }
 
@@ -36,5 +46,6 @@ export function formToNewTask(values: TaskFormValues, dayKey: string): NewTaskIn
     startTime: patch.startTime,
     durationMinutes: patch.durationMinutes,
     notes: patch.notes,
+    jiraIssue: patch.jiraIssue,
   }
 }

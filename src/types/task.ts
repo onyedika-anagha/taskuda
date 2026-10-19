@@ -48,6 +48,7 @@ export interface NewTaskInput {
   startTime?: string | null
   durationMinutes?: number | null
   source?: TaskSource
+  jiraIssue?: JiraIssueLink | null
 }
 
 export type TaskPatch = Partial<

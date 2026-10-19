@@ -191,13 +191,13 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 10.5 Every spoken alert also shows a toast (DAC12)
   - [x] 10.6 Tests with fake timers and mocked speech: timing, catch-up, toasts
 
-- [ ] 11.0 Build the Jira proxy function and Jira integration (Should)
-  - [ ] 11.1 `api/jira.ts` Vercel function: forward only to `https://<site>.atlassian.net/rest/...`; reject other hosts; require the `Origin` to equal `ALLOWED_ORIGIN`; rate limit per client; never log request bodies, headers, or tokens (NFR6, AC15.4)
-  - [ ] 11.2 Jira card: site, email, API token (SecretField), Test connection; status mapping selects (AC15.1)
-  - [ ] 11.3 `jiraClient.ts`: look up issue, update status through the proxy; clear error mapping (not found, no access, rejected token, offline)
-  - [ ] 11.4 LinkJiraIssueDialog (D7) from TaskEditor; issue key, title, status shown on the note (AC15.2)
-  - [ ] 11.5 Status change on a linked task updates Jira when a mapping exists (AC15.3)
-  - [ ] 11.6 Tests: proxy rejects other hosts and origins, rate limit, no logging; client error mapping
+- [x] 11.0 Build the Jira proxy function and Jira integration (Should)
+  - [x] 11.1 `api/jira.ts` Vercel function: forward only to `https://<site>.atlassian.net/rest/...`; reject other hosts; require the `Origin` to equal `ALLOWED_ORIGIN`; rate limit per client; never log request bodies, headers, or tokens (NFR6, AC15.4)
+  - [x] 11.2 Jira card: site, email, API token (SecretField), Test connection; status mapping selects (AC15.1)
+  - [x] 11.3 `jiraClient.ts`: look up issue, update status through the proxy; clear error mapping (not found, no access, rejected token, offline)
+  - [x] 11.4 LinkJiraIssueDialog (D7) from TaskEditor; issue key, title, status shown on the note (AC15.2)
+  - [x] 11.5 Status change on a linked task updates Jira when a mapping exists (AC15.3)
+  - [x] 11.6 Tests: proxy rejects other hosts and origins, rate limit, no logging; client error mapping
 
 - [ ] 12.0 Final pass
   - [ ] 12.1 `a11y.spec.ts`: axe shows 0 WCAG 2.1 AA violations on S2, S3, each S5 step, S6, and each S7 section (DAC10)

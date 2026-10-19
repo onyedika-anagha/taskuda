@@ -14,6 +14,7 @@ describe('taskFormMapping', () => {
       startTime: null,
       durationMinutes: null,
       notes: '',
+      jiraIssue: null,
     })
   })
 
@@ -27,6 +28,7 @@ describe('taskFormMapping', () => {
       startTime: '14:00',
       durationMinutes: 45,
       notes: 'Agenda',
+      jiraIssue: null,
     })
   })
 

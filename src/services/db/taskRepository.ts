@@ -81,7 +81,7 @@ export async function createTask(input: NewTaskInput): Promise<Task> {
       carriedFromTaskId: null,
       carriedToTaskId: null,
       source: input.source ?? 'manual',
-      jiraIssue: null,
+      jiraIssue: input.jiraIssue ?? null,
       createdAt: now,
       updatedAt: now,
     }

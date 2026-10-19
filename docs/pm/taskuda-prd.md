@@ -156,6 +156,7 @@ If Taskuda works, the owner will use it every working day for 4 straight weeks, 
 | RK8 | **Multi-device use** (out of scope) happens anyway | Data overwritten between devices | Restore warns when the backup came from a different device. Full conflict handling is v2. | Owner |
 | RK9 | **Vercel Hobby terms change**, or a commercial use case appears | Hosting must move | Static app; can move to Cloudflare Pages or shared hosting without code changes (except the proxy). | Owner |
 | RK10 | **Domain/DNS hygiene:** the subdomain's DNS record left pointing at a removed Vercel project, or the Search Console verification left unwatched | Subdomain takeover | Remove the DNS record if the project is deleted. Review Search Console access during the Security stage. | Owner (Security stage) |
+| RK11 | **Jira API tokens (found during build, 2026-10-19):** Atlassian's docs say apps that collect API tokens don't meet its security requirements and recommend OAuth 2.0 (3LO) or Forge. Acceptable for personal use with the user's own token, not for a public release. | Blocks a public launch of the Jira feature | Keep the token encrypted (NFR5), the proxy locked down (NFR6). Before going public, move Jira to OAuth 2.0 (3LO) or flag the Jira feature off. | Owner (Security stage) |
 
 ---
 

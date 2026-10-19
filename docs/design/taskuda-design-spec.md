@@ -120,7 +120,7 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 ### F12 — Jira
 1. S7b → Jira "Connect" → site URL, email, API token → "Test connection" → connected (token encrypted, D6 if first secret).
 2. S3 Task Editor → "Link Jira issue" → **D7** → paste key or URL → preview (key, title, status) → Link.
-3. Status mapping in S7b: Taskuda To Do / In Progress / Done → Jira status for each (optional). With a mapping, status changes update Jira.
+3. Status mapping in S7b: Taskuda To Do / In Progress / Done → Jira status for each (optional). With a mapping, status changes update Jira. *Build notes:* the token is saved only after "Test connection" succeeds; status names come from the site ("Load Jira statuses"); when the workflow has no transition to the mapped status, the task still changes and a toast says to update the issue in Jira; linking happens inside the task editor and is saved with the task.
 4. *Failure:* issue not found / no permission / token rejected → specific message (Section 8). Task still saves without the link.
 
 ### F13 — Install
