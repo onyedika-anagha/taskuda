@@ -97,7 +97,7 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 0.1 Create and check out a new branch: `git checkout -b feature/taskuda-v1`
 
 - [x] 1.0 Scaffold the project and tooling
-  - [ ] 1.1 Create a Vite React + TypeScript project in the repo root (strict TypeScript on)
+  - [x] 1.1 Create a Vite React + TypeScript project in the repo root (strict TypeScript on)
   - [x] 1.2 Add Tailwind CSS and initialize shadcn/ui; add the [REUSE] components from the design spec Section 5
   - [x] 1.3 Set up the folder structure from "Relevant Files" (`components/`, `pages/`, `hooks/`, `stores/`, `services/`, `utils/`, `types/`, `schemas/`)
   - [x] 1.4 Add oxlint (the Vite template linter, with the jsx-a11y plugin) and Prettier; add `lint`, `typecheck`, `test`, `e2e`, `build` scripts
