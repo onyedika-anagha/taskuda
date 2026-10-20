@@ -35,7 +35,7 @@ export function buildRecommendationPrompt(input: RecommendationInput): AiPrompt 
     if (company) parts.push(`for ${company}`)
     if (task.carriedOverCount > 0) parts.push(`carried over from earlier days ${task.carriedOverCount}×`)
     const outcome = input.outcomes[task.id]
-    if (outcome === 'carry_over') parts.push('moving to tomorrow')
+    if (outcome === 'carry_over') parts.push('moving to the next working day')
     if (outcome === 'delete') parts.push('dropped today')
     return parts.join(' | ')
   })

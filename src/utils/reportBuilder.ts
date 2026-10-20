@@ -2,6 +2,8 @@ import type { TaskOutcome } from '@/types/closeout'
 import type { Company } from '@/types/company'
 import type { ReportData, ReportGroup, ReportItem, ReportScope } from '@/types/report'
 import type { Task } from '@/types/task'
+import { DEFAULT_WORKING_DAYS, type Weekday } from '@/types/workday'
+import { nextWorkingDay } from './dates'
 
 interface BuildReportInput {
   dayKey: string
@@ -10,6 +12,7 @@ interface BuildReportInput {
   scope: ReportScope
   /** Closeout choices not yet applied; "carry over" already shows in the report before Finish. */
   pendingOutcomes?: Record<string, TaskOutcome>
+  workingDays?: readonly Weekday[]
 }
 
 const toItem = (task: Task): ReportItem => ({ title: task.title, jiraKey: task.jiraIssue?.key ?? null })
@@ -34,7 +37,7 @@ export function isReportEmpty(report: ReportData): boolean {
 }
 
 /**
- * Done / In progress / Carried to tomorrow for one day (PRD AC14.4).
+ * Done / In progress / Carried to (next working day) for one day (PRD AC14.4, AC11.1).
  * "All companies" groups by company; tasks with no company come last under "Other".
  * Tasks being deleted at closeout are left out.
  */
@@ -44,13 +47,20 @@ export function buildReport({
   companies,
   scope,
   pendingOutcomes = {},
+  workingDays = DEFAULT_WORKING_DAYS,
 }: BuildReportInput): ReportData {
   const kept = tasks.filter((t) => pendingOutcomes[t.id] !== 'delete')
+  const carriedToDayKey = nextWorkingDay(dayKey, workingDays)
 
   if (scope !== 'all') {
     const company = companies.find((c) => c.id === scope)
     const own = kept.filter((t) => t.companyId === scope)
-    return { dayKey, scopeName: company?.name ?? null, groups: [groupFor(own, null, pendingOutcomes)] }
+    return {
+      dayKey,
+      scopeName: company?.name ?? null,
+      carriedToDayKey,
+      groups: [groupFor(own, null, pendingOutcomes)],
+    }
   }
 
   const known = new Set(companies.map((c) => c.id))
@@ -66,5 +76,5 @@ export function buildReport({
   const other = kept.filter((t) => !t.companyId || !known.has(t.companyId))
   const hasCompanies = groups.some((g) => !isGroupEmpty(g))
   groups.push(groupFor(other, hasCompanies ? 'Other' : null, pendingOutcomes))
-  return { dayKey, scopeName: null, groups: groups.filter((g) => !isGroupEmpty(g)) }
+  return { dayKey, scopeName: null, carriedToDayKey, groups: groups.filter((g) => !isGroupEmpty(g)) }
 }

@@ -11,6 +11,9 @@ import {
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] })
 
 test.beforeEach(async ({ page }) => {
+  // A Tuesday, so "carried to tomorrow" holds whatever day the suite runs (Friday → Monday is in
+  // workday.spec.ts). The clock keeps running from there.
+  await page.clock.setSystemTime(new Date(2026, 9, 20, 10, 0))
   await page.goto('/')
 })
 

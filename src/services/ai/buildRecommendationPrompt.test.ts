@@ -27,7 +27,7 @@ describe('buildRecommendationPrompt (AC13.3 data minimization)', () => {
   it('includes titles, statuses, companies, carryovers, rating and reflection', () => {
     expect(prompt.user).toContain('- Client call | Done | Afternoon | for Acme')
     expect(prompt.user).toContain(
-      '- Write spec | To Do | Morning | carried over from earlier days 2× | moving to tomorrow',
+      '- Write spec | To Do | Morning | carried over from earlier days 2× | moving to the next working day',
     )
     expect(prompt.user).toContain('Day rating: 2/5 (Meh)')
     expect(prompt.user).toContain('Reflection: Too many meetings')

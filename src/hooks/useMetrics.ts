@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '@/services/db/database'
+import { getWorkingDays } from '@/services/workday/workdaySettings'
 import { todayKey } from '@/utils/dates'
 import { closeoutStreak, medianMinutesToReport, silentlyDroppedCount, windowStart } from '@/utils/metrics'
 
@@ -17,15 +18,17 @@ export interface Metrics {
 export function useMetrics(): Metrics | undefined {
   return useLiveQuery(async () => {
     const today = todayKey()
-    const [tasks, closeouts] = await Promise.all([
+    const [tasks, closeouts, workingDays] = await Promise.all([
       db.tasks.where('dayKey').between(windowStart(today), today, true, false).toArray(),
       db.closeouts.toArray(),
+      getWorkingDays(),
     ])
     return {
       droppedCount: silentlyDroppedCount(tasks, today),
       streak: closeoutStreak(
         closeouts.map((c) => c.dayKey),
         today,
+        workingDays,
       ),
       medianMinutes: medianMinutesToReport(closeouts, today),
       hasCloseouts: closeouts.length > 0,

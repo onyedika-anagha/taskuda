@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
 import { addTask, blockArea, expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
 
-const SETTINGS_SECTIONS = ['companies', 'integrations', 'backup', 'ai-security', 'voice', 'stats', 'about']
+const SETTINGS_SECTIONS = ['companies', 'workday', 'integrations', 'backup', 'ai-security', 'voice', 'stats', 'about']
 
 async function checkScreen(page: Page) {
   await expectNoHorizontalScroll(page)
@@ -31,7 +31,7 @@ for (const scheme of ['light', 'dark'] as const) {
       for (const section of SETTINGS_SECTIONS) {
         await page.goto(`/settings/${section}`)
         await expect(page.getByRole('heading', { level: 2 }).first()).toBeVisible()
-        await checkScreen(page) // S7a–S7g
+        await checkScreen(page) // S7a–S7h
       }
     })
   })

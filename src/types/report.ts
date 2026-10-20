@@ -21,5 +21,7 @@ export interface ReportData {
   dayKey: string
   /** Company name for a single-company report. */
   scopeName: string | null
+  /** The next working day, where carried tasks go (PRD AC11.1). */
+  carriedToDayKey: string
   groups: ReportGroup[]
 }

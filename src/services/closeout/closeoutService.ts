@@ -3,10 +3,11 @@ import { db } from '@/services/db/database'
 import { ValidationError } from '@/services/db/errors'
 import { deleteSetting, getSetting, setSetting } from '@/services/db/settingsRepository'
 import { carryOverTask, deleteTask, listTasksForDay } from '@/services/db/taskRepository'
+import { getWorkingDays } from '@/services/workday/workdaySettings'
 import type { Closeout } from '@/types/closeout'
 import type { CloseoutDraft } from '@/types/closeoutDraft'
 import { relevantOutcomes, unfinishedTasks } from '@/utils/closeoutRules'
-import { addDaysToKey } from '@/utils/dates'
+import { nextWorkingDay } from '@/utils/dates'
 
 const draftKey = (dayKey: string) => `closeout.draft.${dayKey}`
 
@@ -37,13 +38,16 @@ export function discardDraft(dayKey: string): Promise<void> {
 
 export interface FinishResult {
   carried: number
+  /** The day carried tasks went to. */
+  carriedTo: string
   deleted: number
   closeout: Closeout
 }
 
 /**
  * Applies every decision and records the closeout in one transaction, so a crash can't
- * leave tasks half-carried (PRD AC10.1, AC10.3, AC11.1). Unfinished tasks go to the next day.
+ * leave tasks half-carried (PRD AC10.1, AC10.3, AC11.1). Unfinished tasks go to the next
+ * working day (AC19.3).
  */
 export async function finishCloseout(draft: CloseoutDraft, now = Date.now()): Promise<FinishResult> {
   if (draft.rating === null || draft.rating < 1 || draft.rating > 5) {
@@ -64,7 +68,7 @@ export async function finishCloseout(draft: CloseoutDraft, now = Date.now()): Pr
         )
       }
 
-      const nextDay = addDaysToKey(draft.dayKey, 1)
+      const nextDay = nextWorkingDay(draft.dayKey, await getWorkingDays())
       let carried = 0
       let deleted = 0
       for (const [taskId, outcome] of Object.entries(outcomes)) {
@@ -92,7 +96,7 @@ export async function finishCloseout(draft: CloseoutDraft, now = Date.now()): Pr
       }
       await saveCloseout(closeout)
       await discardDraft(draft.dayKey)
-      return { carried, deleted, closeout }
+      return { carried, carriedTo: nextDay, deleted, closeout }
     },
   )
 }

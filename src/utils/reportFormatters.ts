@@ -1,4 +1,5 @@
 import type { ReportData, ReportFormat, ReportGroup, ReportItem } from '@/types/report'
+import { relativeDayName } from './dates'
 import { formatDayLong } from './taskPresentation'
 
 export const FORMAT_LABELS: Record<ReportFormat, string> = {
@@ -8,12 +9,14 @@ export const FORMAT_LABELS: Record<ReportFormat, string> = {
   email: 'Email',
 }
 
-/** Section names from the design spec (Section 8, S6). */
-const SECTIONS = [
-  ['done', 'Done'],
-  ['inProgress', 'In progress'],
-  ['carried', 'Carried to tomorrow'],
-] as const
+/** Section names from the design spec (Section 8, S6); "Carried to Monday" after a Friday. */
+function sections(report: ReportData) {
+  return [
+    ['done', 'Done'],
+    ['inProgress', 'In progress'],
+    ['carried', `Carried to ${relativeDayName(report.dayKey, report.carriedToDayKey)}`],
+  ] as const
+}
 
 interface Syntax {
   title: (text: string) => string
@@ -63,10 +66,10 @@ function itemText(item: ReportItem): string {
   return item.jiraKey ? `${item.jiraKey} ${item.title}` : item.title
 }
 
-function groupLines(group: ReportGroup, syntax: Syntax): string[] {
+function groupLines(group: ReportGroup, syntax: Syntax, labels: ReturnType<typeof sections>): string[] {
   const blocks: string[] = []
   if (group.heading) blocks.push(syntax.heading(group.heading))
-  for (const [key, label] of SECTIONS) {
+  for (const [key, label] of labels) {
     const items = group[key]
     if (!items.length) continue
     blocks.push([syntax.section(label), ...items.map((i) => syntax.item(itemText(i)))].join('\n'))
@@ -82,6 +85,10 @@ export function reportTitle(report: ReportData): string {
 /** The exact text that gets copied (PRD AC14.2). */
 export function formatReport(report: ReportData, format: ReportFormat): string {
   const syntax = SYNTAX[format]
-  const blocks = [syntax.title(reportTitle(report)), ...report.groups.flatMap((g) => groupLines(g, syntax))]
+  const labels = sections(report)
+  const blocks = [
+    syntax.title(reportTitle(report)),
+    ...report.groups.flatMap((g) => groupLines(g, syntax, labels)),
+  ]
   return blocks.join(`\n${syntax.gap}`)
 }

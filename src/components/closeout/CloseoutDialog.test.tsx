@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { getCloseout } from '@/services/db/closeoutRepository'
 import { createTask, getTask, listTasksForDay, setTaskStatus } from '@/services/db/taskRepository'
+import { setWorkingDays } from '@/services/workday/workdaySettings'
 import { useCloseoutStore } from '@/stores/closeoutStore'
 import { renderWithApp } from '@/test/renderWithApp'
 import { resetDatabase } from '@/test/resetDatabase'
@@ -22,6 +23,8 @@ describe('Closeout (S5)', () => {
   beforeEach(async () => {
     useCloseoutStore.setState({ view: { mode: 'closed' } })
     await resetDatabase()
+    // Every day is a working day, so carryover lands on tomorrow whatever day the tests run.
+    await setWorkingDays([0, 1, 2, 3, 4, 5, 6])
   })
 
   it('DAC4 closes out a day with 5 unfinished tasks in 8 interactions and carries them over', async () => {

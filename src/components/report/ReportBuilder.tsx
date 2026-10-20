@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useCopyReport } from '@/hooks/useCopyReport'
+import { useWorkingDays } from '@/hooks/useWorkingDays'
 import type { TaskOutcome } from '@/types/closeout'
 import type { Company } from '@/types/company'
 import type { ReportFormat, ReportScope } from '@/types/report'
@@ -26,10 +27,11 @@ export function ReportBuilder({ dayKey, tasks, companies, pendingOutcomes, onCop
   const [scope, setScope] = useState<ReportScope>('all')
   const [format, setFormat] = useState<ReportFormat>('slack')
   const { state, copy, previewRef, reset } = useCopyReport(onCopied)
+  const workingDays = useWorkingDays()
 
   const report = useMemo(
-    () => buildReport({ dayKey, tasks, companies, scope, pendingOutcomes }),
-    [dayKey, tasks, companies, scope, pendingOutcomes],
+    () => buildReport({ dayKey, tasks, companies, scope, pendingOutcomes, workingDays }),
+    [dayKey, tasks, companies, scope, pendingOutcomes, workingDays],
   )
   const text = useMemo(() => formatReport(report, format), [report, format])
   const empty = isReportEmpty(report)

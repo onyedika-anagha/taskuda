@@ -2,11 +2,14 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { getCloseout, recordReportCopied } from '@/services/db/closeoutRepository'
 import { ValidationError } from '@/services/db/errors'
 import { createTask, getTask, listTasksForDay, setTaskStatus } from '@/services/db/taskRepository'
+import { setWorkingDays } from '@/services/workday/workdaySettings'
 import { resetDatabase } from '@/test/resetDatabase'
 import { discardDraft, finishCloseout, loadDraft, newDraft, saveDraft } from './closeoutService'
 
 const DAY = '2026-10-19'
 const NEXT = '2026-10-20'
+const FRIDAY = '2026-10-16'
+const MONDAY = '2026-10-19'
 
 describe('closeoutService', () => {
   beforeEach(resetDatabase)
@@ -63,6 +66,29 @@ describe('closeoutService', () => {
       reflection: 'Good day',
     })
     expect(await loadDraft(DAY)).toBeNull()
+  })
+
+  it('AC11.1 / AC19.3 carries a Friday task to Monday by default', async () => {
+    const task = await createTask({ title: 'Weekly sync', dayKey: FRIDAY, block: 'morning' })
+    const result = await finishCloseout({
+      ...newDraft(FRIDAY),
+      outcomes: { [task.id]: 'carry_over' as const },
+      rating: 3,
+    })
+    expect(result.carriedTo).toBe(MONDAY)
+    expect(await listTasksForDay('2026-10-17')).toEqual([])
+    expect(await listTasksForDay(MONDAY)).toMatchObject([{ title: 'Weekly sync' }])
+  })
+
+  it('AC19.3 follows custom working days (Saturday is a working day)', async () => {
+    await setWorkingDays([1, 2, 3, 4, 5, 6])
+    const task = await createTask({ title: 'Weekly sync', dayKey: FRIDAY, block: 'morning' })
+    const result = await finishCloseout({
+      ...newDraft(FRIDAY),
+      outcomes: { [task.id]: 'carry_over' as const },
+      rating: 3,
+    })
+    expect(result.carriedTo).toBe('2026-10-17')
   })
 
   it('ignores outcomes for tasks that were finished meanwhile', async () => {

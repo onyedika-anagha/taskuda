@@ -113,6 +113,13 @@ These are recorded in the design spec where they change it.
   - If the calendar sync hasn't run yet, the tombstone is cleared and the event is kept. If it has, the task is pushed as a new event; a calendar-sourced task becomes `source: 'manual'` for that, because unlinked calendar tasks are never pushed.
   - **Calendar sync change:** a cancelled event is only acted on through an existing link. It is no longer re-linked by its Taskuda task id, which would have let the old event of an undone delete remove the restored task again.
   - The undo toast runs its own pausable timer (`UndoToast`, `usePausableTimeout`), because Sonner pauses on hover but not on keyboard focus.
+- **Working days (FR19, added 2026-10-20):**
+  - Stored in the backed-up setting `workday.workingDays` as date-fns weekday numbers (0 = Sunday), Monday-first. An empty or unreadable value falls back to Mon–Fri.
+  - `nextWorkingDay` drives carryover, and `ReportData.carriedToDayKey` drives the "Carried to Monday" heading.
+  - **WeekdayPicker names:** each button's name comes from its text, with the letters past "M"/"Mon" kept inline at zero font size inside one wrapper span. Two simpler options failed:
+    - `aria-label="Monday"` with "Mon" shown fails axe `label-content-name-mismatch`.
+    - `sr-only` spans, or separate flex items, give "Mon day".
+  - The group is a `fieldset` with a screen-reader-only `legend`.
 - **Past days that were never closed out can still be closed out.**
 - **Voice lines say "2:00 PM".**
 - **First-run Drive connect** checks for an existing backup before uploading a new one.

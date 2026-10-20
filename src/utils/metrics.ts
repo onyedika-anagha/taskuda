@@ -1,5 +1,6 @@
 import type { Closeout } from '@/types/closeout'
 import type { Task } from '@/types/task'
+import type { Weekday } from '@/types/workday'
 import { addDaysToKey, isWorkingDay } from './dates'
 
 /** The PRD's 4-week measurement window. */
@@ -21,16 +22,21 @@ export function silentlyDroppedCount(tasks: Task[], todayKey: string): number {
 }
 
 /**
- * M2: consecutive working days (Mon–Fri) with a closeout, counting back from today.
- * Today only counts once closed, so an open day doesn't break the streak; weekends are skipped.
+ * M2: consecutive working days with a closeout, counting back from today (PRD AC19.2).
+ * Today only counts once closed, so an open day doesn't break the streak; other days are skipped.
  */
-export function closeoutStreak(closeoutDays: Iterable<string>, todayKey: string): number {
+export function closeoutStreak(
+  closeoutDays: Iterable<string>,
+  todayKey: string,
+  workingDays: readonly Weekday[],
+): number {
   const closed = new Set(closeoutDays)
-  let day = closed.has(todayKey) || !isWorkingDay(todayKey) ? todayKey : addDaysToKey(todayKey, -1)
+  const working = (day: string) => isWorkingDay(day, workingDays)
+  let day = closed.has(todayKey) || !working(todayKey) ? todayKey : addDaysToKey(todayKey, -1)
   let streak = 0
   // Bounded so corrupted data can't loop forever.
   for (let i = 0; i < 3660; i++, day = addDaysToKey(day, -1)) {
-    if (!isWorkingDay(day)) continue
+    if (!working(day)) continue
     if (!closed.has(day)) break
     streak++
   }

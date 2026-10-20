@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import type { FinishResult } from '@/services/closeout/closeoutService'
 import { ValidationError } from '@/services/db/errors'
 import { useCloseoutStore } from '@/stores/closeoutStore'
 import { useRecommendationsStore } from '@/stores/recommendationsStore'
@@ -7,10 +8,12 @@ import type { CloseoutDraft, CloseoutStep } from '@/types/closeoutDraft'
 import { CLOSEOUT_STEPS } from '@/types/closeoutDraft'
 import type { Task } from '@/types/task'
 import { relevantOutcomes, undecidedCount, unfinishedTasks } from '@/utils/closeoutRules'
+import { relativeDayName } from '@/utils/dates'
 
-function finishedMessage(carried: number): string {
+function finishedMessage({ carried, carriedTo, closeout }: FinishResult): string {
   if (carried === 0) return 'Day closed.'
-  return `Day closed. ${carried} ${carried === 1 ? 'task' : 'tasks'} carried to tomorrow.`
+  const to = relativeDayName(closeout.dayKey, carriedTo)
+  return `Day closed. ${carried} ${carried === 1 ? 'task' : 'tasks'} carried to ${to}.`
 }
 
 /** Step navigation and checks for an open closeout draft (design F5). */
@@ -36,7 +39,7 @@ export function useCloseoutFlow(draft: CloseoutDraft, tasks: Task[]) {
     setFinishing(true)
     try {
       const result = await finishCloseout()
-      toast.success(finishedMessage(result.carried))
+      toast.success(finishedMessage(result))
     } catch (error) {
       toast.error('Couldn’t close out the day.', {
         description: error instanceof ValidationError ? error.message : 'Your choices are kept. Try again.',

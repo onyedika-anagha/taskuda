@@ -259,14 +259,14 @@ Adopted from the My Work Day PRD. These are Should items in v1 scope, built on `
   - [x] 13.5 Check that the toast timer pauses while focus or the pointer is inside it (design Section 7); fix if Sonner doesn't do this. Sonner only pauses on hover, so `UndoToast` has its own pausable timer
   - [x] 13.6 Tests: repository restore round trip and activity log (AC18.2, AC18.3; M1 needs nothing extra because it only reads tasks that exist); calendar sync after restore makes no duplicate (AC18.4); e2e delete → Undo with mouse and with keyboard (AC18.1, AC18.5, DAC15)
 
-- [ ] 14.0 Add configurable working days and the Workday settings section (FR19, S7h; carryover to the next working day, M2)
-  - [ ] 14.1 Create `types/workday.ts` and `services/workday/workdaySettings.ts` with working days (default Mon–Fri, at least one). Use a backed-up key (not `device.`)
-  - [ ] 14.2 Change `utils/dates.ts`: `isWorkingDay(dayKey, workingDays)` and `nextWorkingDay(dayKey, workingDays)`; update every caller; unit tests for Friday → Monday, Saturday as a working day, and a single working day
-  - [ ] 14.3 Pass working days into `closeoutStreak`; `useMetrics` reads the setting (AC19.2)
-  - [ ] 14.4 `finishCloseout` carries over to `nextWorkingDay` instead of the next calendar day (AC11.1, AC19.3); the done toast and the report's carried heading use the day name when it isn't tomorrow (design Section 8)
-  - [ ] 14.5 Add shadcn ToggleGroup; build `WeekdayPicker` (full day names as labels, `aria-pressed`, can't untick the last day, short labels under 400px)
-  - [ ] 14.6 Add `WorkdaySection` at `/settings/workday`, second in the nav, with the Working days field; later tasks add the other fields
-  - [ ] 14.7 Tests: WeekdayPicker minimum rule; closeout carryover Friday → Monday; streak with custom days; e2e change working days in Settings and see the streak and carryover follow
+- [x] 14.0 Add configurable working days and the Workday settings section (FR19, S7h; carryover to the next working day, M2)
+  - [x] 14.1 Create `types/workday.ts` and `services/workday/workdaySettings.ts` with working days (default Mon–Fri, at least one). Use a backed-up key (not `device.`)
+  - [x] 14.2 Change `utils/dates.ts`: `isWorkingDay(dayKey, workingDays)` and `nextWorkingDay(dayKey, workingDays)`; update every caller; unit tests for Friday → Monday, Saturday as a working day, and a single working day
+  - [x] 14.3 Pass working days into `closeoutStreak`; `useMetrics` reads the setting (AC19.2)
+  - [x] 14.4 `finishCloseout` carries over to `nextWorkingDay` instead of the next calendar day (AC11.1, AC19.3); the done toast and the report's carried heading use the day name when it isn't tomorrow (design Section 8). The AI prompt now says "moving to the next working day"
+  - [x] 14.5 Add shadcn ToggleGroup; build `WeekdayPicker` (full day names as labels, `aria-pressed`, can't untick the last day, short labels under 400px)
+  - [x] 14.6 Add `WorkdaySection` at `/settings/workday`, second in the nav, with the Working days field; later tasks add the other fields
+  - [x] 14.7 Tests: WeekdayPicker minimum rule; closeout carryover Friday → Monday; streak with custom days; e2e change working days in Settings and see the carryover follow (streak covered by unit tests); Workday added to the a11y sweep. Closeout tests pin a weekday (e2e clock) or set all days working (unit) so they pass on any day
 
 - [ ] 15.0 Add the report summary line and the time left in the current block (FR24, FR27, DAC20)
   - [ ] 15.1 Add a `summary` (done, in progress, carried counts and company count) to `ReportData` for the all-companies scope only (AC24.3)

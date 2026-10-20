@@ -6,6 +6,7 @@ import { CompaniesSection } from '@/components/settings/CompaniesSection'
 import { IntegrationsSection } from '@/components/settings/IntegrationsSection'
 import { StatsSection } from '@/components/settings/StatsSection'
 import { VoiceSection } from '@/components/settings/VoiceSection'
+import { WorkdaySection } from '@/components/settings/WorkdaySection'
 
 export interface SettingsSectionDef {
   id: string
@@ -16,6 +17,7 @@ export interface SettingsSectionDef {
 /** S7 sections in design order. */
 export const SETTINGS_SECTIONS: readonly SettingsSectionDef[] = [
   { id: 'companies', label: 'Companies', Component: CompaniesSection },
+  { id: 'workday', label: 'Workday', Component: WorkdaySection },
   { id: 'integrations', label: 'Integrations', Component: IntegrationsSection },
   { id: 'backup', label: 'Backup', Component: BackupSection },
   { id: 'ai-security', label: 'AI & Security', Component: AiSecuritySection },

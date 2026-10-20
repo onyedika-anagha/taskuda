@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { addDaysToKey, fromDayKey, isPastDay, isValidDayKey, isWorkingDay, toDayKey, todayKey } from './dates'
+import { DEFAULT_WORKING_DAYS } from '@/types/workday'
+import {
+  addDaysToKey,
+  fromDayKey,
+  isPastDay,
+  isValidDayKey,
+  isWorkingDay,
+  nextWorkingDay,
+  relativeDayName,
+  toDayKey,
+  todayKey,
+} from './dates'
 
 describe('dates', () => {
   it('formats and parses local day keys', () => {
@@ -28,10 +39,29 @@ describe('dates', () => {
     expect(isPastDay('2026-10-19', now)).toBe(false)
   })
 
-  it('treats Monday to Friday as working days (M2 streak)', () => {
-    expect(isWorkingDay('2026-10-16')).toBe(true) // Friday
-    expect(isWorkingDay('2026-10-17')).toBe(false) // Saturday
-    expect(isWorkingDay('2026-10-18')).toBe(false) // Sunday
-    expect(isWorkingDay('2026-10-19')).toBe(true) // Monday
+  it('AC19.1 treats Monday to Friday as working days by default', () => {
+    expect(isWorkingDay('2026-10-16', DEFAULT_WORKING_DAYS)).toBe(true) // Friday
+    expect(isWorkingDay('2026-10-17', DEFAULT_WORKING_DAYS)).toBe(false) // Saturday
+    expect(isWorkingDay('2026-10-18', DEFAULT_WORKING_DAYS)).toBe(false) // Sunday
+    expect(isWorkingDay('2026-10-19', DEFAULT_WORKING_DAYS)).toBe(true) // Monday
+  })
+
+  it('AC19.1 follows custom working days', () => {
+    expect(isWorkingDay('2026-10-17', [1, 2, 3, 4, 5, 6])).toBe(true) // Saturday
+    expect(isWorkingDay('2026-10-16', [2, 4])).toBe(false) // Friday
+  })
+
+  it('AC11.1 / AC19.3 nextWorkingDay skips days off', () => {
+    expect(nextWorkingDay('2026-10-16', DEFAULT_WORKING_DAYS)).toBe('2026-10-19') // Fri → Mon
+    expect(nextWorkingDay('2026-10-19', DEFAULT_WORKING_DAYS)).toBe('2026-10-20') // Mon → Tue
+    expect(nextWorkingDay('2026-10-17', DEFAULT_WORKING_DAYS)).toBe('2026-10-19') // Sat → Mon
+    expect(nextWorkingDay('2026-10-16', [1, 2, 3, 4, 5, 6])).toBe('2026-10-17') // Fri → Sat
+    expect(nextWorkingDay('2026-10-21', [3])).toBe('2026-10-28') // only Wednesdays
+    expect(nextWorkingDay('2026-10-21', [])).toBe('2026-10-22')
+  })
+
+  it('relativeDayName says tomorrow or the weekday', () => {
+    expect(relativeDayName('2026-10-19', '2026-10-20')).toBe('tomorrow')
+    expect(relativeDayName('2026-10-16', '2026-10-19')).toBe('Monday')
   })
 })
