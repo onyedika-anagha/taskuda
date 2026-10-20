@@ -275,17 +275,17 @@ Adopted from the My Work Day PRD. These are Should items in v1 scope, built on `
   - [x] 15.4 Build `BlockTimeLeft` using `useNow` (ticks at least once a minute); show it in the current `TimeBlockColumn` header and under the mobile tab list, only on today; include it in the header's accessible name, not as a live region (AC27.1–AC27.3)
   - [x] 15.5 Tests: formatter tests for each format with and without zero counts; `blockTimeLeft` unit tests; component test with fake timers crossing 11:59 → 12:00 (DAC20); e2e report shows the line for all companies only. Also fixed: the closeout step area now scrolls, so a tall report no longer slides under the Back / Next footer on phones
 
-- [ ] 16.0 Add the closeout nudge, snooze / mark done from reminders, and quiet hours (FR21, FR22, FR23, DAC16, DAC18, DAC19)
-  - [ ] 16.1 Add closeout-reminder time (Off or a time, default 5:30 PM) and quiet hours (off, start, end) to Workday settings; build `TimeRangeField` ("Start and end can't be the same."); add both fields to `WorkdaySection`
-  - [ ] 16.2 `utils/quietHours.ts`: `isInQuietHours(now, range)` including overnight ranges; unit tests
-  - [ ] 16.3 `voiceAlert` doesn't speak during quiet hours; toasts still show (AC23.2)
-  - [ ] 16.4 Reminder toasts: actions Snooze 5 min, Snooze 15 min, Mark done; `duration: Infinity`; never take focus (AC22.1, AC22.4, DAC18)
-  - [ ] 16.5 Snooze: store snoozed-until per reminder id; `dueReminders` fires it again at that time with toast and voice; "Reminder snoozed until 2:15 PM." toast (AC22.2)
-  - [ ] 16.6 Mark done goes through the same path as the status toggle (activity log, cheer, Jira mapping) (AC22.3)
-  - [ ] 16.7 `services/workday/closeoutNudge.ts`: pure function that returns banner / toast / voice from now, settings, today's closeout, the dismissed day, and whether the app was open at nudge time (AC21.2–AC21.4)
-  - [ ] 16.8 Build `NoticeBanner`; show the nudge banner in `CanvasNotices` (order: storage error → offline → nudge → budget; at most two). "Close out day" opens today's closeout even when another day is shown; "Not today" saves the dismissed day (AC21.3, DAC19)
-  - [ ] 16.9 Add `Alt+T` (focus newest action toast) to the shortcuts dialog and make sure Sonner's hotkey matches
-  - [ ] 16.10 Tests: nudge decision table; quiet hours; snooze timing with fake timers; e2e snooze and mark done from the toast (DAC16); nudge banner opens the closeout in one click (DAC19); typing in the editor while alerts fire keeps focus and text (DAC18)
+- [x] 16.0 Add the closeout nudge, snooze / mark done from reminders, and quiet hours (FR21, FR22, FR23, DAC16, DAC18, DAC19)
+  - [x] 16.1 Add closeout-reminder time (Off or a time, default 5:30 PM) and quiet hours (off, start, end) to Workday settings; build `TimeRangeField` ("Start and end can't be the same."); add both fields to `WorkdaySection`
+  - [x] 16.2 `utils/quietHours.ts`: `isInQuietHours(now, range)` including overnight ranges; unit tests
+  - [x] 16.3 `voiceAlert` doesn't speak during quiet hours; toasts still show (AC23.2)
+  - [x] 16.4 Reminder toasts: actions Snooze 5 min, Snooze 15 min, Mark done; `duration: Infinity`; never take focus (AC22.1, AC22.4, DAC18). A custom `ReminderToast`, since Sonner toasts hold one action
+  - [x] 16.5 Snooze: store snoozed-until per reminder id; `dueReminders` fires it again at that time with toast and voice; "Reminder snoozed until 2:15 PM." toast (AC22.2)
+  - [x] 16.6 Mark done goes through the same path as the status toggle (activity log, cheer, Jira mapping) (AC22.3). The shared path is now `services/tasks/taskStatusActions.ts`
+  - [x] 16.7 `services/workday/closeoutNudge.ts`: pure function that returns banner / toast / voice from now, settings, today's closeout, the dismissed day, and whether the app was open at nudge time (AC21.2–AC21.4)
+  - [x] 16.8 Build `NoticeBanner`; show the nudge banner on S2 under the storage notice (the budget banner joins it in 18.0). "Close out day" opens today's closeout even when another day is shown; "Not today" saves the dismissed day (AC21.3, DAC19). Announced politely through the live announcer, not as `role="alert"`
+  - [x] 16.9 Add `Alt+T` (focus newest action toast) to the shortcuts dialog and make sure Sonner's hotkey matches
+  - [x] 16.10 Tests: nudge decision table; quiet hours; snooze timing with fake timers; e2e snooze and mark done from the toast (DAC16); nudge banner opens the closeout in one click (DAC19); typing in the editor while alerts fire keeps focus and text (DAC18). Also fixed: toasts now sit below the app bar (they covered the day navigator), and the a11y helper scans toasts separately, which ends the long-running closeout contrast flake
 
 - [ ] 17.0 Add overlap warnings and carry-over insights (FR25, FR26)
   - [ ] 17.1 Move the 30-minute default duration into a shared constant in `utils/` so utils don't import services; `services/calendar/eventMapping.ts` uses it

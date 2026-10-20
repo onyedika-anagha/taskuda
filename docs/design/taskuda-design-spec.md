@@ -358,7 +358,7 @@ Target: **WCAG 2.1 AA**.
   - Note: `aria-label="Client call, Acme, 2:00 PM, In Progress"`.
   - Calendar-sourced and carried-over icons have text labels ("From Google Calendar", "Carried over twice").
   - Color swatches: color name as label ("Teal").
-- **Toasts** appear at the top center, so they never cover the phone bottom action bar (changed during build).
+- **Toasts** appear at the top center, just below the app bar, so they never cover the phone bottom action bar or the day navigator (changed during build; moved below the app bar on 2026-10-20).
 - **Live regions:** status changes, task moves, "Copied", sync errors, and step changes in S5 are announced through a polite `aria-live` region.
 - **Audio equivalents:** every spoken voice alert has a matching on-screen toast.
 - **Touch targets:** ≥ 44×44 px (StatusToggle, note menu, tabs, FAB, swatches).

@@ -36,7 +36,8 @@ describe('Welcome (S1)', () => {
     const { router } = renderWithApp('/')
     await screen.findByRole('region', { name: /^Morning/ })
     expect(router.state.location.pathname).toBe('/')
-    expect(window.localStorage.getItem('taskuda.welcomeDone')).toBe('1')
+    // Written by an effect once the data check resolves, which can be just after the canvas shows.
+    await waitFor(() => expect(window.localStorage.getItem('taskuda.welcomeDone')).toBe('1'))
   })
 
   it('F1.2 adds the first company, then F1.3 “Not now” finishes on an empty today', async () => {

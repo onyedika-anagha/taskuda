@@ -7,6 +7,7 @@ const SHORTCUTS: [key: string, action: string][] = [
   [']', 'Next day'],
   ['M', 'Open the focused task’s menu'],
   ['Space', 'Pick up or drop the focused task’s drag handle'],
+  ['Alt+T', 'Go to the newest notification'],
   ['?', 'Show this list'],
 ]
 

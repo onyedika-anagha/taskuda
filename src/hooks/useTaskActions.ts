@@ -1,43 +1,20 @@
 import { createElement, useMemo } from 'react'
 import { toast } from 'sonner'
 import { UndoToast } from '@/components/common/UndoToast'
-import { ValidationError } from '@/services/db/errors'
 import * as tasks from '@/services/db/taskRepository'
+import { changeTaskStatus, reportSaveFailure as reportFailure } from '@/services/tasks/taskStatusActions'
 import { announce } from '@/stores/announcerStore'
-import { syncTaskStatusToJira } from '@/services/jira/jiraService'
-import { cheer } from '@/services/voice/voiceAlerts'
-import { jiraErrorMessage } from '@/utils/jiraErrorMessages'
 import { useCanvasUiStore } from '@/stores/canvasUiStore'
 import type { NewTaskInput, Task, TaskPatch, TaskStatus, TimeBlock } from '@/types/task'
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
-import { STATUS_LABELS, nextStatus } from '@/utils/taskStatus'
+import { nextStatus } from '@/utils/taskStatus'
 import { isTimeInBlock } from '@/utils/timeBlocks'
-
-/** AC15.3: move the linked issue to the mapped status; problems show as a toast, never block the task. */
-async function pushStatusToJira(task: Task, status: TaskStatus): Promise<void> {
-  const key = task.jiraIssue?.key
-  try {
-    const result = await syncTaskStatusToJira({ ...task, status }, status)
-    if (result === 'no-transition') {
-      toast(`${key} can’t move to that status from where it is in Jira. Update it in Jira.`)
-    }
-  } catch (error) {
-    toast.error(`Couldn’t update ${key} in Jira.`, { description: jiraErrorMessage(error, { key }) })
-  }
-}
 
 /** `Infinity`: UndoToast closes itself when its own (pausable) timer runs out. */
 function showUndoToast(message: string, onUndo: () => void): void {
   toast.custom((id) => createElement(UndoToast, { toastId: id, message, onUndo }), {
     duration: Infinity,
   })
-}
-
-const GENERIC_SAVE_ERROR = 'Couldn’t save your change.'
-
-function reportFailure(error: unknown, retry: () => void, message = GENERIC_SAVE_ERROR): void {
-  const description = error instanceof ValidationError ? error.message : undefined
-  toast.error(message, { description, action: { label: 'Try again', onClick: retry } })
 }
 
 export interface MoveOptions {
@@ -63,17 +40,7 @@ export function useTaskActions(): TaskActions {
   const requestTimedMove = useCanvasUiStore((s) => s.requestTimedMove)
 
   return useMemo<TaskActions>(() => {
-    async function setStatus(task: Task, status: TaskStatus): Promise<void> {
-      try {
-        await tasks.setTaskStatus(task.id, status)
-        announce(`${task.title}: ${STATUS_LABELS[status]}`)
-        // Completion cheer (PRD AC9.2), only with voice on.
-        if (status === 'done' && task.status !== 'done') void cheer()
-        if (task.jiraIssue) void pushStatusToJira(task, status)
-      } catch (error) {
-        reportFailure(error, () => void setStatus(task, status))
-      }
-    }
+    const setStatus = (task: Task, status: TaskStatus) => changeTaskStatus(task, status)
 
     async function moveTask(
       task: Task,

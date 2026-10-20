@@ -1,10 +1,13 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Toaster } from 'sonner'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ReminderCatchup } from '@/components/canvas/ReminderCatchup'
-import { createTask } from '@/services/db/taskRepository'
+import { saveCloseout } from '@/services/db/closeoutRepository'
+import { createTask, getTask, listTasksForDay, setTaskStatus } from '@/services/db/taskRepository'
 import { setLeadMinutes, setVoiceEnabled } from '@/services/voice/voiceSettings'
+import { setQuietHours, setWorkingDays } from '@/services/workday/workdaySettings'
+import { useCloseoutNudgeStore } from '@/stores/closeoutNudgeStore'
 import { useReminderStore } from '@/stores/reminderStore'
 import { installFakeSpeech, removeFakeSpeech } from '@/test/fakeSpeech'
 import { resetDatabase } from '@/test/resetDatabase'
@@ -24,7 +27,10 @@ describe('reminder checks (PRD FR9)', () => {
     window.localStorage.clear()
     window.localStorage.setItem('taskuda.welcomeDone', '1')
     useReminderStore.setState({ missed: [] })
+    useCloseoutNudgeStore.setState({ dismissedDay: null })
     await resetDatabase()
+    // Every day is a working day, so the nudge tests pass whatever day they run on.
+    await setWorkingDays([0, 1, 2, 3, 4, 5, 6])
     speech = installFakeSpeech()
     await createTask({ title: 'Client call', dayKey: today, block: 'afternoon', startTime: '14:00' })
   })
@@ -80,5 +86,115 @@ describe('reminder checks (PRD FR9)', () => {
     expect(screen.getByText(/Starting now: Client call\./)).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
     expect(screen.queryByText(/You missed/)).not.toBeInTheDocument()
+  })
+
+  describe('Snooze and Mark done from the reminder (PRD FR22)', () => {
+    it('AC22.1 / AC22.4 the reminder stays with Snooze 5 min, Snooze 15 min and Mark done', async () => {
+      render(<Toaster />)
+      await checkReminders(at(14) + 5000, true)
+      expect(await screen.findByText('Starting now: Client call.')).toBeInTheDocument()
+      for (const name of ['Snooze 5 min', 'Snooze 15 min', 'Mark done', 'Close']) {
+        expect(screen.getByRole('button', { name })).toBeInTheDocument()
+      }
+      // Nothing took focus away from the page (design DAC18).
+      expect(document.activeElement).toBe(document.body)
+    })
+
+    it('AC22.2 / DAC16 Snooze repeats the reminder after the chosen time', async () => {
+      render(<Toaster />)
+      vi.setSystemTime(at(14) + 5000)
+      await checkReminders(at(14) + 5000, true)
+      await userEvent.click(await screen.findByRole('button', { name: 'Snooze 5 min' }))
+      expect(await screen.findByText('Reminder snoozed until 2:05 PM.')).toBeInTheDocument()
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'Mark done' })).not.toBeInTheDocument())
+
+      await checkReminders(at(14, 4), true)
+      expect(speech.spoken).toHaveLength(1)
+      await checkReminders(at(14, 5) + 10_000, true)
+      expect(speech.spoken.map((s) => s.text)).toEqual(['Starting now: Client call.', 'Starting now: Client call.'])
+      expect(await screen.findByRole('button', { name: 'Mark done' })).toBeInTheDocument()
+      // Only once.
+      await checkReminders(at(14, 6), true)
+      expect(speech.spoken).toHaveLength(2)
+    })
+
+    it('a snoozed reminder is dropped once its task is done', async () => {
+      render(<Toaster />)
+      vi.setSystemTime(at(14) + 5000)
+      await checkReminders(at(14) + 5000, true)
+      await userEvent.click(await screen.findByRole('button', { name: 'Snooze 15 min' }))
+      const [task] = await listTasksForDay(today)
+      await setTaskStatus(task.id, 'done')
+      await checkReminders(at(14, 16), true)
+      expect(speech.spoken).toHaveLength(1)
+    })
+
+    it('a snooze that comes due while in the background is listed as missed', async () => {
+      render(<><Toaster /><ReminderCatchup /></>)
+      vi.setSystemTime(at(14) + 5000)
+      await checkReminders(at(14) + 5000, true)
+      await userEvent.click(await screen.findByRole('button', { name: 'Snooze 5 min' }))
+      await checkReminders(at(14, 30), false)
+      expect(speech.spoken).toHaveLength(1)
+      // "Up next" was already missed at 2:00; the snoozed "Starting now" joins it.
+      expect(useReminderStore.getState().missed.map((r) => r.text)).toEqual([
+        'Up next at 2:00 PM: Client call.',
+        'Starting now: Client call.',
+      ])
+    })
+
+    it('AC22.3 / DAC16 Mark done completes the task like the status toggle', async () => {
+      render(<Toaster />)
+      await checkReminders(at(14) + 5000, true)
+      await userEvent.click(await screen.findByRole('button', { name: 'Mark done' }))
+      const [task] = await listTasksForDay(today)
+      await vi.waitFor(async () => expect((await getTask(task.id))?.status).toBe('done'))
+      // The cheer plays, as with the toggle.
+      await vi.waitFor(() => expect(speech.spoken).toHaveLength(2))
+    })
+  })
+
+  describe('quiet hours (PRD FR23)', () => {
+    it('AC23.2 nothing is spoken during quiet hours, but the reminder still shows', async () => {
+      render(<Toaster />)
+      await setQuietHours({ enabled: true, start: '13:00', end: '15:00' })
+      vi.setSystemTime(at(14) + 5000)
+      await checkReminders(at(14) + 5000, true)
+      expect(speech.spoken).toEqual([])
+      expect(await screen.findByText('Starting now: Client call.')).toBeInTheDocument()
+    })
+  })
+
+  describe('closeout nudge (PRD FR21)', () => {
+    it('AC21.2 / AC21.3 at the nudge time: one toast and one spoken line', async () => {
+      render(<Toaster />)
+      await checkReminders(at(17, 30) + 20_000, true)
+      expect(await screen.findByText('It’s 5:30 PM. Ready to close out your day?')).toBeInTheDocument()
+      expect(speech.spoken.map((s) => s.text)).toContain('It’s 5:30 PM. Time to close out your day.')
+      const spoken = speech.spoken.length
+      await checkReminders(at(17, 45), true)
+      expect(speech.spoken).toHaveLength(spoken)
+    })
+
+    it('AC21.4 opened later that day: no toast or voice (the banner shows instead)', async () => {
+      render(<Toaster />)
+      await checkReminders(at(19), true)
+      expect(speech.spoken.map((s) => s.text)).not.toContain('It’s 5:30 PM. Time to close out your day.')
+      expect(screen.queryByText('It’s 5:30 PM. Ready to close out your day?')).not.toBeInTheDocument()
+    })
+
+    it('AC21.2 no nudge once the day is closed', async () => {
+      await saveCloseout({
+        dayKey: today,
+        startedAt: 0,
+        finishedAt: 1,
+        reportCopiedAt: null,
+        rating: 4,
+        reflection: '',
+        outcomes: {},
+      })
+      await checkReminders(at(17, 30) + 20_000, true)
+      expect(speech.spoken.map((s) => s.text)).not.toContain('It’s 5:30 PM. Time to close out your day.')
+    })
   })
 })

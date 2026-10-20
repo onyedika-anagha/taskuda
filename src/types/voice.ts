@@ -22,3 +22,7 @@ export interface Reminder {
   /** What's spoken and shown (design spec Section 8, Voice lines). */
   text: string
 }
+
+/** Snooze choices on a reminder toast (PRD AC22.1). */
+export const SNOOZE_MINUTES = [5, 15] as const
+export type SnoozeMinutes = (typeof SNOOZE_MINUTES)[number]

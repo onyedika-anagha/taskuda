@@ -78,3 +78,21 @@ test('AC19.3 with Saturday as a working day, a Friday closeout carries to Saturd
   expect(copied).toContain('_Carried to tomorrow_\n• Write spec')
   await expect(page.getByText('Day closed. 1 task carried to tomorrow.')).toBeVisible()
 })
+
+test('AC21.1 / AC23.1 close-out reminder and quiet hours settings', async ({ page }) => {
+  await page.goto('/settings/workday')
+  await expect(page.getByLabel('Remind me to close out at')).toHaveValue('17:30')
+  await page.getByRole('switch', { name: /Close-out reminder/ }).click()
+  await expect(page.getByLabel('Remind me to close out at')).toBeHidden()
+
+  await page.getByRole('switch', { name: /Quiet hours/ }).click()
+  const quiet = page.getByRole('group', { name: 'Quiet hours' })
+  await expect(quiet.getByLabel('From')).toHaveValue('22:00')
+  await expect(quiet.getByText('Runs overnight, into the next morning.')).toBeVisible()
+  await quiet.getByLabel('To').fill('22:00')
+  await expect(quiet.getByText('Start and end can’t be the same.')).toBeVisible()
+  await quiet.getByLabel('To').fill('06:30')
+  await page.reload()
+  await expect(page.getByRole('group', { name: 'Quiet hours' }).getByLabel('To')).toHaveValue('06:30')
+  await expect(page.getByLabel('Remind me to close out at')).toBeHidden()
+})

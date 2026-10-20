@@ -125,6 +125,16 @@ These are recorded in the design spec where they change it.
   - **Time left:** rounded up to whole minutes, so the last seconds read "1 min left". It ticks every 15 s.
   - **Screen readers:** they get "1 hour 20 minutes left" inside the block heading. On phones the heading is hidden, and an `aria-hidden` line under the tabs shows the time.
   - **Closeout layout fix:** the step content area scrolls on its own (`overflow-y-auto`). Before, tall content (the report with its new summary line) overflowed behind the Back / Next footer on phones, which blocked "Copy report".
+- **Nudge, snooze and quiet hours (FR21–FR23, added 2026-10-20):**
+  - **Settings:** `workday.closeoutReminder` (`HH:mm` or `null`, default 17:30) and `workday.quietHours` (`{ enabled, start, end }`, off by default, 22:00–07:00). Both are backed up. A quiet-hours range with start = end is rejected.
+  - **Voice:** `speakAlert` and `voiceAlert` speak only when voice is on and it isn't quiet hours. The cheer follows the same rule.
+  - **Reminder toasts:** `ReminderToast` is a custom Sonner toast, because Sonner toasts hold only one action. There's one toast per task (`reminder:<taskId>`), so "Starting now" replaces "Up next", and it stays until the user acts.
+  - **Snoozes:** kept in `localStorage` per day next to the handled list, so a pending snooze **survives a reload** (design note resolved). A snooze due while hidden goes to the catch-up list, and one whose task is done is dropped.
+  - **Mark done:** `changeTaskStatus` (moved out of `useTaskActions` into `services/tasks/taskStatusActions.ts`) is the one status path for the note and the reminder.
+  - **Nudge:** `closeoutNudge.ts` holds pure decisions. `checkCloseoutNudge` runs with each reminder tick and alerts once a day, only when visible within 2 minutes of the nudge time. `useCloseoutNudge` drives the banner. The dismissed day and the alerted day are per-device `localStorage` values.
+  - **NoticeBanner** is its own markup with no live role (shadcn `Alert` forces `role="alert"`, which interrupts). The nudge is announced once through the polite live announcer.
+- **Toasts below the app bar (2026-10-20):** the top-center toasts covered the day navigator for about 4 s after every action. The Toaster now has a top offset of `calc(env(safe-area-inset-top) + 60px)`.
+- **a11y test helper:** page scans wait two frames, then for running animations and unsettled Sonner toasts, and they leave the toaster out. `expectNoToastA11yViolations` scans toasts on their own (a11y spec, both themes). This was the cause of the long-running "closeout contrast" e2e flake: a toast fading in or out mid-scan, and a scan that started before the lazy closeout dialog had faded in.
 - **Past days that were never closed out can still be closed out.**
 - **Voice lines say "2:00 PM".**
 - **First-run Drive connect** checks for an existing backup before uploading a new one.

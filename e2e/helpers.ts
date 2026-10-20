@@ -35,20 +35,47 @@ export async function noteTitles(area: Locator): Promise<string[]> {
     )
 }
 
-export async function expectNoA11yViolations(page: Page): Promise<void> {
-  // Fading dialogs and toasts give mid-animation colors; scan the settled page.
-  // Infinite ones (loading pulses) never settle, so they're ignored.
-  await page.waitForFunction(() =>
-    document
-      .getAnimations()
-      .every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity),
+/** Lets animations that are about to start (and Sonner's mount step) settle before a scan. */
+async function waitForSettledPage(page: Page): Promise<void> {
+  // An animation for something just inserted starts on the next frame, so let two frames pass.
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
   )
-  const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-    .analyze()
-  expect(
-    results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
-  ).toEqual([])
+  // Fading dialogs and toasts give mid-animation colors; scan the settled page.
+  // Infinite ones (loading pulses) never settle, so they're ignored. Sonner starts a toast's fade-in
+  // a frame after inserting it (`data-mounted`), so wait for toasts to settle too.
+  await page.waitForFunction(
+    () =>
+      document
+        .getAnimations()
+        .every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity) &&
+      [...document.querySelectorAll('[data-sonner-toast]')].every(
+        (toast) => toast.getAttribute('data-mounted') === 'true' && toast.getAttribute('data-removed') !== 'true',
+      ),
+  )
+}
+
+function violationList(results: Awaited<ReturnType<AxeBuilder['analyze']>>): string[] {
+  return results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)
+}
+
+const WCAG_21_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
+
+/**
+ * Scans the page, leaving out toasts: they fade out on their own timer, so one can start leaving
+ * mid-scan. `expectNoToastA11yViolations` checks toasts on their own.
+ */
+export async function expectNoA11yViolations(page: Page): Promise<void> {
+  await waitForSettledPage(page)
+  const results = await new AxeBuilder({ page }).withTags(WCAG_21_AA).exclude('[data-sonner-toaster]').analyze()
+  expect(violationList(results)).toEqual([])
+}
+
+/** Scans only the toasts showing now, right after they've settled. */
+export async function expectNoToastA11yViolations(page: Page): Promise<void> {
+  await waitForSettledPage(page)
+  const results = await new AxeBuilder({ page }).withTags(WCAG_21_AA).include('[data-sonner-toaster]').analyze()
+  expect(violationList(results)).toEqual([])
 }
 
 export async function expectNoHorizontalScroll(page: Page): Promise<void> {

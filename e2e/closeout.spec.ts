@@ -25,6 +25,8 @@ test('DAC4 / AC10–AC11 close out a day and find carried tasks tomorrow', async
 
   await page.getByRole('button', { name: 'Close out day' }).click()
   const dialog = page.getByRole('dialog', { name: /^Close out / })
+  // The dialog loads on first use; scan it once it's there, not while it fades in.
+  await expect(dialog.getByRole('button', { name: 'Carry over all' })).toBeVisible()
   await expectNoA11yViolations(page)
   await dialog.getByRole('button', { name: 'Carry over all' }).click()
   await dialog.getByRole('button', { name: 'Next' }).click()

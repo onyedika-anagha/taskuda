@@ -1,6 +1,12 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
-import { addTask, blockArea, expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
+import {
+  addTask,
+  blockArea,
+  expectNoA11yViolations,
+  expectNoHorizontalScroll,
+  expectNoToastA11yViolations,
+} from './helpers'
 
 const SETTINGS_SECTIONS = ['companies', 'workday', 'integrations', 'backup', 'ai-security', 'voice', 'stats', 'about']
 
@@ -12,6 +18,20 @@ async function checkScreen(page: Page) {
 for (const scheme of ['light', 'dark'] as const) {
   test.describe(`${scheme} theme`, () => {
     test.use({ colorScheme: scheme })
+
+    test('DAC10 toasts, plain and with actions, have no WCAG 2.1 AA violations', async ({ page }) => {
+      await page.goto('/')
+      await addTask(page, 'Standup', 'Morning')
+      await expect(page.getByText('Task added')).toBeVisible()
+      await expectNoToastA11yViolations(page)
+
+      await blockArea(page, 'Morning')
+      await page.getByRole('button', { name: 'Options for Standup' }).click()
+      await page.getByRole('menuitem', { name: 'Delete task' }).click()
+      await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
+      await expect(page.getByRole('button', { name: 'Undo' })).toBeVisible()
+      await expectNoToastA11yViolations(page)
+    })
 
     test('DAC8 / DAC10 every screen: no horizontal scroll, no WCAG 2.1 AA violations', async ({ page }) => {
       await page.goto('/')
