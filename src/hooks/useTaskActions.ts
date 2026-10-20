@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { createElement, useMemo } from 'react'
 import { toast } from 'sonner'
+import { UndoToast } from '@/components/common/UndoToast'
 import { ValidationError } from '@/services/db/errors'
 import * as tasks from '@/services/db/taskRepository'
 import { announce } from '@/stores/announcerStore'
@@ -23,6 +24,13 @@ async function pushStatusToJira(task: Task, status: TaskStatus): Promise<void> {
   } catch (error) {
     toast.error(`Couldn’t update ${key} in Jira.`, { description: jiraErrorMessage(error, { key }) })
   }
+}
+
+/** `Infinity`: UndoToast closes itself when its own (pausable) timer runs out. */
+function showUndoToast(message: string, onUndo: () => void): void {
+  toast.custom((id) => createElement(UndoToast, { toastId: id, message, onUndo }), {
+    duration: Infinity,
+  })
 }
 
 const GENERIC_SAVE_ERROR = 'Couldn’t save your change.'
@@ -89,6 +97,17 @@ export function useTaskActions(): TaskActions {
       }
     }
 
+    /** Undo for a delete (PRD FR18). */
+    async function restore(deleted: tasks.DeletedTask): Promise<void> {
+      try {
+        await tasks.restoreTask(deleted)
+        announce(`${deleted.task.title} restored`)
+        toast.success('Task restored')
+      } catch (error) {
+        reportFailure(error, () => void restore(deleted), 'Couldn’t restore the task.')
+      }
+    }
+
     return {
       async createTask(input) {
         const task = await tasks.createTask(input)
@@ -108,8 +127,9 @@ export function useTaskActions(): TaskActions {
 
       async deleteTask(task) {
         try {
-          await tasks.deleteTask(task.id)
-          toast.success('Task deleted')
+          const deleted = await tasks.deleteTask(task.id)
+          announce('Task deleted. Undo available.')
+          showUndoToast('Task deleted', () => void restore(deleted))
         } catch (error) {
           reportFailure(error, () => void tasks.deleteTask(task.id))
         }

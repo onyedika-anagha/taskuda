@@ -10,6 +10,7 @@ import {
   getTask,
   listTasksForDay,
   moveTask,
+  restoreTask,
   setTaskStatus,
   updateTask,
 } from './taskRepository'
@@ -168,6 +169,79 @@ describe('taskRepository', () => {
         type: 'task_deleted',
         data: { title: 'A' },
       })
+    })
+  })
+
+  describe('restoreTask (PRD FR18)', () => {
+    const link = (taskId: string) => ({
+      taskId,
+      eventId: 'evt',
+      calendarId: 'primary',
+      etag: null,
+      updatedAt: 1,
+      taskUpdatedAt: 1,
+      eventUpdatedAt: 1,
+    })
+
+    it('AC18.2 brings the task back with the same content and position', async () => {
+      await createTask({ title: 'First', dayKey: DAY, block: 'afternoon' })
+      const a = await createTask({
+        title: 'A',
+        dayKey: DAY,
+        block: 'afternoon',
+        notes: 'Notes',
+        companyId: 'acme',
+        startTime: '14:00',
+        durationMinutes: 45,
+        jiraIssue: { key: 'ABC-1', title: 'Issue', status: 'To Do' },
+      })
+      await createTask({ title: 'Last', dayKey: DAY, block: 'afternoon' })
+      await setTaskStatus(a.id, 'in_progress')
+      const before = await getTask(a.id)
+
+      const restored = await restoreTask(await deleteTask(a.id))
+
+      expect(restored).toEqual({ ...before, updatedAt: restored.updatedAt })
+      expect(await titles('afternoon')).toEqual(['First', 'A', 'Last'])
+    })
+
+    it('AC18.3 records the restore after the deletion', async () => {
+      const a = await createTask({ title: 'A', dayKey: DAY, block: 'morning' })
+      await restoreTask(await deleteTask(a.id))
+      const types = (await listActivityForTask(a.id)).map((e) => e.type)
+      expect(types).toEqual(['task_created', 'task_deleted', 'task_restored'])
+    })
+
+    it('restoring twice does nothing the second time', async () => {
+      const a = await createTask({ title: 'A', dayKey: DAY, block: 'morning' })
+      const deleted = await deleteTask(a.id)
+      await restoreTask(deleted)
+      await restoreTask(deleted)
+      expect(await titles()).toEqual(['A'])
+      expect((await listActivityForTask(a.id)).filter((e) => e.type === 'task_restored')).toHaveLength(1)
+    })
+
+    it('AC18.4 before the next sync, clears the tombstone so the task keeps its event', async () => {
+      const a = await createTask({ title: 'A', dayKey: DAY, block: 'afternoon', startTime: '14:00' })
+      await db.calendarMappings.put(link(a.id))
+      await restoreTask(await deleteTask(a.id))
+      const mapping = await db.calendarMappings.get(a.id)
+      expect(mapping).toMatchObject({ eventId: 'evt' })
+      expect(mapping?.taskDeleted).toBeUndefined()
+    })
+
+    it('AC18.4 after the sync removed the event, a calendar task becomes a Taskuda task so it is pushed again', async () => {
+      const a = await createTask({
+        title: 'Dentist',
+        dayKey: DAY,
+        block: 'afternoon',
+        startTime: '14:00',
+        source: 'calendar',
+      })
+      await db.calendarMappings.put(link(a.id))
+      const deleted = await deleteTask(a.id)
+      await db.calendarMappings.delete(a.id) // what the sync does after deleting the event
+      expect((await restoreTask(deleted)).source).toBe('manual')
     })
   })
 

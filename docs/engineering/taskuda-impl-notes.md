@@ -108,6 +108,11 @@ These are recorded in the design spec where they change it.
 - **Done notes are desaturated** instead of faded with opacity, which would break contrast.
 - **Next and Save buttons stay enabled** and explain what's missing, instead of being greyed out.
 - **Toasts appear at the top,** so they don't cover the phone's bottom bar.
+- **Undo delete (FR18, added 2026-10-20):**
+  - `deleteTask` returns a snapshot, and `restoreTask` puts the task back with the same id and position, logging `task_restored`.
+  - If the calendar sync hasn't run yet, the tombstone is cleared and the event is kept. If it has, the task is pushed as a new event; a calendar-sourced task becomes `source: 'manual'` for that, because unlinked calendar tasks are never pushed.
+  - **Calendar sync change:** a cancelled event is only acted on through an existing link. It is no longer re-linked by its Taskuda task id, which would have let the old event of an undone delete remove the restored task again.
+  - The undo toast runs its own pausable timer (`UndoToast`, `usePausableTimeout`), because Sonner pauses on hover but not on keyboard focus.
 - **Past days that were never closed out can still be closed out.**
 - **Voice lines say "2:00 PM".**
 - **First-run Drive connect** checks for an existing backup before uploading a new one.

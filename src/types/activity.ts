@@ -5,6 +5,7 @@ export type ActivityEventType =
   | 'task_moved'
   | 'task_carried_over'
   | 'task_deleted'
+  | 'task_restored'
 
 export interface ActivityEvent {
   id?: number

@@ -83,7 +83,10 @@ async function findMapping(event: CalendarEvent, calendarId: string): Promise<Ca
 
 /** Returns true if a task was created, changed or deleted. */
 async function applyRemoteEvent(event: CalendarEvent, calendarId: string): Promise<boolean> {
-  const mapping = await findMapping(event, calendarId)
+  // A deleted event is only acted on through an existing link. Re-linking it by its task id would
+  // let the old event of an undone delete (FR18) remove the restored task again.
+  const mapping =
+    event.status === 'cancelled' ? await getMappingForEvent(event.id) : await findMapping(event, calendarId)
   const remoteAt = eventUpdatedAt(event)
 
   if (event.status === 'cancelled') {

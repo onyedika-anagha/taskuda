@@ -151,17 +151,55 @@ export async function moveTask(
   })
 }
 
+/** What `deleteTask` removed, so the delete can be undone (PRD FR18). */
+export interface DeletedTask {
+  task: Task
+  /** The task had a calendar event when it was deleted. */
+  hadCalendarEvent: boolean
+}
+
 /**
  * Deletes a task. If it's linked to a calendar event, the link is kept as a tombstone so the next
  * calendar sync can delete the event too (PRD AC8.4).
  */
-export async function deleteTask(id: string): Promise<void> {
-  await db.transaction('rw', db.tasks, db.activityLog, db.calendarMappings, async () => {
+export async function deleteTask(id: string): Promise<DeletedTask> {
+  return db.transaction('rw', db.tasks, db.activityLog, db.calendarMappings, async () => {
     const task = await getTaskOrThrow(id)
     await db.tasks.delete(id)
     const mapping = await db.calendarMappings.get(id)
     if (mapping) await db.calendarMappings.put({ ...mapping, taskDeleted: true, updatedAt: Date.now() })
     await appendActivity('task_deleted', id, task.dayKey, { title: task.title })
+    return { task, hadCalendarEvent: !!mapping }
+  })
+}
+
+/**
+ * Undoes `deleteTask`: the task comes back with the same id and position (PRD AC18.2, AC18.3).
+ *
+ * Calendar (AC18.4): if the sync hasn't deleted the event yet, the tombstone is cleared and the task
+ * keeps its event. If it has, the task is pushed as a new event at the next sync; a calendar-sourced
+ * task becomes a Taskuda task for that, because unlinked calendar tasks are never pushed.
+ */
+export async function restoreTask({ task, hadCalendarEvent }: DeletedTask): Promise<Task> {
+  return db.transaction('rw', db.tasks, db.activityLog, db.calendarMappings, async () => {
+    const existing = await db.tasks.get(task.id)
+    if (existing) return existing
+
+    const now = Date.now()
+    const mapping = await db.calendarMappings.get(task.id)
+    const eventGone = hadCalendarEvent && !mapping
+    const restored: Task = {
+      ...task,
+      source: eventGone && task.startTime ? 'manual' : task.source,
+      updatedAt: now,
+    }
+    if (mapping?.taskDeleted) {
+      const { taskDeleted: _tombstone, ...link } = mapping
+      await db.calendarMappings.put({ ...link, updatedAt: now })
+    }
+    await db.tasks.add(restored)
+    await appendActivity('task_restored', task.id, task.dayKey, { title: task.title })
+    return restored
   })
 }
 

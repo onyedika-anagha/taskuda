@@ -39,7 +39,8 @@ describe('Voice settings (S7e) and the completion cheer', () => {
 
     await user.click(screen.getByRole('switch', { name: /Spoken reminders/ }))
     await waitFor(async () => expect((await getVoiceSettings()).enabled).toBe(false))
-    expect(screen.getByRole('button', { name: 'Play test' })).toBeDisabled()
+    // The saved setting reaches the UI on the next live-query update.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Play test' })).toBeDisabled())
   })
 
   it('AC9.2 / DAC12 marking a task Done plays a short cheer with a matching toast', async () => {

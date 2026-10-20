@@ -89,6 +89,19 @@ describe('TodayPage (S2)', () => {
     expect(await screen.findByText('Task deleted')).toBeInTheDocument()
   })
 
+  it('AC18.1 Undo after a delete puts the task back', async () => {
+    const task = await createTask({ title: 'Standup', dayKey: today, block: 'morning' })
+    const { user } = renderWithApp('/')
+    await user.click(await screen.findByRole('button', { name: 'Options for Standup' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Delete task' }))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Delete this task?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }))
+    await user.click(await screen.findByRole('button', { name: 'Undo' }))
+    await waitFor(async () => expect(await getTask(task.id)).toBeDefined())
+    expect(await screen.findByText('Task restored')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Options for Standup' })).toBeInTheDocument()
+  })
+
   it('AC3.2 moves a task to another block from the menu', async () => {
     const task = await createTask({ title: 'Standup', dayKey: today, block: 'morning' })
     const { user } = renderWithApp('/')

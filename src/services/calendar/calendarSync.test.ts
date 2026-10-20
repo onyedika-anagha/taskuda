@@ -7,6 +7,7 @@ import {
   deleteTask,
   getTask,
   listTasksForDay,
+  restoreTask,
   updateTask,
 } from '@/services/db/taskRepository'
 import { forgetAccessToken } from '@/services/google/googleAuth'
@@ -134,6 +135,48 @@ describe('calendarSync (PRD FR8)', () => {
     await runCalendarSync()
     expect(calendar.live()).toEqual([])
     expect(await listMappings()).toEqual([])
+  })
+
+  describe('AC18.4 undoing a delete', () => {
+    it('before the next sync: the event is kept, not deleted and recreated', async () => {
+      const task = await createTask({ title: 'Call', dayKey: today, block: 'afternoon', startTime: '14:00' })
+      await runCalendarSync()
+      const eventId = calendar.live()[0].id
+      await restoreTask(await deleteTask(task.id))
+      await runCalendarSync()
+      expect(calendar.live().map((e) => e.id)).toEqual([eventId])
+    })
+
+    it('after the sync deleted the event: the task gets exactly one new event', async () => {
+      const task = await createTask({ title: 'Call', dayKey: today, block: 'afternoon', startTime: '14:00' })
+      await runCalendarSync()
+      const deleted = await deleteTask(task.id)
+      await runCalendarSync()
+      expect(calendar.live()).toEqual([])
+      await restoreTask(deleted)
+      await runCalendarSync()
+      await runCalendarSync()
+      expect(calendar.live()).toHaveLength(1)
+      expect(await listTasksForDay(today)).toHaveLength(1)
+    })
+
+    it('a calendar-sourced task restored after its event was deleted gets one event and no duplicate task', async () => {
+      calendar.addRemote({
+        summary: 'Dentist',
+        start: { dateTime: at(today, 15) },
+        end: { dateTime: at(today, 16) },
+      })
+      await runCalendarSync()
+      const [task] = await listTasksForDay(today)
+      const deleted = await deleteTask(task.id)
+      await runCalendarSync()
+      expect(calendar.live()).toEqual([])
+      await restoreTask(deleted)
+      await runCalendarSync()
+      await runCalendarSync()
+      expect(calendar.live()).toHaveLength(1)
+      expect(await listTasksForDay(today)).toMatchObject([{ title: 'Dentist' }])
+    })
   })
 
   it('AC8.4 deleting the event deletes the task', async () => {

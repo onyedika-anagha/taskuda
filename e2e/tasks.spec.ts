@@ -1,4 +1,5 @@
 import { expect, test } from './fixtures'
+import type { Page } from '@playwright/test'
 import {
   addTask,
   blockArea,
@@ -66,6 +67,43 @@ test('AC2.3 deleting asks for confirmation', async ({ page }) => {
     .getByRole('button', { name: 'Delete' })
     .click()
   await expect(page.getByRole('article', { name: /^Standup/ })).toHaveCount(0)
+})
+
+async function deleteStandup(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Options for Standup' }).click()
+  await page.getByRole('menuitem', { name: 'Delete task' }).click()
+  await page
+    .getByRole('alertdialog', { name: 'Delete this task?' })
+    .getByRole('button', { name: 'Delete' })
+    .click()
+  await expect(page.getByRole('article', { name: /^Standup/ })).toHaveCount(0)
+}
+
+test('AC18.1 DAC15 Undo with the mouse restores the task, and it survives reload', async ({ page }) => {
+  await addTask(page, 'Standup', 'Morning')
+  await blockArea(page, 'Morning')
+  await deleteStandup(page)
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(page.getByText('Task restored')).toBeVisible()
+  await page.reload()
+  await blockArea(page, 'Morning')
+  await expect(page.getByRole('article', { name: /^Standup/ })).toBeVisible()
+})
+
+test('AC18.5 DAC15 Undo with the keyboard (Alt+T focuses the toast)', async ({ page }) => {
+  await addTask(page, 'Standup', 'Morning')
+  await blockArea(page, 'Morning')
+  await deleteStandup(page)
+  // Alt+T focuses the toast list. Each toast is a tab stop, and "Task added" may still be showing,
+  // so Tab until Undo has focus (a few presses at most).
+  const undo = page.getByRole('button', { name: 'Undo' })
+  await page.keyboard.press('Alt+T')
+  for (let i = 0; i < 5 && !(await undo.evaluate((el) => el === document.activeElement)); i++) {
+    await page.keyboard.press('Tab')
+  }
+  await expect(undo).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('article', { name: /^Standup/ })).toBeVisible()
 })
 
 test('AC3.1 drags a note to another block with the mouse, and the move survives reload', async ({ page }) => {
