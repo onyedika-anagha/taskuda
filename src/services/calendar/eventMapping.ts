@@ -4,12 +4,11 @@ import type { EventInput } from '@/services/google/calendarApi'
 import type { CalendarEvent } from '@/types/calendar'
 import type { Task } from '@/types/task'
 import { fromDayKey, toDayKey } from '@/utils/dates'
+import { effectiveMinutes } from '@/utils/taskDuration'
 import { timeToMinutes } from '@/utils/timeBlocks'
 
 /** Marks events Taskuda created, so they can be matched back to their task. */
 export const TASK_ID_PROPERTY = 'taskudaTaskId'
-/** Events without a duration get this length in the calendar. */
-export const DEFAULT_EVENT_MINUTES = 30
 
 export function localTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -23,7 +22,7 @@ function localDateTime(dayKey: string, startTime: string, plusMinutes = 0): stri
 /** Calendar event for a task with a start time (PRD AC8.1). */
 export function taskToEvent(task: Task & { startTime: string }, companyName?: string): EventInput {
   const timeZone = localTimeZone()
-  const minutes = task.durationMinutes ?? DEFAULT_EVENT_MINUTES
+  const minutes = effectiveMinutes(task)
   return {
     summary: task.title,
     description: companyName ? `${companyName} · from Taskuda` : 'From Taskuda',

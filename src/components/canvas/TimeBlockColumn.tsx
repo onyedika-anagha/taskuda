@@ -15,6 +15,8 @@ interface TimeBlockColumnProps {
   tasksById: Map<string, Task>
   companiesById: Map<string, Company>
   readOnly: boolean
+  /** Task id → the tasks it overlaps (PRD FR25). */
+  overlapsById: Map<string, Task[]>
   /** Mobile tabs already show the block name. */
   showHeader?: boolean
   /** Set on today's current block only (PRD FR27). */
@@ -29,6 +31,7 @@ export function TimeBlockColumn({
   tasksById,
   companiesById,
   readOnly,
+  overlapsById,
   showHeader = true,
   minutesLeft = null,
   onAdd,
@@ -48,9 +51,7 @@ export function TimeBlockColumn({
       >
         {BLOCK_LABELS[block]}
         <span className="text-sm font-normal text-muted-foreground tabular-nums">{taskIds.length}</span>
-        {minutesLeft !== null ? (
-          <BlockTimeLeft minutesLeft={minutesLeft} className="ml-auto" />
-        ) : null}
+        {minutesLeft !== null ? <BlockTimeLeft minutesLeft={minutesLeft} className="ml-auto" /> : null}
       </h2>
       {/* Phones: the heading is hidden (the tab names the block), so show the time under the tabs. */}
       {!showHeader && minutesLeft !== null ? (
@@ -74,6 +75,7 @@ export function TimeBlockColumn({
                 index={index}
                 blockSize={taskIds.length}
                 readOnly={readOnly}
+                overlaps={overlapsById.get(id)}
               />
             )
           })}

@@ -5,12 +5,14 @@ import {
   type CollisionDetection,
   type UniqueIdentifier,
 } from '@dnd-kit/core'
+import { useMemo } from 'react'
 import { useBlockTimeLeft } from '@/hooks/useBlockTimeLeft'
 import { screenReaderInstructions, useCanvasDragAndDrop } from '@/hooks/useCanvasDragAndDrop'
 import { TABLET_UP, useMediaQuery } from '@/hooks/useMediaQuery'
 import type { Company } from '@/types/company'
 import type { Task, TimeBlock } from '@/types/task'
 import { TIME_BLOCKS } from '@/types/task'
+import { overlapMap } from '@/utils/overlaps'
 import { TimeBlockColumn } from './TimeBlockColumn'
 import { TimeBlockTabs } from './TimeBlockTabs'
 
@@ -48,6 +50,7 @@ export function TaskCanvas({ tasks, companiesById, readOnly, isToday, onAdd }: T
   const isTabletUp = useMediaQuery(TABLET_UP)
   const dnd = useCanvasDragAndDrop(tasks)
   const timeLeft = useBlockTimeLeft(isToday)
+  const overlapsById = useMemo(() => overlapMap(tasks), [tasks])
 
   const renderBlock = (block: TimeBlock, showHeader = true) => (
     <TimeBlockColumn
@@ -57,6 +60,7 @@ export function TaskCanvas({ tasks, companiesById, readOnly, isToday, onAdd }: T
       tasksById={dnd.tasksById}
       companiesById={companiesById}
       readOnly={readOnly}
+      overlapsById={overlapsById}
       showHeader={showHeader}
       minutesLeft={timeLeft?.block === block ? timeLeft.minutesLeft : null}
       onAdd={onAdd}

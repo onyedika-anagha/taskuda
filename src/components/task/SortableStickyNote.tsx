@@ -14,10 +14,18 @@ interface SortableStickyNoteProps {
   index: number
   blockSize: number
   readOnly: boolean
+  overlaps?: Task[]
 }
 
 /** A sticky note wired to drag-and-drop, its menu and task actions. */
-export function SortableStickyNote({ task, company, index, blockSize, readOnly }: SortableStickyNoteProps) {
+export function SortableStickyNote({
+  task,
+  company,
+  index,
+  blockSize,
+  readOnly,
+  overlaps,
+}: SortableStickyNoteProps) {
   const actions = useTaskActions()
   const openEdit = useCanvasUiStore((s) => s.openEdit)
   const requestDelete = useCanvasUiStore((s) => s.requestDelete)
@@ -34,6 +42,7 @@ export function SortableStickyNote({ task, company, index, blockSize, readOnly }
         task={task}
         company={company}
         readOnly={readOnly}
+        overlaps={overlaps}
         isDragging={isDragging}
         style={{ transform: CSS.Translate.toString(transform), transition }}
         onOpen={() => openEdit(task.id)}

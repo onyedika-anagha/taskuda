@@ -287,14 +287,14 @@ Adopted from the My Work Day PRD. These are Should items in v1 scope, built on `
   - [x] 16.9 Add `Alt+T` (focus newest action toast) to the shortcuts dialog and make sure Sonner's hotkey matches
   - [x] 16.10 Tests: nudge decision table; quiet hours; snooze timing with fake timers; e2e snooze and mark done from the toast (DAC16); nudge banner opens the closeout in one click (DAC19); typing in the editor while alerts fire keeps focus and text (DAC18). Also fixed: toasts now sit below the app bar (they covered the day navigator), and the a11y helper scans toasts separately, which ends the long-running closeout contrast flake
 
-- [ ] 17.0 Add overlap warnings and carry-over insights (FR25, FR26)
-  - [ ] 17.1 Move the 30-minute default duration into a shared constant in `utils/` so utils don't import services; `services/calendar/eventMapping.ts` uses it
-  - [ ] 17.2 `utils/overlaps.ts`: for a day's tasks, map each task to the tasks it overlaps (start + duration, default 30 min; done tasks ignored; calendar tasks included) (AC25.1, AC25.4)
-  - [ ] 17.3 `TaskCanvas` computes overlaps once per day; `StickyNote` shows the overlap marker (icon + text, "Overlaps with 2 tasks") and adds it to the note's `aria-label` (AC25.2)
-  - [ ] 17.4 `TaskEditorForm` shows the non-blocking overlap warning under Duration (AC25.3)
-  - [ ] 17.5 `utils/metrics.ts`: carry-over rate per company and overall for past days in the 28-day window; "needs attention" for ≥ 5 tasks and ≥ 30%; open tasks carried 3+ times (AC26.1–AC26.3)
-  - [ ] 17.6 Build `CarryoverInsights` in `StatsSection` with company names (never ids), percentages, callouts, the 3+ list, and the empty state (AC26.4)
-  - [ ] 17.7 Tests: overlap unit tests (touching ends don't overlap, no duration, done ignored); metric unit tests; component tests for marker labels and the editor warning; Stats component test
+- [x] 17.0 Add overlap warnings and carry-over insights (FR25, FR26)
+  - [x] 17.1 Move the 30-minute default duration into a shared constant in `utils/` so utils don't import services; `services/calendar/eventMapping.ts` uses it
+  - [x] 17.2 `utils/overlaps.ts`: for a day's tasks, map each task to the tasks it overlaps (start + duration, default 30 min; done tasks ignored; calendar tasks included) (AC25.1, AC25.4)
+  - [x] 17.3 `TaskCanvas` computes overlaps once per day; `StickyNote` shows the overlap marker (icon + text, "Overlaps with 2 tasks") and adds it to the note's `aria-label` (AC25.2)
+  - [x] 17.4 `TaskEditorForm` shows the non-blocking overlap warning under Duration (AC25.3)
+  - [x] 17.5 `utils/metrics.ts`: carry-over rate per company and overall for past days in the 28-day window; "needs attention" for ≥ 5 tasks and ≥ 30%; open tasks carried 3+ times (AC26.1–AC26.3). Built as `utils/carryoverInsights.ts`, reusing `windowStart` from metrics, to keep files single-purpose
+  - [x] 17.6 Build `CarryoverInsights` in `StatsSection` with company names (never ids), percentages, callouts, the 3+ list, and the empty state (AC26.4)
+  - [x] 17.7 Tests: overlap unit tests (touching ends don't overlap, no duration, done ignored); metric unit tests; component tests for marker labels and the editor warning; Stats component test. Also fixed: the close-out nudge e2e test polls for the spoken line (the banner and voice come from separate ticks)
 
 - [ ] 18.0 Add eye-break reminders and the in-app time budget, with M4 and M5 in Stats (FR28, FR29, DAC21)
   - [ ] 18.1 Add eye-break settings (off by default; interval 20/30/45/60, default 20; hours default 9:00 AM–5:00 PM) and the daily budget (Off/1–4 h) to Workday settings and `WorkdaySection`

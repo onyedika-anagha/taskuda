@@ -135,6 +135,13 @@ These are recorded in the design spec where they change it.
   - **NoticeBanner** is its own markup with no live role (shadcn `Alert` forces `role="alert"`, which interrupts). The nudge is announced once through the polite live announcer.
 - **Toasts below the app bar (2026-10-20):** the top-center toasts covered the day navigator for about 4 s after every action. The Toaster now has a top offset of `calc(env(safe-area-inset-top) + 60px)`.
 - **a11y test helper:** page scans wait two frames, then for running animations and unsettled Sonner toasts, and they leave the toaster out. `expectNoToastA11yViolations` scans toasts on their own (a11y spec, both themes). This was the cause of the long-running "closeout contrast" e2e flake: a toast fading in or out mid-scan, and a scan that started before the lazy closeout dialog had faded in.
+- **Overlaps and carry-over insights (FR25, FR26, added 2026-10-20):**
+  - **Default duration:** `DEFAULT_TASK_MINUTES` (30) lives in `utils/taskDuration.ts`. The calendar mapping and the overlap check both use it, so a task without a duration is the same length on the canvas and in the calendar.
+  - **Overlap rule:** `utils/overlaps.ts` treats ranges as half-open, so 2:00–2:30 and 2:30–3:00 don't overlap. Done tasks and tasks without a start time never overlap. `TaskCanvas` computes the map once per render of the day, and the editor checks the unsaved start time and duration live (`useDraftOverlaps`).
+  - **Several overlaps in the editor:** the design spec only gives copy for one task. With more than one, the warning lists them: "Overlaps with 2 tasks: Client call (2:00–2:30 PM), Standup (2:15–2:45 PM). You can still save." The warning is linked to the Duration field with `aria-describedby`.
+  - **Carry-over logic** lives in `utils/carryoverInsights.ts`, not `utils/metrics.ts` (the task list named metrics.ts), to keep each file to one job. It reuses `windowStart`. "Needs attention" only names real companies. Tasks without a company show as "No company" in the rates but are never called out. The 3+ list shows only the latest open copy (`carriedToTaskId === null`), read from the window start onward.
+  - **Stats layout:** Carry-over shows even before the first closeout, since it has its own empty state.
+- **Voice e2e race fixed (2026-10-20):** the nudge banner and the spoken nudge come from separate ticks, so the test now polls for the spoken line instead of reading it once.
 - **Past days that were never closed out can still be closed out.**
 - **Voice lines say "2:00 PM".**
 - **First-run Drive connect** checks for an existing backup before uploading a new one.

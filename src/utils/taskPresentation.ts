@@ -2,6 +2,7 @@ import { format, parse } from 'date-fns'
 import type { Company } from '@/types/company'
 import type { Task, TimeBlock } from '@/types/task'
 import { fromDayKey } from './dates'
+import { overlapSpokenLabel } from './overlapLabels'
 import { STATUS_LABELS } from './taskStatus'
 
 export const BLOCK_LABELS: Record<TimeBlock, string> = {
@@ -52,8 +53,11 @@ export function carriedOverLabel(count: number): string {
   return count > 1 ? `Carried over ×${count}` : 'Carried over'
 }
 
-/** Screen-reader label for a note: "Client call, Acme, 2:00 PM, In Progress" (design spec Section 7). */
-export function taskAriaLabel(task: Task, company: Company | undefined): string {
+/**
+ * Screen-reader label for a note: "Client call, Acme, 2:00 PM, In Progress, overlaps with Standup"
+ * (design spec Section 7).
+ */
+export function taskAriaLabel(task: Task, company: Company | undefined, overlaps: Task[] = []): string {
   const parts = [task.title]
   if (company) parts.push(company.name)
   if (task.startTime) parts.push(formatTime(task.startTime))
@@ -62,5 +66,6 @@ export function taskAriaLabel(task: Task, company: Company | undefined): string 
     parts.push(task.carriedOverCount > 1 ? `carried over ${task.carriedOverCount} times` : 'carried over')
   }
   if (task.source === 'calendar') parts.push('from Google Calendar')
+  if (overlaps.length) parts.push(overlapSpokenLabel(overlaps))
   return parts.join(', ')
 }

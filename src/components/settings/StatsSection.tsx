@@ -1,12 +1,13 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { useMetrics } from '@/hooks/useMetrics'
+import { CarryoverInsights } from './CarryoverInsights'
 import { MetricTile } from './MetricTile'
 
 function formatMinutes(minutes: number): string {
   return minutes < 10 ? `${minutes.toFixed(1)} min` : `${Math.round(minutes)} min`
 }
 
-/** S7f Stats: M1–M3 from this device's data (PRD FR17). */
+/** S7f Stats: M1–M3 (PRD FR17) and carry-over insights (FR26) from this device's data. */
 export function StatsSection() {
   const metrics = useMetrics()
 
@@ -40,6 +41,7 @@ export function StatsSection() {
           />
         </dl>
       )}
+      <CarryoverInsights />
     </section>
   )
 }

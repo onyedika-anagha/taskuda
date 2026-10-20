@@ -58,6 +58,8 @@ export function TaskEditor({ dayKey, tasks }: TaskEditorProps) {
           defaultValues={defaultValues}
           companies={companies ?? []}
           isEdit={!!task}
+          dayTasks={tasks}
+          editing={task}
           onSubmit={onSubmit}
           onCancel={closeEditor}
           onDelete={

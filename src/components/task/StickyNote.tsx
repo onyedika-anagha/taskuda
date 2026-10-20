@@ -1,10 +1,11 @@
-import { CalendarIcon, RepeatIcon } from 'lucide-react'
+import { CalendarIcon, RepeatIcon, TriangleAlertIcon } from 'lucide-react'
 import { forwardRef, type CSSProperties, type ReactNode } from 'react'
 import { CompanyChip } from '@/components/company/CompanyChip'
 import { cn } from '@/lib/utils'
 import type { Company } from '@/types/company'
 import type { Task } from '@/types/task'
 import { noteColorVariables } from '@/utils/noteColors'
+import { overlapMarkerLabel } from '@/utils/overlapLabels'
 import { carriedOverLabel, formatDuration, formatTime, taskAriaLabel } from '@/utils/taskPresentation'
 import { StatusToggle } from './StatusToggle'
 
@@ -12,6 +13,8 @@ interface StickyNoteProps {
   task: Task
   company: Company | undefined
   readOnly: boolean
+  /** Tasks this one clashes with on its day (PRD FR25). */
+  overlaps?: Task[]
   isDragging?: boolean
   style?: CSSProperties
   onOpen: () => void
@@ -22,10 +25,21 @@ interface StickyNoteProps {
 
 /** One task as a paper note tinted with its company's color (design spec Section 10). */
 export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function StickyNote(
-  { task, company, readOnly, isDragging = false, style, onOpen, onCycleStatus, menu, dragHandle },
+  {
+    task,
+    company,
+    readOnly,
+    overlaps = [],
+    isDragging = false,
+    style,
+    onOpen,
+    onCycleStatus,
+    menu,
+    dragHandle,
+  },
   ref,
 ) {
-  const label = taskAriaLabel(task, company)
+  const label = taskAriaLabel(task, company, overlaps)
 
   return (
     <article
@@ -70,7 +84,7 @@ export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function Stic
           {task.title}
         </button>
 
-        {task.carriedOverCount > 0 || task.source === 'calendar' || task.jiraIssue ? (
+        {task.carriedOverCount > 0 || task.source === 'calendar' || task.jiraIssue || overlaps.length ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium">
             {task.carriedOverCount > 0 ? (
               <span className="inline-flex items-center gap-1">
@@ -82,6 +96,12 @@ export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function Stic
               <span className="inline-flex items-center gap-1">
                 <CalendarIcon aria-hidden="true" className="size-3.5" />
                 From Google Calendar
+              </span>
+            ) : null}
+            {overlaps.length ? (
+              <span className="inline-flex items-center gap-1">
+                <TriangleAlertIcon aria-hidden="true" className="size-3.5" />
+                {overlapMarkerLabel(overlaps)}
               </span>
             ) : null}
             {task.jiraIssue ? <span className="font-mono">{task.jiraIssue.key}</span> : null}

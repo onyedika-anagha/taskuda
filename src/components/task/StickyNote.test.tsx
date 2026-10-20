@@ -1,11 +1,19 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { makeCompany, makeTask } from '@/test/factories'
+import type { Task } from '@/types/task'
 import { StickyNote } from './StickyNote'
 
-function renderNote(task = makeTask(), company = makeCompany()) {
+function renderNote(task = makeTask(), company = makeCompany(), overlaps: Task[] = []) {
   return render(
-    <StickyNote task={task} company={company} readOnly={false} onOpen={() => {}} onCycleStatus={() => {}} />,
+    <StickyNote
+      task={task}
+      company={company}
+      readOnly={false}
+      overlaps={overlaps}
+      onOpen={() => {}}
+      onCycleStatus={() => {}}
+    />,
   )
 }
 
@@ -30,6 +38,22 @@ describe('StickyNote', () => {
   it('AC11.1 / AC11.2 marks carried-over tasks with a count', () => {
     renderNote(makeTask({ carriedOverCount: 2 }))
     expect(screen.getByText('Carried over ×2')).toBeInTheDocument()
+  })
+
+  it('AC25.2 marks an overlap with the other task, in text and in the label', () => {
+    const standup = makeTask({ id: 'standup', title: 'Standup', startTime: '14:15' })
+    renderNote(makeTask({ startTime: '14:00' }), makeCompany(), [standup])
+    expect(screen.getByText('Overlaps with Standup')).toBeInTheDocument()
+    expect(
+      screen.getByRole('article', { name: 'Client call, Acme, 2:00 PM, To Do, overlaps with Standup' }),
+    ).toBeInTheDocument()
+  })
+
+  it('AC25.2 counts several overlapping tasks', () => {
+    const others = [makeTask({ id: 'a', title: 'A' }), makeTask({ id: 'b', title: 'B' })]
+    renderNote(makeTask({ startTime: '14:00' }), makeCompany(), others)
+    expect(screen.getByText('Overlaps with 2 tasks')).toBeInTheDocument()
+    expect(screen.getByRole('article', { name: /overlaps with 2 tasks$/ })).toBeInTheDocument()
   })
 
   it('labels calendar-sourced tasks', () => {

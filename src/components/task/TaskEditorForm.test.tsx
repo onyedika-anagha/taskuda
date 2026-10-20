@@ -2,18 +2,21 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import type { TaskFormValues } from '@/schemas/taskForm'
-import { makeCompany } from '@/test/factories'
+import { makeCompany, makeTask } from '@/test/factories'
+import type { Task } from '@/types/task'
 import { emptyTaskForm } from '@/utils/taskFormMapping'
 import { TaskEditorForm } from './TaskEditorForm'
 
 function renderForm(
   onSubmit = vi.fn<(values: TaskFormValues) => Promise<void>>().mockResolvedValue(undefined),
+  dayTasks: Task[] = [],
 ) {
   render(
     <TaskEditorForm
       defaultValues={emptyTaskForm('morning')}
       companies={[makeCompany()]}
       isEdit={false}
+      dayTasks={dayTasks}
       onSubmit={onSubmit}
       onCancel={() => {}}
     />,
@@ -75,5 +78,32 @@ describe('TaskEditorForm', () => {
     ]) {
       expect(screen.getByLabelText(label)).toBeInTheDocument()
     }
+  })
+
+  describe('overlap warning (PRD AC25.3)', () => {
+    const call = makeTask({ id: 'call', title: 'Client call', startTime: '14:00', durationMinutes: null })
+
+    it('warns under Duration when the time overlaps, and still saves', async () => {
+      const onSubmit = renderForm(undefined, [call])
+      await userEvent.type(screen.getByLabelText('Title'), 'Standup')
+      await userEvent.type(screen.getByLabelText('Start time (optional)'), '14:15')
+      const warning = screen.getByText('Overlaps with Client call (2:00–2:30 PM). You can still save.')
+      expect(screen.getByLabelText('Duration in minutes (optional)')).toHaveAttribute(
+        'aria-describedby',
+        warning.id,
+      )
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    it('clears when the duration no longer reaches the other task', async () => {
+      renderForm(undefined, [call])
+      await userEvent.type(screen.getByLabelText('Start time (optional)'), '13:30')
+      await userEvent.type(screen.getByLabelText('Duration in minutes (optional)'), '45')
+      expect(screen.getByText(/^Overlaps with Client call/)).toBeInTheDocument()
+      await userEvent.clear(screen.getByLabelText('Duration in minutes (optional)'))
+      await userEvent.type(screen.getByLabelText('Duration in minutes (optional)'), '30')
+      expect(screen.queryByText(/^Overlaps with/)).not.toBeInTheDocument()
+    })
   })
 })
