@@ -120,6 +120,11 @@ These are recorded in the design spec where they change it.
     - `aria-label="Monday"` with "Mon" shown fails axe `label-content-name-mismatch`.
     - `sr-only` spans, or separate flex items, give "Mon day".
   - The group is a `fieldset` with a screen-reader-only `legend`.
+- **Report summary and time left (FR24, FR27, added 2026-10-20):**
+  - **Summary:** `ReportData.summary` is set for the all-companies scope only. The line follows the title in all four formats. Tasks without a company don't count as a company.
+  - **Time left:** rounded up to whole minutes, so the last seconds read "1 min left". It ticks every 15 s.
+  - **Screen readers:** they get "1 hour 20 minutes left" inside the block heading. On phones the heading is hidden, and an `aria-hidden` line under the tabs shows the time.
+  - **Closeout layout fix:** the step content area scrolls on its own (`overflow-y-auto`). Before, tall content (the report with its new summary line) overflowed behind the Back / Next footer on phones, which blocked "Copy report".
 - **Past days that were never closed out can still be closed out.**
 - **Voice lines say "2:00 PM".**
 - **First-run Drive connect** checks for an existing backup before uploading a new one.

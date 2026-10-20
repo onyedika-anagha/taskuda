@@ -1,6 +1,6 @@
 import type { TaskOutcome } from '@/types/closeout'
 import type { Company } from '@/types/company'
-import type { ReportData, ReportGroup, ReportItem, ReportScope } from '@/types/report'
+import type { ReportData, ReportGroup, ReportItem, ReportScope, ReportSummary } from '@/types/report'
 import type { Task } from '@/types/task'
 import { DEFAULT_WORKING_DAYS, type Weekday } from '@/types/workday'
 import { nextWorkingDay } from './dates'
@@ -59,12 +59,13 @@ export function buildReport({
       dayKey,
       scopeName: company?.name ?? null,
       carriedToDayKey,
+      summary: null,
       groups: [groupFor(own, null, pendingOutcomes)],
     }
   }
 
   const known = new Set(companies.map((c) => c.id))
-  const groups = [...companies]
+  const companyGroups = [...companies]
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((company) =>
       groupFor(
@@ -73,8 +74,23 @@ export function buildReport({
         pendingOutcomes,
       ),
     )
-  const other = kept.filter((t) => !t.companyId || !known.has(t.companyId))
-  const hasCompanies = groups.some((g) => !isGroupEmpty(g))
-  groups.push(groupFor(other, hasCompanies ? 'Other' : null, pendingOutcomes))
-  return { dayKey, scopeName: null, carriedToDayKey, groups: groups.filter((g) => !isGroupEmpty(g)) }
+    .filter((g) => !isGroupEmpty(g))
+  const other = groupFor(
+    kept.filter((t) => !t.companyId || !known.has(t.companyId)),
+    companyGroups.length ? 'Other' : null,
+    pendingOutcomes,
+  )
+  const groups = isGroupEmpty(other) ? companyGroups : [...companyGroups, other]
+  return {
+    dayKey,
+    scopeName: null,
+    carriedToDayKey,
+    summary: summarize(groups, companyGroups.length),
+    groups,
+  }
+}
+
+function summarize(groups: ReportGroup[], companies: number): ReportSummary {
+  const count = (key: 'done' | 'inProgress' | 'carried') => groups.reduce((n, g) => n + g[key].length, 0)
+  return { done: count('done'), inProgress: count('inProgress'), carried: count('carried'), companies }
 }

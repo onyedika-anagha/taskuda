@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import type { Company } from '@/types/company'
 import type { Task, TimeBlock } from '@/types/task'
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
+import { BlockTimeLeft } from './BlockTimeLeft'
 import { EmptyBlockState } from './EmptyBlockState'
 
 interface TimeBlockColumnProps {
@@ -16,6 +17,8 @@ interface TimeBlockColumnProps {
   readOnly: boolean
   /** Mobile tabs already show the block name. */
   showHeader?: boolean
+  /** Set on today's current block only (PRD FR27). */
+  minutesLeft?: number | null
   onAdd: (block: TimeBlock) => void
 }
 
@@ -27,6 +30,7 @@ export function TimeBlockColumn({
   companiesById,
   readOnly,
   showHeader = true,
+  minutesLeft = null,
   onAdd,
 }: TimeBlockColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
@@ -44,7 +48,16 @@ export function TimeBlockColumn({
       >
         {BLOCK_LABELS[block]}
         <span className="text-sm font-normal text-muted-foreground tabular-nums">{taskIds.length}</span>
+        {minutesLeft !== null ? (
+          <BlockTimeLeft minutesLeft={minutesLeft} className="ml-auto" />
+        ) : null}
       </h2>
+      {/* Phones: the heading is hidden (the tab names the block), so show the time under the tabs. */}
+      {!showHeader && minutesLeft !== null ? (
+        <p aria-hidden="true" className="-mb-1">
+          <BlockTimeLeft minutesLeft={minutesLeft} />
+        </p>
+      ) : null}
       <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
         <ul
           ref={setNodeRef}

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { blockForDate, blockForTime, isTimeInBlock, isValidTime, timeToMinutes } from './timeBlocks'
+import {
+  blockForDate,
+  blockForTime,
+  blockTimeLeft,
+  isTimeInBlock,
+  isValidTime,
+  timeToMinutes,
+} from './timeBlocks'
 
 describe('timeBlocks', () => {
   it.each([
@@ -32,5 +39,28 @@ describe('timeBlocks', () => {
   it('checks whether a time belongs to a block (design D2)', () => {
     expect(isTimeInBlock('14:00', 'afternoon')).toBe(true)
     expect(isTimeInBlock('14:00', 'evening')).toBe(false)
+  })
+})
+
+describe('blockTimeLeft (PRD FR27)', () => {
+  const at = (h: number, m: number, s = 0) => new Date(2026, 9, 20, h, m, s)
+
+  it('AC27.1 counts down to the end of Morning and Afternoon', () => {
+    expect(blockTimeLeft(at(10, 40))).toEqual({ block: 'morning', minutesLeft: 80 })
+    expect(blockTimeLeft(at(16, 15))).toEqual({ block: 'afternoon', minutesLeft: 45 })
+  })
+
+  it('rounds up, so the last seconds still read 1 min', () => {
+    expect(blockTimeLeft(at(11, 59, 30))).toEqual({ block: 'morning', minutesLeft: 1 })
+    expect(blockTimeLeft(at(11, 58, 1))).toEqual({ block: 'morning', minutesLeft: 2 })
+  })
+
+  it('AC27.2 moves to the next block when one ends', () => {
+    expect(blockTimeLeft(at(12, 0))).toEqual({ block: 'afternoon', minutesLeft: 300 })
+  })
+
+  it('AC27.1 Evening has no countdown, including after midnight', () => {
+    expect(blockTimeLeft(at(17, 0))).toEqual({ block: 'evening', minutesLeft: null })
+    expect(blockTimeLeft(at(2, 0))).toEqual({ block: 'evening', minutesLeft: null })
   })
 })

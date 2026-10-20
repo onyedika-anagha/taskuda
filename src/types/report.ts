@@ -17,11 +17,22 @@ export interface ReportGroup {
   carried: ReportItem[]
 }
 
+/** Totals for the summary line of an all-companies report (PRD FR24). */
+export interface ReportSummary {
+  done: number
+  inProgress: number
+  carried: number
+  /** Companies with something in the report; tasks without a company don't count. */
+  companies: number
+}
+
 export interface ReportData {
   dayKey: string
   /** Company name for a single-company report. */
   scopeName: string | null
   /** The next working day, where carried tasks go (PRD AC11.1). */
   carriedToDayKey: string
+  /** All-companies reports only (PRD AC24.3). */
+  summary: ReportSummary | null
   groups: ReportGroup[]
 }

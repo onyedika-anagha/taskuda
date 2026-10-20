@@ -6,6 +6,7 @@ import {
   formatDayShort,
   formatDuration,
   formatTime,
+  spokenDuration,
   taskAriaLabel,
 } from './taskPresentation'
 
@@ -21,6 +22,14 @@ describe('taskPresentation', () => {
     expect(formatDuration(30)).toBe('30 min')
     expect(formatDuration(60)).toBe('1 h')
     expect(formatDuration(90)).toBe('1 h 30 min')
+  })
+
+  it('spells durations out for screen readers', () => {
+    expect(spokenDuration(1)).toBe('1 minute')
+    expect(spokenDuration(45)).toBe('45 minutes')
+    expect(spokenDuration(60)).toBe('1 hour')
+    expect(spokenDuration(80)).toBe('1 hour 20 minutes')
+    expect(spokenDuration(121)).toBe('2 hours 1 minute')
   })
 
   it('AC11.2 shows how many times a task was carried', () => {

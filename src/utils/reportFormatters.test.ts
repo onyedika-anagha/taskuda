@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { makeCompany, makeTask } from '@/test/factories'
 import { buildReport, isReportEmpty } from './reportBuilder'
-import { formatReport } from './reportFormatters'
+import { formatReport, summaryLine } from './reportFormatters'
 
 const DAY = '2026-10-19'
 const acme = makeCompany({ id: 'acme', name: 'Acme' })
@@ -112,6 +112,8 @@ describe('formatReport (AC14.2)', () => {
       [
         'End-of-day report · Monday, Oct 19',
         '',
+        '2 done · 1 in progress · 1 carried to tomorrow, across 2 companies',
+        '',
         'ACME',
         '',
         'Done:',
@@ -131,5 +133,57 @@ describe('formatReport (AC14.2)', () => {
         '- Inbox zero',
       ].join('\n'),
     )
+  })
+})
+
+describe('summary line (PRD FR24)', () => {
+  const all = report('all', { '3': 'carry_over', '5': 'delete' })
+  const LINE = '2 done · 1 in progress · 1 carried to tomorrow, across 2 companies'
+
+  it('AC24.1 counts done, in progress and carried tasks, and the companies', () => {
+    expect(all.summary).toEqual({ done: 2, inProgress: 1, carried: 1, companies: 2 })
+    expect(summaryLine(all)).toBe(LINE)
+  })
+
+  it('AC24.2 comes right after the title in every format, matching the sections', () => {
+    for (const format of ['slack', 'teams', 'jira', 'email'] as const) {
+      expect(formatReport(all, format).split('\n').slice(1, 3)).toEqual(['', LINE])
+    }
+  })
+
+  it('AC24.3 single-company reports have no summary line', () => {
+    const one = report('acme')
+    expect(one.summary).toBeNull()
+    expect(formatReport(one, 'slack')).not.toContain('across')
+  })
+
+  it('leaves out zero counts and says “1 company”', () => {
+    const data = buildReport({
+      dayKey: DAY,
+      tasks: [makeTask({ title: 'Ship', companyId: 'acme', status: 'done' })],
+      companies: [acme],
+      scope: 'all',
+    })
+    expect(summaryLine(data)).toBe('1 done, across 1 company')
+  })
+
+  it('has no “across” part when no task has a company', () => {
+    const data = buildReport({
+      dayKey: DAY,
+      tasks: [makeTask({ title: 'Inbox zero', companyId: null, status: 'done' })],
+      companies: [acme],
+      scope: 'all',
+    })
+    expect(summaryLine(data)).toBe('1 done')
+  })
+
+  it('names the next working day after a Friday', () => {
+    const data = buildReport({
+      dayKey: '2026-10-16',
+      tasks: [makeTask({ title: 'Spec', companyId: 'acme', status: 'todo', carriedToTaskId: 'x' })],
+      companies: [acme],
+      scope: 'all',
+    })
+    expect(summaryLine(data)).toBe('1 carried to Monday, across 1 company')
   })
 })

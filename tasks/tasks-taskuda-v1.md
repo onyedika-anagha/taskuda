@@ -268,12 +268,12 @@ Adopted from the My Work Day PRD. These are Should items in v1 scope, built on `
   - [x] 14.6 Add `WorkdaySection` at `/settings/workday`, second in the nav, with the Working days field; later tasks add the other fields
   - [x] 14.7 Tests: WeekdayPicker minimum rule; closeout carryover Friday → Monday; streak with custom days; e2e change working days in Settings and see the carryover follow (streak covered by unit tests); Workday added to the a11y sweep. Closeout tests pin a weekday (e2e clock) or set all days working (unit) so they pass on any day
 
-- [ ] 15.0 Add the report summary line and the time left in the current block (FR24, FR27, DAC20)
-  - [ ] 15.1 Add a `summary` (done, in progress, carried counts and company count) to `ReportData` for the all-companies scope only (AC24.3)
-  - [ ] 15.2 Render the summary line first in the Slack, Teams, Jira and Email formatters; leave out zero counts; "1 company" vs "3 companies" (AC24.1, AC24.2)
-  - [ ] 15.3 Add `minutesLeftInBlock(now)` to `utils/timeBlocks.ts` (`null` for Evening) and a formatter for "1 h 20 min left"
-  - [ ] 15.4 Build `BlockTimeLeft` using `useNow` (ticks at least once a minute); show it in the current `TimeBlockColumn` header and under the mobile tab list, only on today; include it in the header's accessible name, not as a live region (AC27.1–AC27.3)
-  - [ ] 15.5 Tests: formatter tests for each format with and without zero counts; `minutesLeftInBlock` unit tests; component test with fake timers crossing 11:59 → 12:00 (DAC20); e2e report shows the line for all companies only
+- [x] 15.0 Add the report summary line and the time left in the current block (FR24, FR27, DAC20)
+  - [x] 15.1 Add a `summary` (done, in progress, carried counts and company count) to `ReportData` for the all-companies scope only (AC24.3)
+  - [x] 15.2 Render the summary line first in the Slack, Teams, Jira and Email formatters; leave out zero counts; "1 company" vs "3 companies" (AC24.1, AC24.2)
+  - [x] 15.3 Add `blockTimeLeft(date)` to `utils/timeBlocks.ts` (`null` for Evening) and `spokenDuration` next to `formatDuration` for "1 h 20 min left"
+  - [x] 15.4 Build `BlockTimeLeft` using `useNow` (ticks at least once a minute); show it in the current `TimeBlockColumn` header and under the mobile tab list, only on today; include it in the header's accessible name, not as a live region (AC27.1–AC27.3)
+  - [x] 15.5 Tests: formatter tests for each format with and without zero counts; `blockTimeLeft` unit tests; component test with fake timers crossing 11:59 → 12:00 (DAC20); e2e report shows the line for all companies only. Also fixed: the closeout step area now scrolls, so a tall report no longer slides under the Back / Next footer on phones
 
 - [ ] 16.0 Add the closeout nudge, snooze / mark done from reminders, and quiet hours (FR21, FR22, FR23, DAC16, DAC18, DAC19)
   - [ ] 16.1 Add closeout-reminder time (Off or a time, default 5:30 PM) and quiet hours (off, start, end) to Workday settings; build `TimeRangeField` ("Start and end can't be the same."); add both fields to `WorkdaySection`

@@ -77,6 +77,27 @@ function groupLines(group: ReportGroup, syntax: Syntax, labels: ReturnType<typeo
   return blocks
 }
 
+/**
+ * "8 done · 3 in progress · 2 carried to tomorrow, across 3 companies" (PRD AC24.1, design S6).
+ * Zero counts are left out; `null` when there's nothing to sum up.
+ */
+export function summaryLine(report: ReportData): string | null {
+  const summary = report.summary
+  if (!summary) return null
+  const counts = [
+    summary.done ? `${summary.done} done` : null,
+    summary.inProgress ? `${summary.inProgress} in progress` : null,
+    summary.carried
+      ? `${summary.carried} carried to ${relativeDayName(report.dayKey, report.carriedToDayKey)}`
+      : null,
+  ].filter((part): part is string => part !== null)
+  if (!counts.length) return null
+  const across = summary.companies
+    ? `, across ${summary.companies} ${summary.companies === 1 ? 'company' : 'companies'}`
+    : ''
+  return counts.join(' · ') + across
+}
+
 export function reportTitle(report: ReportData): string {
   const day = formatDayLong(report.dayKey)
   return report.scopeName ? `End-of-day report · ${report.scopeName} · ${day}` : `End-of-day report · ${day}`
@@ -86,8 +107,10 @@ export function reportTitle(report: ReportData): string {
 export function formatReport(report: ReportData, format: ReportFormat): string {
   const syntax = SYNTAX[format]
   const labels = sections(report)
+  const summary = report.summary ? summaryLine(report) : null
   const blocks = [
     syntax.title(reportTitle(report)),
+    ...(summary ? [summary] : []),
     ...report.groups.flatMap((g) => groupLines(g, syntax, labels)),
   ]
   return blocks.join(`\n${syntax.gap}`)

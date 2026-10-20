@@ -31,6 +31,23 @@ export function blockForDate(date: Date): TimeBlock {
   return blockForMinutes(date.getHours() * 60 + date.getMinutes())
 }
 
+/** Where blocks end; Evening runs past midnight, so it has no countdown (PRD AC27.1). */
+const BLOCK_ENDS: Partial<Record<TimeBlock, number>> = { morning: AFTERNOON_START, afternoon: EVENING_START }
+
+export interface BlockTimeLeft {
+  block: TimeBlock
+  /** Whole minutes left, rounded up so the last seconds read "1 min"; `null` for Evening. */
+  minutesLeft: number | null
+}
+
+export function blockTimeLeft(date: Date): BlockTimeLeft {
+  const block = blockForDate(date)
+  const end = BLOCK_ENDS[block]
+  if (end === undefined) return { block, minutesLeft: null }
+  const secondsNow = date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds()
+  return { block, minutesLeft: Math.ceil((end * 60 - secondsNow) / 60) }
+}
+
 export function isTimeInBlock(time: string, block: TimeBlock): boolean {
   return blockForTime(time) === block
 }

@@ -5,6 +5,7 @@ import {
   type CollisionDetection,
   type UniqueIdentifier,
 } from '@dnd-kit/core'
+import { useBlockTimeLeft } from '@/hooks/useBlockTimeLeft'
 import { screenReaderInstructions, useCanvasDragAndDrop } from '@/hooks/useCanvasDragAndDrop'
 import { TABLET_UP, useMediaQuery } from '@/hooks/useMediaQuery'
 import type { Company } from '@/types/company'
@@ -37,13 +38,16 @@ interface TaskCanvasProps {
   tasks: Task[]
   companiesById: Map<string, Company>
   readOnly: boolean
+  /** Today shows the time left in the current block (PRD FR27). */
+  isToday: boolean
   onAdd: (block: TimeBlock) => void
 }
 
 /** S2 canvas: three columns on tablet and up, tabs on phones, with drag-and-drop across blocks. */
-export function TaskCanvas({ tasks, companiesById, readOnly, onAdd }: TaskCanvasProps) {
+export function TaskCanvas({ tasks, companiesById, readOnly, isToday, onAdd }: TaskCanvasProps) {
   const isTabletUp = useMediaQuery(TABLET_UP)
   const dnd = useCanvasDragAndDrop(tasks)
+  const timeLeft = useBlockTimeLeft(isToday)
 
   const renderBlock = (block: TimeBlock, showHeader = true) => (
     <TimeBlockColumn
@@ -54,6 +58,7 @@ export function TaskCanvas({ tasks, companiesById, readOnly, onAdd }: TaskCanvas
       companiesById={companiesById}
       readOnly={readOnly}
       showHeader={showHeader}
+      minutesLeft={timeLeft?.block === block ? timeLeft.minutesLeft : null}
       onAdd={onAdd}
     />
   )

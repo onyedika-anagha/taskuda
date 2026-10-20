@@ -30,7 +30,7 @@ describe('ReportBuilder (S6)', () => {
     const { user } = renderBuilder()
     await user.click(screen.getByRole('radio', { name: 'Email' }))
     expect(screen.getByLabelText('Preview')).toHaveValue(
-      'End-of-day report · Monday, Oct 19\n\nACME\n\nDone:\n- Ship login\n\nNORTHWIND\n\nDone:\n- Write spec',
+      'End-of-day report · Monday, Oct 19\n\n2 done, across 2 companies\n\nACME\n\nDone:\n- Ship login\n\nNORTHWIND\n\nDone:\n- Write spec',
     )
   })
 

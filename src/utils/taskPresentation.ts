@@ -39,6 +39,15 @@ export function formatDuration(minutes: number): string {
   return rest ? `${hours} h ${rest} min` : `${hours} h`
 }
 
+/** `80` → `1 hour 20 minutes`, for screen readers (design spec Section 7). */
+export function spokenDuration(minutes: number): string {
+  const hours = Math.floor(minutes / 60)
+  const rest = minutes % 60
+  const unit = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
+  if (!hours) return unit(rest, 'minute')
+  return rest ? `${unit(hours, 'hour')} ${unit(rest, 'minute')}` : unit(hours, 'hour')
+}
+
 export function carriedOverLabel(count: number): string {
   return count > 1 ? `Carried over ×${count}` : 'Carried over'
 }

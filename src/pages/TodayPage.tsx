@@ -78,6 +78,7 @@ export function TodayPage() {
           tasks={tasks ?? []}
           companiesById={companiesById}
           readOnly={readOnly}
+          isToday={nav.isToday}
           onAdd={openCreate}
         />
       )}
