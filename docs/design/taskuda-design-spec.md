@@ -3,7 +3,9 @@
 **Track:** A
 **Upstream:** [docs/pm/taskuda-prd.md](../pm/taskuda-prd.md) (Definition of Ready passed, waiver W1)
 **Status:** Definition of Ready — passed (see Section 11)
-**Last updated:** 2026-10-18
+**Last updated:** 2026-10-20
+
+**Revision 2026-10-20:** added design for PRD FR18–FR29: flows F14–F17, the S7h Workday settings section, dialog D8, new states on S2, S3 and S7f, microcopy, and DAC15–DAC21.
 
 Requirement IDs (FR, NFR, AC, CR) refer to the PRD. Screen IDs (S), flow IDs (F), and component names are defined here.
 
@@ -37,6 +39,18 @@ Requirement IDs (FR, NFR, AC, CR) refer to the PRD. Screen IDs (S), flow IDs (F)
 | NFR9 Browser support | Must | S7e (unsupported state), S2 (catch-up) | F11 |
 | CR1 BYO Google client ID | Could | S7b Integrations (Advanced) | F9 alt |
 | CR2 Export/import file | Could | S7c Backup | F8 alt |
+| FR18 Undo delete | Should | S2 Today, S3 (Delete task), D1 → undo toast | F2 alt |
+| FR19 Working days | Should | S7h Workday | F5, F16 |
+| FR20 Recurring tasks | Should | S3 Task Editor (Repeat), S2 (repeats marker), D1 repeating variant, D8 Edit Repeating | F14 |
+| FR21 Closeout nudge | Should | S2 (nudge banner), S7h Workday | F16 |
+| FR22 Snooze / Mark done from reminder | Should | S2 (reminder toasts) | F11 |
+| FR23 Quiet hours | Should | S7h Workday | F11, F15 |
+| FR24 Report summary line | Should | S5 step 4, S6 Report | F5, F6 |
+| FR25 Overlap warning | Should | S2 (overlap marker), S3 (overlap warning) | F2 alt |
+| FR26 Carry-over insights | Should | S7f Stats | — |
+| FR27 Time left in block | Should | S2 (block header / mobile tab strip) | — |
+| FR28 Eye-break reminders | Should | S2 (eye-break toast), S7h Workday, S7f Stats (M4) | F15 |
+| FR29 In-app time budget | Should | S2 (budget banner), S7h Workday, S7f Stats (M5, time in Taskuda) | F17 |
 
 Day navigation (DayNavigator on S2) has no requirement of its own. It is needed for AC8.3 (events appear "on the right day") and AC11.1 (carried tasks appear on the next day).
 
@@ -57,6 +71,8 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 3. User types a title → Enter (or "Save") → note appears in the block, with a toast "Task added".
 4. *Alt:* user adds notes, company, start time, duration, Jira link before saving. Setting a start time sets the block to match.
 5. *Failure:* empty title → inline "Give the task a title." on submit or blur, and nothing is saved (Save stays enabled so the error can be discovered; changed during build). *Failure:* local save fails (storage full or blocked) → error toast with "Try again", and the editor stays open with the input kept.
+6. *Alt (FR25):* the start time and duration overlap another task that isn't done on that day → an inline warning under Duration: "Overlaps with Client call (2:00–2:30 PM)." Save still works. After saving, both notes show the overlap marker.
+7. *Alt (FR18):* the user deletes a task (note menu or editor) → D1 → Delete → toast "Task deleted" with **Undo** for 10 s → Undo puts the task back in the same place, with the toast "Task restored". After 10 s the toast closes and the delete stays.
 
 ### F3 — Move a task
 1. User drags a note to another position or block → it drops there and the order is saved.
@@ -116,6 +132,8 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 1. Task with start time → N minutes before: spoken "Up next at 2:00: Client call" + visual toast. At start: "Starting now: Client call" + toast. On Done: short cheer + toast.
 2. *Alt:* app was in background/closed when a reminder was due → on return, **ReminderCatchup** panel: "You missed 2 reminders" with the list + "Dismiss".
 3. *Alt:* browser can't speak → toasts still show; S7e shows the unsupported message.
+4. *Alt (FR22):* the "Up next" / "Starting now" toast stays until the user acts. Actions: **Snooze 5 min** · **Snooze 15 min** · **Mark done** · close (X). Snooze → toast "Reminder snoozed until 2:15 PM.", and the same reminder comes back then. Mark done → the task becomes Done, with the cheer (same as F4).
+5. *Alt (FR23):* during quiet hours the toast shows but nothing is spoken.
 
 ### F12 — Jira
 1. S7b → Jira "Connect" → site URL, email, API token → "Test connection" → connected (token encrypted, D6 if first secret).
@@ -127,6 +145,34 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 1. Supported browser and not installed → InstallPrompt (dismissible) in app bar: "Install Taskuda" → browser install dialog.
 2. *Alt:* dismissed → not shown again for 30 days; still available in S7g About.
 3. New version deployed → toast "Taskuda updated. Reload to get the latest version." + "Reload".
+
+### F14 — Make a task repeat (FR20)
+1. S3 Task Editor → **Repeat** select (under Time of day): Doesn't repeat · Every day · Every working day · Weekly · Monthly.
+2. Weekly → a WeekdayPicker appears, with the task's own weekday preselected; at least one day is required. Monthly → "On day" select (1–31), preselected to the task's date; the hint "In shorter months, it moves to the last day." shows for days 29–31.
+3. Save → the note shows the repeats marker; matching days from today onward show an occurrence when opened.
+4. *Edit an occurrence:* change any field → Save → **D8 Edit Repeating**: "This task only" / "This and future tasks" / Cancel.
+5. *Delete an occurrence:* D1 repeating variant: "This task only" / "This and future tasks" / Cancel → undo toast (F2 step 7). Undo also brings the series back.
+6. *Alt:* yesterday's occurrence was carried over → today shows only the carried copy (with both markers), not a second occurrence.
+7. *Failure:* Weekly with no day selected → inline "Pick at least one day." on Save.
+
+### F15 — Eye break (FR28)
+1. Eye breaks are on (S7h), it's a working day, during eye-break hours, not quiet hours, and Taskuda is open → after each interval a toast appears at the top: "Time for an eye break. Look at something far away for 20 seconds." Actions: **Done** · **Snooze 5 min**. If voice is on, it also says "Time for an eye break."
+2. Done → the toast closes and the outcome is logged (M4). The next prompt is one interval later.
+3. *Alt:* Snooze → it comes back in 5 minutes. Close (X) → logged as dismissed.
+4. *Alt:* the prompt came due while Taskuda was in the background → it shows once on return, with "(missed while you were away)" added, logged as missed.
+5. *Alt:* a new prompt comes due while the previous one is still open → the old one is replaced and logged as missed.
+
+### F16 — Closeout nudge (FR21)
+1. Working day, nudge time reached, today not closed out, Taskuda open → the nudge banner on S2 ("It's 5:30 PM. Ready to close out your day?" with **Close out day** · **Not today**), a toast with the same text, and a spoken line if voice is on and it's not quiet hours.
+2. Close out day → F5. The banner goes away when the closeout finishes.
+3. Not today → the banner is hidden until the next working day.
+4. *Alt:* Taskuda opened after the nudge time → banner only, no toast or voice.
+5. *Alt:* the user is viewing another day → the banner still shows, and Close out day opens today's closeout.
+
+### F17 — Time budget warning (FR29)
+1. A budget is set (S7h) and today's time in Taskuda passes it → a toast and the budget banner on S2: "You've spent 2 h in Taskuda today, past your 2 h budget. A short break might help." with **Dismiss**.
+2. Dismiss → the banner hides; at most one more warning after each extra hour ("3 h in Taskuda today…").
+3. Nothing is locked. All actions keep working.
 
 ---
 
@@ -153,14 +199,19 @@ Dialogs (D1–D7) are listed after the screens.
 | Success | Toast confirmations (added, deleted, moved via menu); "Day closed at 6:12 PM · View report" banner after closeout |
 | Past day | Read-only. Banner "You're viewing Tue, Oct 14. Tasks from past days can't be edited." |
 | Offline | OfflineBanner (thin, dismissible) "You're offline. Everything still saves on this device." |
+| Time left (FR27) | Today only: the current block's header shows "1 h 20 min left" after the block name for Morning and Afternoon (none for Evening). On mobile it shows under the tab list for the current tab. Muted text, tabular numbers. |
+| Notices (FR21, FR29) | Above the blocks, in the existing notices area, in this order: storage error → offline → nudge banner → budget banner. At most two banners show at once; the budget banner waits if two are already showing. |
+| Note markers (FR20, FR25) | Repeats marker (repeat icon + "Repeats daily" / "Working days" / "Weekly" / "Monthly"). Overlap marker (warning icon + "Overlaps with Client call"; "Overlaps with 2 tasks" when more than one). Shown next to the existing carried-over and calendar markers. |
+| Alert toasts (FR22, FR28) | Reminder and eye-break toasts stay until the user acts or closes them. Only one eye-break toast at a time. |
 
 ### S3 Task Editor (Dialog on ≥768px, bottom Sheet on <768px)
 | State | Spec |
 |---|---|
-| Default | Fields: Title*, Company, Block, Start time, Duration, Notes, Jira link (if Jira connected); Save, Cancel; Delete (edit mode only) |
+| Default | Fields: Title*, Company, Block, Repeat (+ WeekdayPicker or "On day" when needed), Start time, Duration, Notes, Jira link (if Jira connected); Save, Cancel; Delete (edit mode only) |
 | Loading | Save button spinner (rarely visible) |
-| Empty | Create mode: empty fields, title focused |
-| Error | Inline field errors; save-failed toast with input kept |
+| Empty | Create mode: empty fields, title focused, Repeat = Doesn't repeat |
+| Error | Inline field errors (including "Pick at least one day."); save-failed toast with input kept |
+| Warning | Overlap warning under Duration (FR25); doesn't block Save |
 | Success | Closes; toast "Task added" / "Changes saved" |
 
 ### S5 Closeout (full-screen on <768px, large Dialog on ≥768px, 4 steps)
@@ -176,14 +227,14 @@ Dialogs (D1–D7) are listed after the screens.
 ### S6 Report
 | State | Spec |
 |---|---|
-| Default | Scope Select, FormatSwitcher tabs, ReportPreview, Copy report |
+| Default | Scope Select, FormatSwitcher tabs, ReportPreview (all-companies scope starts with the summary line, FR24), Copy report |
 | Loading | N/A — generated locally and instantly |
 | Empty | No tasks for the scope: "Nothing to report yet." (Copy disabled) |
 | Error | Clipboard blocked (F5.5) |
 | Success | Copy button changes to "Copied" with a check for 2 s + aria-live announcement |
 
 ### S7 Settings (sections in a side nav on ≥1024px, list → subpage on smaller screens)
-Sections: **S7a Companies, S7b Integrations, S7c Backup, S7d AI & Security, S7e Voice, S7f Stats, S7g About**.
+Sections: **S7a Companies, S7h Workday, S7b Integrations, S7c Backup, S7d AI & Security, S7e Voice, S7f Stats, S7g About** (nav order; S7h is new and sits second because it's used more than the integrations).
 
 | Section | Default | Loading | Empty | Error | Success |
 |---|---|---|---|---|---|
@@ -192,13 +243,15 @@ Sections: **S7a Companies, S7b Integrations, S7c Backup, S7d AI & Security, S7e 
 | S7c Backup | Drive status, "Last backed up …", Back up now, Restore from Drive, Export / Import (CR2) | "Backing up…" | Not connected: "Your data is only on this device." + Connect | "Backup failed" + Try again | "Backed up just now" |
 | S7d AI & Security | Provider, SecretField, model, Test key, Remove; Passphrase: "Change passphrase", "Reset secrets" | Test key spinner | No key: "No AI key added. AI recommendations are off." | Key rejected / test failed | "Key works" |
 | S7e Voice | Voice on/off, reminder lead time (Off, 5, 10, 15 min), voice choice, "Play test" | N/A | N/A | Unsupported: "Your browser can't speak reminders. You'll still see them on screen." (controls disabled) | Test plays |
-| S7f Stats | Three MetricTiles (M1, M2, M3) + one-line explanation each | N/A (local) | Before first closeout: "Your stats appear after your first closeout." | N/A — calculated locally; if logs can't be read, same as storage error on S2 | N/A |
+| S7f Stats | Five MetricTiles (M1–M5; M4/M5 show "Off" with a link to Workday when that feature is off) + one-line explanation each. "Time in Taskuda" line (today + 7-day average, "on this device"). **Carry-over** subsection: rate per company and overall, "Needs attention" callouts, list of tasks carried 3+ times | N/A (local) | Before first closeout: "Your stats appear after your first closeout." Carry-over with no past tasks: "Carry-over stats appear once you have past days." | N/A — calculated locally; if logs can't be read, same as storage error on S2 | N/A |
+| S7h Workday | Working days (WeekdayPicker), Close-out reminder (Off / time), Quiet hours (switch + from/to times), Eye breaks (switch, interval Select, from/to times), Daily time budget (Off / 1–4 h). Each saves on change. | N/A (local) | N/A — always has defaults | All working days unticked: the last one can't be unticked, with the hint "Keep at least one working day." Quiet-hours or eye-break start = end: "Start and end can't be the same." | Toast "Saved" (one per change, merged) |
 | S7g About | Version, Install button (if available), Privacy summary, link to privacy page | N/A | N/A | N/A | N/A |
 
 ### Dialogs
 | ID | Purpose | States |
 |---|---|---|
-| D1 Delete Task | "Delete this task?" Delete / Cancel | Default, Success (toast). No loading/empty/error: local action; failure → save-failed toast |
+| D1 Delete Task | "Delete this task?" Delete / Cancel. Repeating variant: This task only / This and future tasks / Cancel | Default, Success (toast with Undo for 10 s, FR18). No loading/empty/error: local action; failure → save-failed toast |
+| D8 Edit Repeating | "Change repeating task?" This task only / This and future tasks / Cancel | Default only (local); on Cancel the editor stays open with the changes kept |
 | D2 Timed-Task Move | "Move to Evening? This task starts at 2:00 PM." Remove time and move / Cancel | Default only (local) |
 | D3 Delete Company | Company has tasks: "Remove company from tasks" / "Cancel". No tasks: simple confirm | Default, Success |
 | D4 Restore Confirm | Version info, warning, Restore / Cancel | Default, Loading ("Restoring…"), Error (unreadable), Success (→ S2, toast "Restored backup from Oct 17, 9:14 PM") |
@@ -215,10 +268,10 @@ App shell
 ├── S2 Today (home, "/")            ← default route; DayNavigator switches date ("/day/2026-10-19")
 │   ├── S3 Task Editor (overlay)
 │   ├── S5 Closeout (overlay, resumable)
-│   └── D1, D2, D7 (overlays)
+│   └── D1, D2, D7, D8 (overlays)
 ├── S6 Report ("/report", optional ?date=)
 ├── S7 Settings ("/settings/<section>")
-│   └── S7a–S7g
+│   └── S7a–S7h (S7h = "/settings/workday")
 └── S1 Welcome ("/welcome", first run only; redirects to "/" afterwards)
 ```
 
@@ -263,6 +316,14 @@ App shell
 | MetricTile | [NEW] | S7f | Number + label + explanation |
 | ReminderCatchup | [NEW] | S2 | Missed-reminder list panel |
 | InstallPrompt | [NEW] | App bar, S7g | Wraps the browser install event |
+| ToggleGroup | [REUSE] | WeekdayPicker | shadcn/ui; add with the CLI (not yet in the project) |
+| WeekdayPicker | [NEW] | S3 (Weekly), S7h | Seven toggle buttons (Mon–Sun) with a "keep at least one" rule; ToggleGroup alone has no minimum |
+| RepeatField | [NEW] | S3 | Repeat select plus the WeekdayPicker or day-of-month field that goes with it |
+| TimeRangeField | [NEW] | S7h (quiet hours, eye-break hours) | Two labeled time inputs with the "can't be the same" rule and an overnight hint |
+| BlockTimeLeft | [NEW] | S2 block header, mobile tab strip | Ticking countdown with a quiet aria-live policy (see Section 7) |
+| NoticeBanner | [NEW] | S2 nudge and budget banners | Alert plus one or two actions and a dismiss. Wraps Alert so the two banners look and behave the same |
+| AlertToast actions | [REUSE] | Reminder, eye-break, undo toasts | Sonner toasts with action buttons and `duration: Infinity` (10 s for undo) |
+| CarryoverInsights | [NEW] | S7f | Per-company rates, callouts and the carried 3+ list; MetricTile only holds one number |
 
 ---
 
@@ -278,6 +339,7 @@ App shell
 - **Android Chrome:** full support target. **iOS Safari:** best effort; voice and install may be limited, so show the unsupported messages instead of broken controls.
 - **Drag start (all devices):** dragging starts from the note's drag handle (grip icon), so the note body scrolls normally on touch and keeps no nested controls inside a draggable element. Changed during build from "long-press on the note".
 - Minimum supported width: 320px with no horizontal scrolling.
+- **New pieces (FR18–FR29):** NoticeBanner actions wrap below the text under 480px. WeekdayPicker shows single letters (M T W T F S S) under 400px and three-letter names above, with full day names as accessible labels either way. In S7h, TimeRangeField stacks its two inputs under 400px. Action toasts put their buttons on a second line on mobile.
 
 ---
 
@@ -303,6 +365,12 @@ Target: **WCAG 2.1 AA**.
 - **Motion:** with `prefers-reduced-motion`, drag animations, toasts, and step transitions use fades or no animation.
 - **Forms:** every field has a visible label; errors are tied to fields with `aria-describedby` and appear on blur or submit.
 - **Zoom:** usable at 200% browser zoom without loss of content.
+- **Undo toast (FR18):** Undo is a real button and can be reached with Tab. While focus is inside the toast, the 10 s timer pauses. The deletion is announced as "Task deleted. Undo available."
+- **Action toasts (FR22, FR28):** they never take focus on their own, so typing in a field isn't interrupted. They're announced politely. `Alt+T` moves focus to the newest action toast (added to the `?` shortcut list).
+- **Time left (FR27):** the visible text updates every minute, but it's not a live region, so screen readers aren't interrupted every minute. The block header's accessible name includes it ("Afternoon, 1 hour 20 minutes left").
+- **WeekdayPicker:** each toggle has `aria-pressed` and a full day name ("Monday"). The group is labeled ("Working days" / "Repeat on").
+- **Markers:** repeats and overlap markers have text labels and are part of the note's `aria-label`, for example "Client call, Acme, 2:00 PM, In Progress, repeats weekly, overlaps with Standup".
+- **Eye-break prompts** contain no flashing or motion, and with `prefers-reduced-motion` they appear with no animation.
 
 ---
 
@@ -324,12 +392,24 @@ Target: **WCAG 2.1 AA**.
 | Storage error | Taskuda can't save on this device. Your browser is blocking storage, often because of private browsing. Open Taskuda in a normal window to keep your tasks. |
 | Sync indicator | Saved on this device · Backed up 2 min ago · Backing up… · Offline · Reconnect Google · Backup failed · Calendar sync paused |
 | Reminder catch-up | You missed 2 reminders while Taskuda was in the background. — Dismiss |
+| Time left | 1 h 20 min left · 45 min left · 1 min left |
+| Repeats marker | Repeats daily · Repeats on working days · Repeats weekly · Repeats monthly |
+| Overlap marker | Overlaps with Client call · Overlaps with 2 tasks |
+| Undo toast | Task deleted — Undo. After Undo: Task restored. Repeating, "This and future": Repeating task deleted — Undo |
+| Reminder toast actions | Snooze 5 min · Snooze 15 min · Mark done. After snooze: Reminder snoozed until 2:15 PM. |
+| Nudge banner / toast | It's 5:30 PM. Ready to close out your day? — Close out day · Not today |
+| Nudge voice line | "It's 5:30 PM. Time to close out your day." |
+| Eye-break toast | Time for an eye break. Look at something far away for 20 seconds. — Done · Snooze 5 min. Missed: (missed while you were away) appended |
+| Eye-break voice line | "Time for an eye break." |
+| Budget banner / toast | You've spent 2 h in Taskuda today, past your 2 h budget. A short break might help. — Dismiss |
 
 ### S3 Task Editor
 | Element | Copy |
 |---|---|
 | Titles | New task · Edit task |
-| Fields | Title · Company · Time of day · Start time (optional) · Duration (optional) · Notes (optional) · Jira issue (optional) |
+| Fields | Title · Company · Time of day · Repeat · Start time (optional) · Duration (optional) · Notes (optional) · Jira issue (optional) |
+| Repeat options | Doesn't repeat · Every day · Every working day · Weekly · Monthly. Weekly: Repeat on (weekdays). Monthly: On day (1–31). Hint for 29–31: In shorter months, it moves to the last day. Error: Pick at least one day. |
+| Overlap warning | Overlaps with Client call (2:00–2:30 PM). You can still save. |
 | Company empty option | No company |
 | Buttons | Save · Cancel · Delete task · Link Jira issue |
 | Title error | Give the task a title. |
@@ -345,6 +425,8 @@ Target: **WCAG 2.1 AA**.
 | D4 | **Restore this backup?** This replaces everything on this device with the backup from Oct 17, 9:14 PM. — Restore · Cancel. Different-device warning: This backup was made on another device ("Windows · Chrome"). Changes made here since then will be lost. |
 | D5 | **Enter your passphrase** to unlock your AI key and Jira token. — Unlock · Restore without keys. Error: That passphrase doesn't match. Try again, or restore without keys and add them again later. |
 | D6 | **Set a passphrase** — It protects your AI key and Jira token, including in your Drive backup. You'll only need it on a new device. If you forget it, you'll need to add your keys again — nothing else is lost. Fields: Passphrase · Confirm passphrase. Errors: Use at least 8 characters. / The passphrases don't match. |
+| D1 repeating | **Delete repeating task?** Delete only this one, or this one and all future ones? Past days aren't changed. — This task only · This and future tasks · Cancel |
+| D8 | **Change repeating task?** Apply your changes to this task only, or to this and all future ones? Past days aren't changed. — This task only · This and future tasks · Cancel |
 | D7 | **Link a Jira issue** — Paste an issue key (ABC-123) or link. Buttons: Look up · Link · Cancel. Errors: We couldn't find ABC-123 on yoursite.atlassian.net. Check the key. / Your Jira token doesn't have access to this issue. / You're offline. Link the issue when you're back online. |
 
 ### S5 Closeout
@@ -369,7 +451,7 @@ Target: **WCAG 2.1 AA**.
 | Step 4 heading | Your report |
 | Finish | Finish day |
 | Leave confirm | **Leave closeout?** Your choices so far will be kept. — Leave · Keep going |
-| Done toast | Day closed. 3 tasks carried to tomorrow. |
+| Done toast | Day closed. 3 tasks carried to tomorrow. When the next working day isn't tomorrow (FR19): Day closed. 3 tasks carried to Monday. |
 | Already closed | You closed out today at 6:12 PM. — View report · Close out again |
 
 ### S6 Report
@@ -377,7 +459,8 @@ Target: **WCAG 2.1 AA**.
 |---|---|
 | Scope | All companies · (company names) |
 | Formats | Slack · Teams · Jira · Email |
-| Report sections | Done · In progress · Carried to tomorrow |
+| Summary line (all companies) | 8 done · 3 in progress · 2 carried to tomorrow, across 3 companies. Zero counts are left out ("5 done, across 2 companies"); one company says "across 1 company". |
+| Report sections | Done · In progress · Carried to tomorrow (Carried to Monday when the next working day isn't tomorrow, FR19) |
 | Copy button | Copy report → Copied |
 | Empty | Nothing to report yet. Mark tasks done and they'll show up here. |
 | Clipboard error | Couldn't copy automatically. The text is selected — press Ctrl+C (⌘C on Mac) to copy it. |
@@ -385,7 +468,8 @@ Target: **WCAG 2.1 AA**.
 ### S7 Settings
 | Element | Copy |
 |---|---|
-| Section names | Companies · Integrations · Backup · AI & Security · Voice · Stats · About |
+| Section names | Companies · Workday · Integrations · Backup · AI & Security · Voice · Stats · About |
+| Workday | **Working days** — Taskuda carries tasks over, keeps your streak and sends reminders on these days. Hint: Keep at least one working day. · **Close-out reminder** — Remind me to close out at: Off / (time). Default 5:30 PM. · **Quiet hours** — No spoken alerts or eye-break prompts from (time) to (time). Reminders still show on screen. · **Eye breaks** — Remind me to rest my eyes: Every 20 / 30 / 45 / 60 minutes, from (time) to (time) on working days. Only while Taskuda is open. · **Daily time budget** — Warn me after this much time in Taskuda: Off / 1 h / 2 h / 3 h / 4 h. Counts only time Taskuda is on screen on this device. · Error: Start and end can't be the same. · Toast: Saved |
 | Companies empty | No companies yet. Add one to color-code your tasks. — Add company |
 | Duplicate name | You already have a company called Acme. |
 | Drive not connected | Your data is only on this device. Connect Google Drive to back it up. Taskuda can only see its own backup file, not your other Drive files. — Connect Google Drive |
@@ -402,7 +486,9 @@ Target: **WCAG 2.1 AA**.
 | Security | Change passphrase · Reset secrets (removes your AI key and Jira token from this device and your backup) |
 | Voice | Spoken reminders · Remind me before a task starts: Off / 5 / 10 / 15 minutes · Voice · Play test. Unsupported: Your browser can't speak reminders. You'll still see them on screen. |
 | Voice lines | "Up next at 2:00 PM: Client call." (time includes AM/PM, changed during build) · "Starting now: Client call." · Cheers (random): "Nice work." / "Done. On to the next." / "That's one off the list." |
-| Stats | Tasks dropped without a decision · Closeout streak (working days) · Median time to report. Empty: Your stats appear after your first closeout. |
+| Stats | Tasks dropped without a decision · Closeout streak (working days) · Median time to report · Eye breaks taken · Days within time budget. Off tiles: Eye breaks are off. — Turn on in Workday / No time budget set. — Set one in Workday. Empty: Your stats appear after your first closeout. |
+| Time in Taskuda | Time in Taskuda today: 1 h 12 min · 7-day average: 54 min (on this device, not total screen time) |
+| Carry-over | Heading: Carry-over, last 4 weeks · Row: Acme — 40% carried over · Overall — 22% · Callout: Needs attention: Acme — 40% of tasks carried over in the last 4 weeks. · List heading: Carried over 3+ times · Row: Write onboarding doc (Acme) — carried 4 times · Empty: Carry-over stats appear once you have past days. |
 | About | Install Taskuda · Version (number) · Your data stays on your device and in your own Google Drive. Taskuda has no server that stores your tasks or keys. |
 | Update toast | Taskuda updated. Reload to get the latest version. — Reload |
 | Install prompt | Install Taskuda for one-click access. — Install · Not now |
@@ -435,6 +521,13 @@ Target: **WCAG 2.1 AA**.
 | DAC12 | Every spoken alert shows a matching toast within 500 ms. | e2e with speech mocked |
 | DAC13 | Leaving and reopening the closeout resumes at the same step with the same choices. | e2e test |
 | DAC14 | A saved secret is never displayed in full: only the last 4 characters, in every screen. | Component test |
+| DAC15 | A deleted task can be restored with 1 interaction (Undo), with the keyboard or the mouse, any time within 10 s of the delete. | e2e test |
+| DAC16 | Snoozing or completing a task from its reminder takes 1 interaction on the toast. | e2e with fake timers |
+| DAC17 | Making a new task repeat weekly on one day adds ≤ 2 interactions to DAC1 (choose Weekly; the task's own weekday is preselected). | e2e test |
+| DAC18 | No reminder, eye-break, nudge or budget alert ever moves keyboard focus or clears text being typed. | e2e: type in the editor while alerts fire |
+| DAC19 | From the nudge banner, the closeout opens with 1 interaction. | e2e test |
+| DAC20 | The time-left text changes to the next block within 60 s of a block boundary. | Component test with fake timers |
+| DAC21 | Every number shown for in-app time is labeled "on this device" or "in Taskuda" on the same screen. | Copy review + component test |
 
 ---
 
@@ -460,9 +553,14 @@ Target: **WCAG 2.1 AA**.
 - [x] Design Acceptance Criteria exist and are testable by someone else (Section 9)
 - [x] File is committed at `docs/design/taskuda-design-spec.md`
 
+Re-checked on 2026-10-20 for FR18–FR29: each has a Traceability row; S7h and D8 have their states; all new copy is final; new components are tagged; accessibility, responsive behavior and DAC15–DAC21 are specified.
+
 ### Notes for the Software Engineer stage
 These are engineering decisions the design depends on. They are noted here, not decided:
 - Default model for each AI provider (S7d preset). **Decided:** Gemini `gemini-3.5-flash-lite` (Google's recommendation for new projects, Oct 2026); OpenRouter `openrouter/auto`. The model is a text field so users can change it without an app update.
 - Which side wins when a task and its calendar event are both edited between syncs (PRD RK6). **Decided:** the later edit wins (task `updatedAt` vs the event's `updated` time); a task edited after its event was deleted keeps itself and gets a new event. Other build decisions: scopes `calendar.events.owned` + `calendar.calendarlist.readonly` (narrowest that work); all-day events aren't turned into tasks; tasks from a week ago onwards sync, events up to 90 days ahead are pulled; a carried-over copy gets its own event on its new day; switching calendars starts fresh and leaves existing events where they are.
 - How many Drive backup versions to keep (PRD RK7). **Decided:** the newest 10, one file each in the hidden app-data folder. Google access tokens stay in memory only (no refresh token in a browser-only app): after a reload or after about an hour, backups resume silently when Google allows it, otherwise the indicator shows "Reconnect Google" and one click resumes them.
 - Whether "Close out again" replaces or appends the day's closeout log entry for M2/M3 (design assumes replace). **Decided:** replace, keeping the first closeout's start/copy times for M3.
+- *(FR20)* How occurrences are stored: created when a day is opened, or computed from the series on the fly. The design only needs AC20.2–AC20.5 to hold, and every occurrence to behave like a normal task once it exists (status, move, carryover, calendar).
+- *(FR28, FR29)* Whether the eye-break log and the daily in-app time are backed up to Drive or kept on this device only (like `device.*` settings). In-app time is per device by definition.
+- *(FR22, FR28)* Snoozed reminders and eye-break timing after a reload: keep pending snoozes across a reload, or drop them.
