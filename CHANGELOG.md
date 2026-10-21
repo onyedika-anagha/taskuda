@@ -2,6 +2,22 @@
 
 All notable changes to Taskuda. Dates are UTC.
 
+## [Unreleased]
+
+Adds PRD FR30–FR34. Not yet deployed. Export a backup before deploying.
+
+### Added
+- **Due dates:** an optional due date and time on a task, shown on its note ("Due Fri, Oct 24"). Carried-over and restored tasks keep it; repeating tasks don't have one.
+- **At-risk markers** on notes and in the closeout: Overdue, Overran, Running late (10 minutes after a To Do task's start), Due today and Stuck (carried over 3+ times). One marker per note, with no sounds or toasts.
+- **Day summary row:** "4 of 9 done" and an "At risk" button that lists the day's at-risk tasks; choosing one opens it.
+- **Stats M6:** deadlines met (tasks with a due date done on time, last 4 weeks).
+- **Intro slides** on first run, with Skip on every slide, and "Show intro again" in Settings → About.
+- **First-run setup** with three skippable steps: add several companies, set working days and the close-out reminder, then Drive backup. Setup resumes at its step after a closed tab. "I already use Taskuda" goes straight to restore.
+
+### Changed
+- **Database** version 5 (additive): `dueDate` and `dueTime` on tasks.
+- **Backup format version 3** adds due dates. Version 1 and 2 backups and export files still restore and import.
+
 ## [0.2.0] — 2026-10-21
 
 Adds PRD FR18–FR29 (the "My Work Day" additions). Not yet deployed. Export a backup before deploying (PRD RK16).

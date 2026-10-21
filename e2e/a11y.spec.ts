@@ -111,7 +111,7 @@ for (const scheme of ['light', 'dark'] as const) {
       })
       await checkScreen(page)
 
-      // S7f with all five tiles (a closeout makes them show) and the carry-over section.
+      // S7f with all six tiles (a closeout makes them show) and the carry-over section.
       await page.evaluate(
         () =>
           new Promise<void>((resolve, reject) => {
@@ -137,6 +137,57 @@ for (const scheme of ['light', 'dark'] as const) {
       await expect(page.getByText('Days within time budget')).toBeVisible()
       await expect(page.getByText(/^Time in Taskuda today:/)).toBeVisible()
       await checkScreen(page)
+    })
+
+    test('DAC29 the at-risk marker and D9 list: no horizontal scroll, no WCAG 2.1 AA violations', async ({
+      page,
+    }) => {
+      // Wednesday, Oct 21, 2026, 9:00 AM; the task below is already overdue.
+      await page.clock.install({ time: new Date(2026, 9, 21, 9, 0) })
+      await page.goto('/')
+      await expect(page.getByRole('heading', { level: 1, name: /, today$/ })).toBeVisible()
+      await page.keyboard.press('n')
+      const editor = page.getByRole('dialog', { name: 'New task' })
+      await editor.getByLabel('Title').fill('Send invoice')
+      await editor.getByRole('button', { name: 'Add due date' }).click()
+      await editor.getByLabel('Due date').fill('2026-10-20')
+      await expect(editor.getByText('This date has passed. The task will show as overdue.')).toBeVisible()
+      await checkScreen(page)
+      await editor.getByRole('button', { name: 'Save' }).click()
+      await expect(editor).toBeHidden()
+
+      const area = await blockArea(page, 'Morning')
+      await expect(area.getByText('Overdue · due Oct 20')).toBeVisible()
+      await checkScreen(page)
+      await page.getByRole('button', { name: 'At risk · 1, show 1 task' }).click()
+      await expect(page.getByRole('dialog', { name: 'At risk today' })).toBeVisible()
+      await checkScreen(page)
+    })
+
+    test.describe('first run', () => {
+      test.use({ firstRun: true })
+
+      test('DAC29 every intro slide and setup step: no horizontal scroll, no WCAG 2.1 AA violations', async ({
+        page,
+      }) => {
+        await page.goto('/')
+        for (let slide = 1; slide <= 4; slide++) {
+          await expect(page.getByRole('group', { name: `Slide ${slide} of 4` })).toBeVisible()
+          await checkScreen(page)
+          if (slide < 4) await page.getByRole('button', { name: 'Next' }).click()
+        }
+        await page.getByRole('button', { name: 'Get started' }).click()
+        await page.getByLabel('Company name').fill('Acme')
+        await page.getByLabel('Company name').press('Enter')
+        await expect(page.getByRole('button', { name: 'Remove Acme' })).toBeVisible()
+        await checkScreen(page)
+        await page.getByRole('button', { name: 'Continue' }).click()
+        await expect(page.getByRole('heading', { name: 'Step 2 of 3 · Workday' })).toBeVisible()
+        await checkScreen(page)
+        await page.getByRole('button', { name: 'Continue' }).click()
+        await expect(page.getByRole('heading', { name: 'Step 3 of 3 · Backup' })).toBeVisible()
+        await checkScreen(page)
+      })
     })
 
     test('DAC8 / DAC10 every screen: no horizontal scroll, no WCAG 2.1 AA violations', async ({ page }) => {

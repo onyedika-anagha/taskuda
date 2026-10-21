@@ -14,6 +14,9 @@ Product and design docs: [PRD](docs/pm/taskuda-prd.md) · [Design spec](docs/des
 - **Repeating tasks:** in the task editor, set Repeat to every day, every working day, weekly on chosen days, or monthly on a date. Each day you open gets its own copy, so repeats work with carryover, reminders, calendar sync and reports. Editing or deleting a repeat asks whether to change only that task or that one and all later ones; past days never change.
 - **Overlap warnings:** notes and the editor flag timed tasks that clash, including imported meetings. Saving is never blocked.
 - **Undo:** deleting a task shows Undo for 10 seconds.
+- **Due dates:** "Add due date" in the task editor sets an optional date and time. With no time, the task is due at the end of that day.
+- **At-risk markers:** a note shows one marker when its task slips: Overdue, Overran, Running late (still To Do 10 minutes after its start), Due today, or Stuck (carried over 3+ times). Above the blocks, "4 of 9 done" shows progress, and the At risk button lists the day's at-risk tasks. Markers never make a sound.
+- **First run:** a short intro (skippable, and available again in Settings → About), then setup: your companies, your working days and close-out time, and Drive backup. Every step can be skipped.
 
 ### Workday settings (Settings → Workday)
 
@@ -25,7 +28,7 @@ Product and design docs: [PRD](docs/pm/taskuda-prd.md) · [Design spec](docs/des
 | Eye breaks | Off | Every 20, 30, 45 or 60 minutes within set hours on working days, with Done and Snooze 5 min. |
 | Daily time budget | Off | A gentle warning after 1–4 hours of time in Taskuda, then at most once per extra hour. Nothing is locked. |
 
-Every alert runs only while Taskuda is open in the browser. Stats shows the carry-over rate per company, eye breaks taken, days within your time budget, and today's time in Taskuda. That time counts only while Taskuda is on screen on this device, so it isn't your total screen time.
+Every alert runs only while Taskuda is open in the browser. Stats shows the carry-over rate per company, eye breaks taken, days within your time budget, deadlines met, and today's time in Taskuda. That time counts only while Taskuda is on screen on this device, so it isn't your total screen time.
 
 ## Stack
 

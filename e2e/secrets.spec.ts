@@ -69,7 +69,8 @@ test('AC12.3 / AC12.4 / AC12.6 the AI key is encrypted, remembered, and sent onl
 
   await page.goto('/')
   await addTask(page, 'Write spec', 'Morning')
-  await page.getByRole('button', { name: 'Close out day' }).click()
+  // After 5:30 PM the closeout nudge banner has a second "Close out day" button.
+  await page.getByRole('button', { name: 'Close out day' }).first().click()
   const dialog = page.getByRole('dialog', { name: /^Close out / })
   await dialog.getByRole('button', { name: 'Carry over all' }).click()
   await dialog.getByRole('button', { name: 'Next' }).click()

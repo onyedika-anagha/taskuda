@@ -301,7 +301,7 @@ Sections: **S7a Companies, S7h Workday, S7b Integrations, S7c Backup, S7d AI & S
 | D5 Unlock | Passphrase field, Unlock, "Restore without keys" | Default, Loading, Error (wrong passphrase), Success |
 | D6 Set Passphrase | Passphrase + confirm + warning copy | Default, Error (mismatch / too short, min 8 chars), Success |
 | D7 Link Jira Issue | Key/URL input → preview → Link | Default, Loading ("Looking up issue…"), Error (not found / no access / offline), Success (preview card) |
-| D9 At-risk list (FR32) | Title + one row per at-risk task: RiskMarker, title, CompanyChip, start time. Rows are buttons. Dialog on ≥768px, bottom Sheet on <768px (ResponsiveDialog) | Default (list). Empty: "Nothing at risk right now." + Close (only reachable when the count drops to 0 while open). Loading: N/A (local, already loaded for S2). Error: N/A (local). Success: choosing a row closes D9 and opens S3 for that task |
+| D9 At-risk list (FR32) | Title + one row per at-risk task: RiskMarker, title, CompanyChip, start time. Rows are buttons whose accessible name is their visible text. Dialog on ≥768px (560px wide, the shared ResponsiveDialog; changed during build from 480px), bottom Sheet on <768px | Default (list). Empty: "Nothing at risk right now." + Close (only reachable when the count drops to 0 while open). Loading: N/A (local, already loaded for S2). Error: N/A (local). Success: choosing a row closes D9 and opens S3 for that task |
 
 ---
 
@@ -378,7 +378,7 @@ App shell
 | DueDateField | [NEW] | S3 | Collapsed "Add due date" → date + optional time + remove, with the passed-date hint and the repeating rule; no shadcn date-and-time field fits |
 | RiskMarker | [NEW] | StickyNote, D9, S5 step 1 | One icon + text pill with two visual strengths; the existing note markers are plain text and have no strong style |
 | DayProgress | [NEW] | S2 day summary row | "4 of 9 done" with a thin progress bar; no existing progress component |
-| AtRiskButton | [NEW] | S2 day summary row | Count button that opens D9 and carries the accessible name "2 tasks at risk"; hidden at 0 |
+| AtRiskButton | [NEW] | S2 day summary row | Count button that opens D9, with the accessible name "At risk · 2, show 2 tasks"; hidden at 0 |
 | IntroCarousel | [NEW] | S1a | Slides with dots, Back/Next, swipe (uses the existing useSwipe hook) and arrow keys; shadcn has no carousel in this project, and adding Embla for 4 static slides isn't worth the dependency |
 | IntroSlide | [NEW] | S1a | Illustration + heading + body for one slide |
 | SetupCompanyList | [NEW] | S1b step 1 | List of companies added so far, each with Remove; Settings' S7a list has rename/recolor/delete menus that are too heavy for setup |
@@ -438,7 +438,7 @@ Target: **WCAG 2.1 AA**.
 - **Markers:** repeats and overlap markers have text labels and are part of the note's `aria-label`, for example "Client call, Acme, 2:00 PM, In Progress, repeats weekly, overlaps with Standup".
 - **Eye-break prompts** contain no flashing or motion, and with `prefers-reduced-motion` they appear with no animation.
 - **RiskMarker (FR31):** icon + text, never color alone. Its text has ≥ 4.5:1 contrast against the marker's own background in light and dark, on all 10 note tints (DAC28). The note's `aria-label` includes it, for example "Client call, Acme, 10:00 AM, To Do, running late". The marker is not a live region: markers changing as time passes are not announced.
-- **Day summary row (FR32):** DayProgress is plain text with a decorative bar (`aria-hidden`). The At-risk button's accessible name is "2 tasks at risk. Show list" ("1 task at risk…"). Count changes are not announced (AC32.4). D9 follows the overlay rules: focus goes to the first row, Esc closes it, and focus returns to the button (or to the editor's trigger once a task is chosen).
+- **Day summary row (FR32):** DayProgress is plain text with a decorative bar (`aria-hidden`). The At-risk button's accessible name starts with its visible text (WCAG 2.5.3): "At risk · 2, show 2 tasks" ("At risk · 1, show 1 task"). *(Changed during build: the first wording failed the label-in-name check.)* Count changes are not announced (AC32.4). D9 follows the overlay rules: focus goes to the first row, Esc closes it, and focus returns to the button (or to the editor's trigger once a task is chosen).
 - **DueDateField (FR30):** "Add due date" is a button. After it's pressed, focus moves to the date input. The passed-date hint is tied to the input with `aria-describedby`. "Remove due date" returns focus to the "Add due date" button.
 - **IntroCarousel (FR33):** a region with `aria-roledescription="carousel"` and label "About Taskuda". Each slide is a group labeled "Slide 2 of 4". Only the current slide is in the accessibility tree. Dots are buttons ("Go to slide 3", `aria-current="step"` on the current one). ←/→ move between slides when focus is inside the carousel. Slides never advance on their own. When the slide changes, focus moves to the new slide's heading. With `prefers-reduced-motion`, slides switch with no sliding animation. Touch targets for dots are 44×44px, even though each dot is drawn smaller.
 - **S1b Setup (FR34):** the step indicator is in the page heading's accessible text ("Step 1 of 3, Companies"). Adding a company announces "Acme added" through the polite live region and keeps focus in the name field. Remove buttons are labeled "Remove Acme"; after removing, focus moves to the next row's Remove, or to the name field when the list is empty.
@@ -477,7 +477,7 @@ Target: **WCAG 2.1 AA**.
 | Risk markers (FR31) | **Overdue** · due Oct 20 (same day: Overdue · due 5:00 PM) · **Overran** · ended 2:30 PM · Running late · 10:00 AM · Due today · Due today 5:00 PM · Stuck · carried over ×4 |
 | Risk markers, spoken (in the note label) | overdue, due October 20 · overran, ended 2:30 PM · running late, was due to start at 10:00 AM · due today at 5:00 PM · stuck, carried over 4 times |
 | Day progress (FR32) | 4 of 9 done · All 9 done · 0 of 3 done |
-| At-risk button | At risk · 2. Accessible name: 2 tasks at risk. Show list |
+| At-risk button | At risk · 2. Accessible name: At risk · 2, show 2 tasks |
 | D9 At-risk list | Title: At risk today (other days: At risk on Wed, Oct 22). Row: (marker) · (title) · (company) · (time). Empty: Nothing at risk right now. — Close |
 | Setup done toast (FR34) | You're all set. Press N or + to add your first task. Touch screens: You're all set. Tap + to add your first task. |
 
@@ -586,7 +586,7 @@ Target: **WCAG 2.1 AA**.
 |---|---|
 | Indicator | Step 1 of 3 · Companies · Step 2 of 3 · Workday · Step 3 of 3 · Backup |
 | Step 1 | **Who do you work for?** — Add each employer or client. Their color tags your tasks. Fields: Company name · Color. Button: Add company. After adding: Acme added (announced). Row action: Remove (Remove Acme). Footer: Continue (once ≥ 1 company) · Skip for now. Error: You already have a company called Acme. Save failed: Couldn't save Acme. Try again. |
-| Step 2 | **Your workday** — Taskuda carries tasks over, keeps your streak and reminds you on these days. Fields: Working days · Remind me to close out at: Off / (time). Hint: Keep at least one working day. Footer: Continue · Skip (keeps Monday–Friday and 5:30 PM) |
+| Step 2 | **Your workday** — Taskuda carries tasks over, keeps your streak and reminds you on these days. Fields: Working days · Close-out reminder (switch) · Remind me to close out at (time). Hint: Keep at least one working day. Footer: Continue · Skip (keeps Monday–Friday and 5:30 PM). Save failed: Couldn’t save your workday. Try again, or skip and change it later in Settings. *(Switch and error copy added during build, matching S7h.)* |
 | Step 3 | **Back up to Google Drive** — Your tasks are saved on this device. Back them up to your own Drive so you never lose them. — Connect Google Drive · Not now. Error: Google sign-in was cancelled. You can connect later in Settings. — Try again · Skip |
 | Step 3, backup found | **Found a backup from Oct 17** — Restore it to pick up where you left off? — Restore · Start fresh |
 

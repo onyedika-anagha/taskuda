@@ -37,7 +37,8 @@ test('F9 tasks with a time become events, and events become tasks (AC8.1, AC8.3)
   await page.goto('/')
   const morning = await blockArea(page, 'Morning')
   await expect(
-    morning.getByRole('article', { name: /^Dentist, 9:30 AM, To Do, from Google Calendar$/ }),
+    // Depending on the time of day the note may also be running late or overran (PRD FR31).
+    morning.getByRole('article', { name: /^Dentist, 9:30 AM, To Do, (.+, )?from Google Calendar$/ }),
   ).toBeVisible()
   await expect(morning.getByText('From Google Calendar')).toBeVisible()
   await addTask(page, 'Untimed', 'Evening')

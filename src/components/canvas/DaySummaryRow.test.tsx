@@ -42,7 +42,7 @@ describe('AtRiskDialog (D9)', () => {
     )
     const dialog = screen.getByRole('dialog', { name: 'At risk today' })
     const row = within(dialog).getByRole('button', {
-      name: 'Client call, running late, was due to start at 10:00 AM, Acme, 10:00 AM',
+      name: /^Client call\s*Running late · 10:00 AM\s*Acme\s*10:00 AM$/,
     })
     expect(within(row).getByText('Running late · 10:00 AM')).toBeInTheDocument()
     row.click()
@@ -87,9 +87,9 @@ describe('Day summary row on Today (PRD FR32)', () => {
     await createTask({ title: 'Send invoice', dayKey: today, block: 'morning', dueDate: yesterday })
     await createTask({ title: 'Fine', dayKey: today, block: 'morning' })
     const { user } = renderWithApp('/')
-    await user.click(await screen.findByRole('button', { name: '1 task at risk. Show list' })) // 1
+    await user.click(await screen.findByRole('button', { name: 'At risk · 1, show 1 task' })) // 1
     const list = await screen.findByRole('dialog', { name: 'At risk today' })
-    await user.click(within(list).getByRole('button', { name: /^Send invoice, overdue/ })) // 2
+    await user.click(within(list).getByRole('button', { name: /^Send invoice\s*Overdue/ })) // 2
     const editor = await screen.findByRole('dialog', { name: 'Edit task' })
     expect(within(editor).getByLabelText('Title')).toHaveValue('Send invoice')
   })

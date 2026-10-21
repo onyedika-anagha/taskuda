@@ -21,7 +21,9 @@ export async function addTask(page: Page, title: string, block: BlockName): Prom
 /** The block region on tablet/desktop, or the selected tab panel on phones. */
 export async function blockArea(page: Page, block: BlockName): Promise<Locator> {
   if (isMobile(page)) {
-    await page.getByRole('tab', { name: new RegExp(`^${block}`) }).click()
+    const tab = page.getByRole('tab', { name: new RegExp(`^${block}`) })
+    // Clicking the open tab again does nothing, and a toast may be fading out over it.
+    if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click()
     return page.getByRole('tabpanel')
   }
   return page.getByRole('region', { name: new RegExp(`^${block}`) })
@@ -50,7 +52,8 @@ async function waitForSettledPage(page: Page): Promise<void> {
         .getAnimations()
         .every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity) &&
       [...document.querySelectorAll('[data-sonner-toast]')].every(
-        (toast) => toast.getAttribute('data-mounted') === 'true' && toast.getAttribute('data-removed') !== 'true',
+        (toast) =>
+          toast.getAttribute('data-mounted') === 'true' && toast.getAttribute('data-removed') !== 'true',
       ),
   )
 }
@@ -67,14 +70,20 @@ const WCAG_21_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']
  */
 export async function expectNoA11yViolations(page: Page): Promise<void> {
   await waitForSettledPage(page)
-  const results = await new AxeBuilder({ page }).withTags(WCAG_21_AA).exclude('[data-sonner-toaster]').analyze()
+  const results = await new AxeBuilder({ page })
+    .withTags(WCAG_21_AA)
+    .exclude('[data-sonner-toaster]')
+    .analyze()
   expect(violationList(results)).toEqual([])
 }
 
 /** Scans only the toasts showing now, right after they've settled. */
 export async function expectNoToastA11yViolations(page: Page): Promise<void> {
   await waitForSettledPage(page)
-  const results = await new AxeBuilder({ page }).withTags(WCAG_21_AA).include('[data-sonner-toaster]').analyze()
+  const results = await new AxeBuilder({ page })
+    .withTags(WCAG_21_AA)
+    .include('[data-sonner-toaster]')
+    .analyze()
   expect(violationList(results)).toEqual([])
 }
 

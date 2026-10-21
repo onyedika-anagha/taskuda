@@ -161,13 +161,13 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 5.6 Add "Show intro again" to `AboutSection`
   - [x] 5.7 Component tests for `IntroCarousel` (keyboard, dots, Skip, focus) and a test that replay changes no data
 
-- [ ] 6.0 Verification and docs
-  - [ ] 6.1 `e2e/risk.spec.ts`: add a due date (DAC22), markers appear and change with a mocked clock (DAC23), open an at-risk task in 2 interactions (DAC25)
-  - [ ] 6.2 `e2e/welcome.spec.ts`: skip everything to Today in ≤ 5 interactions (DAC26), add 3 companies (DAC27), reload mid-setup resumes, "I already use Taskuda" reaches Backup
-  - [ ] 6.3 `e2e/backup.spec.ts`: export and import a version 3 file; a version 2 file still imports
-  - [ ] 6.4 `e2e/a11y.spec.ts`: axe and the 320/768/1280 width checks for S1a, each S1b step and D9 (DAC29)
-  - [ ] 6.5 Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` and `npm run e2e`; fix anything that fails
-  - [ ] 6.6 Do the User-Relevance Review (workspace rule) on the notes, D9, setup and the M6 tile: no raw IDs, enum values or ISO dates shown
-  - [ ] 6.7 Update `docs/engineering/taskuda-impl-notes.md`: the decisions from the design spec notes (due-date storage, where the risk function lives, setup resume, the M6 timestamp), the database v5 / backup v3 migration and rollback, and a test map for AC30–AC34 and DAC22–DAC29
-  - [ ] 6.8 Update `README.md` (features) and `CHANGELOG.md`
-  - [ ] 6.9 Self-review the full diff against the Definition of Done checklist, item by item
+- [x] 6.0 Verification and docs
+  - [x] 6.1 `e2e/risk.spec.ts`: add a due date (DAC22), markers appear and change with a mocked clock (DAC23), open an at-risk task in 2 interactions (DAC25)
+  - [x] 6.2 `e2e/welcome.spec.ts`: skip everything to Today in ≤ 5 interactions (DAC26), add 3 companies (DAC27), reload mid-setup resumes, "I already use Taskuda" reaches Backup
+  - [x] 6.3 `e2e/backup.spec.ts`: export and import a version 3 file; a version 2 file still imports
+  - [x] 6.4 `e2e/a11y.spec.ts`: axe and the 320/768/1280 width checks for S1a, each S1b step and D9 (DAC29)
+  - [x] 6.5 Run `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` and `npm run e2e`; fix anything that fails
+  - [x] 6.6 Do the User-Relevance Review (workspace rule) on the notes, D9, setup and the M6 tile: no raw IDs, enum values or ISO dates shown
+  - [x] 6.7 Update `docs/engineering/taskuda-impl-notes.md`: the decisions from the design spec notes (due-date storage, where the risk function lives, setup resume, the M6 timestamp), the database v5 / backup v3 migration and rollback, and a test map for AC30–AC34 and DAC22–DAC29
+  - [x] 6.8 Update `README.md` (features) and `CHANGELOG.md`
+  - [x] 6.9 Self-review the full diff against the Definition of Done checklist, item by item

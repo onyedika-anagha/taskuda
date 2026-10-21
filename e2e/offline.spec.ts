@@ -36,3 +36,17 @@ test('AC6.2 a change survives a close right after saving', async ({ page, contex
   await blockArea(reopened, 'Evening')
   await expect(reopened.getByRole('article', { name: /^Saved fast/ })).toBeVisible()
 })
+
+test('AC33.5 the intro replay works offline after the first load', async ({ page, context }) => {
+  await page.goto('/')
+  await page.evaluate(() => navigator.serviceWorker.ready)
+  await page.reload()
+  await expect(page.getByRole('heading', { level: 1, name: /, today$/ })).toBeVisible()
+
+  await context.setOffline(true)
+  await page.goto('/intro')
+  await expect(page.getByRole('heading', { name: 'One board for every job.' })).toBeVisible()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await expect(page.getByRole('heading', { name: 'Plan by time of day.' })).toBeVisible()
+  await context.setOffline(false)
+})

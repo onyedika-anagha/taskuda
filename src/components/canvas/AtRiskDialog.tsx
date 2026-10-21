@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import type { Company } from '@/types/company'
 import type { AtRiskTask } from '@/types/risk'
 import type { Task } from '@/types/task'
-import { riskLabel, riskSpokenLabel } from '@/utils/riskLabels'
+import { riskLabel } from '@/utils/riskLabels'
 import { formatDayShort, formatTime } from '@/utils/taskPresentation'
 
 interface AtRiskDialogProps {
@@ -18,7 +18,10 @@ interface AtRiskDialogProps {
   onChoose: (task: Task) => void
 }
 
-/** D9 At-risk list (PRD AC32.3, design F19): choosing a task opens it in the editor. */
+/**
+ * D9 At-risk list (PRD AC32.3, design F19): choosing a task opens it in the editor. Each row's name
+ * is its visible text (title, marker, company, time), so it passes label-in-name (WCAG 2.5.3).
+ */
 export function AtRiskDialog({
   open,
   onOpenChange,
@@ -43,15 +46,10 @@ export function AtRiskDialog({
         <ul className="grid gap-2">
           {atRisk.map(({ task, kind }) => {
             const company = task.companyId ? companiesById.get(task.companyId) : undefined
-            const spoken = [task.title, riskSpokenLabel(kind, task, today), company?.name]
-              .concat(task.startTime ? formatTime(task.startTime) : [])
-              .filter(Boolean)
-              .join(', ')
             return (
               <li key={task.id}>
                 <button
                   type="button"
-                  aria-label={spoken}
                   onClick={() => onChoose(task)}
                   className="grid min-h-11 w-full gap-1.5 rounded-lg border bg-card p-3 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
                 >

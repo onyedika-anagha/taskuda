@@ -2,9 +2,9 @@
 
 **Track:** A
 **Upstream:** [PRD](../pm/taskuda-prd.md) (DoR passed, waiver W1) · [Design spec](../design/taskuda-design-spec.md) (DoR passed)
-**Branch:** `feature/taskuda-v1`
+**Branch:** `feature/taskuda-v1`; FR30–FR34 on `feature/risk-and-onboarding`
 **Status:** Definition of Done — passed with waivers E1–E4 (Section 7)
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-21
 
 This document is written for the Security Engineer stage: every endpoint, data flow, credential and dependency is listed here so the review doesn't need archaeology.
 
@@ -33,7 +33,7 @@ Layers (workspace code-separation rule): `pages/` compose components; `component
 
 | Table | Key | Backed up | Contents |
 |---|---|---|---|
-| `tasks` | `id` (`[seriesId+dayKey]`) | Yes | Task (title, notes, companyId, dayKey, block, order, startTime, duration, status, carryover links, source, jiraIssue, seriesId) |
+| `tasks` | `id` (`[seriesId+dayKey]`) | Yes | Task (title, notes, companyId, dayKey, block, order, startTime, duration, status, carryover links, source, jiraIssue, seriesId, dueDate, dueTime) |
 | `companies` | `id` | Yes | name, colorId |
 | `closeouts` | `dayKey` | Yes | started/finished/report-copied times, rating, reflection, outcomes |
 | `activityLog` | `++id` | Yes | created / updated / status / moved / carried / deleted events (metric M1) |
@@ -45,9 +45,11 @@ Layers (workspace code-separation rule): `pages/` compose components; `component
 | `eyeBreakLog` | `++id` (`dayKey`) | **No** (this device only) | eye-break prompt outcomes: done / snoozed / dismissed / missed (metric M4) |
 | `screenTime` | `dayKey` | **No** (this device only) | ms Taskuda was visible that day (metric M5, time in Taskuda) |
 
-Schema versions: **v1** (first six tables), **v2** (adds `vault`, `deviceKeys`), **v3** (adds `eyeBreakLog`, `screenTime`) and **v4** (adds `recurringSeries`, the `[seriesId+dayKey]` index, and `seriesId: null` on every existing task). All are additive.
+Schema versions: **v1** (first six tables), **v2** (adds `vault`, `deviceKeys`), **v3** (adds `eyeBreakLog`, `screenTime`) **v4** (adds `recurringSeries`, the `[seriesId+dayKey]` index, and `seriesId: null` on every existing task) and **v5** (FR30: `dueDate: null, dueTime: null` on every existing task; no new index). All are additive.
 
-**Migration reversibility:** IndexedDB/Dexie can't be downgraded in place; a lower version number throws `VersionError`. Rollback path: export a backup file (Settings → Backup), deploy the older build, clear site data, then import. The backup format is versioned and validated with Zod. Version 2 (written since FR20) adds `recurringSeries`. Version 1 files still restore and import: their tasks get `seriesId: null` and there are no series (tested, RK16).
+**Onboarding state (FR33–FR34)** is not in IndexedDB. It's three per-device `localStorage` keys, never backed up: `taskuda.welcomeDone` (setup finished; the key predates the intro), `taskuda.setupStep` (the step setup was left on) and `taskuda.introSeen`.
+
+**Migration reversibility:** IndexedDB/Dexie can't be downgraded in place; a lower version number throws `VersionError`. Rollback path: export a backup file (Settings → Backup), deploy the older build, clear site data, then import. The backup format is versioned and validated with Zod. Version 2 (written since FR20) adds `recurringSeries`. Version 1 files still restore and import: their tasks get `seriesId: null` and there are no series (tested, RK16). Version 3 (FR30) adds `dueDate`/`dueTime` on tasks; version 1 and 2 files restore with both `null` (tested, RK20).
 
 ### 1.3 Endpoints and external calls (every network path)
 
@@ -97,6 +99,10 @@ Every PRD requirement maps to the screens in the design spec's traceability map.
 | Report | FR14 | `utils/reportBuilder.ts`, `utils/reportFormatters.ts`, `components/report/*` |
 | Jira | FR15, NFR6 | `server/jiraProxy.ts`, `api/jira.ts`, `services/jira/*` |
 | Stats | FR17 | `utils/metrics.ts`, `hooks/useMetrics.ts` |
+| Due dates | FR30 | `utils/dueDates.ts`, `components/task/DueDateField.tsx`, `hooks/useDueDateField.ts`, `schemas/taskForm.ts`, `services/db/taskRepository.ts` |
+| At-risk markers | FR31 | `utils/taskRisk.ts` (rules), `utils/riskLabels.ts`, `utils/riskMarkerColors.ts`, `hooks/useRiskClock.ts`, `hooks/useTaskRisks.ts`, `components/task/RiskMarker.tsx` |
+| Day progress, at-risk list, M6 | FR32, AC17.3 | `components/canvas/DaySummaryRow.tsx`, `DayProgress.tsx`, `AtRiskButton.tsx`, `AtRiskDialog.tsx`; `deadlinesMet` in `utils/metrics.ts` |
+| Intro and setup | FR33, FR34 | `services/onboarding/onboardingProgress.ts`, `hooks/useFirstRun.ts`, `hooks/useWelcomeFlow.ts`, `hooks/useIntroCarousel.ts`, `hooks/useSetupCompanies.ts`, `hooks/useSetupWorkday.ts`, `components/welcome/*`, `pages/WelcomePage.tsx`, `pages/IntroPage.tsx` |
 
 ### 1.6 Decisions made during build
 
@@ -177,12 +183,22 @@ These are recorded in the design spec where they change it.
   - First load is about 270 KB gzip of JavaScript; the app's own chunk is 46 KB.
 - **Focus outline:** a solid 2px outline is used everywhere, with contrast between 6.9:1 and 9.4:1.
 
+**FR30–FR34 (2026-10-21).** The design spec's open engineering questions, decided:
+- **Due date storage:** a local `dueDate` (`yyyy-MM-dd`) and an optional `dueTime` (`HH:mm`), matching `dayKey`/`startTime`. With no time, the due moment is the end of that day. The repository rejects a time without a date.
+- **Risk rules:** one pure function, `taskRisk(task, now)` in `utils/taskRisk.ts`, used by the canvas, D9 and the closeout. Start and end times are on the task's own day, the same as reminders, so a 01:00 Evening task is 01:00 on its `dayKey`. `useRiskClock` re-renders every minute and on `visibilitychange`; one `useTaskRisks` call in `TodayPage` feeds both the notes and the summary row, so they never disagree.
+- **Setup resume (AC34.5):** `useFirstRun` used to treat "has a company" as finished. It now checks `taskuda.setupStep` first. `useWelcomeFlow` saves the step in an effect from the first setup step on, so a company added before a closed tab can't skip the rest. Devices with data and no saved step still count as finished (PRD Out of Scope 29).
+- **M6 timestamp:** the latest `task_status_changed` to Done in the activity log (falling back to `updatedAt`), compared with the due moment. Only the latest copy of a carried task counts, so carrying a task over doesn't count as two misses.
+- **Repeating tasks and due dates:** turning Repeat on hides the due date and `formToPatch` drops it, rather than clearing it in an effect. Series never store due fields: `changeSeriesFrom` strips them from the patch.
+- **Marker colors:** the marker has its own hex palette (`riskMarkerColors.ts`) on a near-opaque background, so DAC28 is a plain contrast test rather than 10 tints × 2 themes × 2 styles.
+- **D9** reuses `ResponsiveDialog`, so it is 560px wide on tablet and up, not the 480px in the design spec. Not worth a size option on the shared component.
+- **Accessible names (WCAG 2.5.3):** the e2e axe run flagged the At-risk button and the D9 rows, whose spoken names didn't contain their visible text. The button is now named "At risk · 2, show 2 tasks", and each D9 row's name is its visible text. Design spec updated.
+
 ---
 
 ## 2. Test Plan & Coverage
 
-- **Totals:** 52 unit/component test files and 13 Playwright specs.
-  - Final run (2026-10-20): 383 unit/component tests and 92 Playwright tests passing across desktop, tablet and phone sizes, with 4 skipped as screen-size specific.
+- **Totals:** 82 unit/component test files and 16 Playwright specs.
+  - Final run (2026-10-21, after FR30–FR34): 775 unit/component tests and 179 Playwright tests passing across desktop, tablet and phone sizes, with 4 skipped as screen-size specific.
 - **External services** are replaced by faithful fakes:
   - Google Identity Services, Drive and Calendar, including sync tokens and 410 handling (`src/test/fakeGoogle.ts`, `fakeDrive.ts`, `fakeCalendar.ts`, `e2e/fakeGoogle.ts`)
   - AI providers (`mockFetch`)
@@ -323,6 +339,34 @@ Paths are under `src/` unless they start with `e2e/` or `server/`.
 | DAC19 | `components/canvas/CloseoutNudgeBanner.test.tsx`, `e2e/voice.spec.ts` |
 | DAC20 | `components/canvas/BlockTimeLeft.test.tsx` |
 | DAC21 | `components/settings/StatsSection.test.tsx` |
+| AC17.3 (M6) | `utils/metrics.test.ts`, `components/settings/StatsSection.test.tsx` |
+| AC18.2 (due date) | `services/db/taskRepository.test.ts` |
+| AC30.1 | `services/db/taskRepository.test.ts`, `utils/dueDates.test.ts`, `components/task/TaskEditorForm.test.tsx` |
+| AC30.2 | `utils/dueDates.test.ts`, `components/task/StickyNote.test.tsx`, `e2e/risk.spec.ts` |
+| AC30.3 | `components/task/TaskEditorForm.test.tsx`, `e2e/a11y.spec.ts` |
+| AC30.4 | `services/db/taskRepository.test.ts`, `utils/taskFormMapping.test.ts`, `components/task/TaskEditorForm.test.tsx` |
+| AC30.5 | `services/db/taskRepository.test.ts` (carryover, undo), `utils/taskFormMapping.test.ts`, `components/task/TaskEditorForm.test.tsx` |
+| AC30.6 | `services/backup/backupSnapshot.test.ts` (v2 and v3), `components/settings/BackupSection.test.tsx`, `e2e/backup.spec.ts` |
+| AC31.1–AC31.3 | `utils/taskRisk.test.ts` |
+| AC31.4 | `components/task/StickyNote.test.tsx`, `utils/riskLabels.test.ts` |
+| AC31.5 | `components/closeout/CloseoutDialog.test.tsx` |
+| AC31.6 | `hooks/useTaskRisks.test.tsx`, `components/canvas/RiskMarkers.test.tsx`, `e2e/risk.spec.ts` |
+| AC31.7 | `components/canvas/RiskMarkers.test.tsx` |
+| AC32.1, AC32.2 | `components/canvas/DaySummaryRow.test.tsx`, `e2e/risk.spec.ts` |
+| AC32.3 | `utils/taskRisk.test.ts` (`atRiskTasks`), `components/canvas/DaySummaryRow.test.tsx` |
+| AC32.4 | `components/canvas/DaySummaryRow.test.tsx`, `e2e/a11y.spec.ts` |
+| AC33.1, AC33.3, AC33.4 | `pages/WelcomePage.test.tsx`, `components/welcome/IntroCarousel.test.tsx`, `e2e/welcome.spec.ts` |
+| AC33.2 | `components/welcome/IntroCarousel.test.tsx` |
+| AC33.5 | `e2e/offline.spec.ts` |
+| AC34.1–AC34.6 | `pages/WelcomePage.test.tsx`, `services/onboarding/onboardingProgress.test.ts`, `utils/companyPalette.test.ts`, `e2e/welcome.spec.ts` |
+| DAC22 | `components/task/TaskEditorForm.test.tsx`, `e2e/risk.spec.ts` |
+| DAC23 | `hooks/useTaskRisks.test.tsx`, `components/canvas/RiskMarkers.test.tsx`, `e2e/risk.spec.ts` |
+| DAC24 | `utils/taskRisk.test.ts` (every combination) |
+| DAC25 | `components/canvas/DaySummaryRow.test.tsx`, `e2e/risk.spec.ts` |
+| DAC26 | `components/welcome/IntroCarousel.test.tsx`, `e2e/welcome.spec.ts` |
+| DAC27 | `pages/WelcomePage.test.tsx`, `e2e/welcome.spec.ts` |
+| DAC28 | `utils/riskMarkerColors.test.ts` |
+| DAC29 | `e2e/a11y.spec.ts` (both themes, three sizes), `e2e/risk.spec.ts` |
 
 ---
 
@@ -344,6 +388,12 @@ Paths are under `src/` unless they start with `e2e/` or `server/`.
   - Toasts covered the phone action bar.
   - Several contrast failures: muted text, the red Delete text in both themes, and the focus ring.
   - A form inside a dialog submitted the task editor through the React portal.
+- **Bugs caught and fixed during FR30–FR34:**
+  - Editing a repeating task "and future" would have copied `dueDate`/`dueTime: null` into the series record.
+  - A company added in setup before the step was saved would have skipped the rest of setup on the next open.
+  - The At-risk button and D9 rows failed WCAG 2.5.3 (label in name), caught by axe in Playwright.
+  - Tests that depended on the time of day: after 5:30 PM the closeout nudge adds a second "Close out day" button (`CloseoutDialog.test.tsx`, `e2e/secrets.spec.ts`), and after 10 AM the calendar spec's 9:30 event is now correctly marked Overran (`e2e/calendar.spec.ts`).
+  - On a 320px phone the new summary row moves the block tabs under the toast area. With the page clock frozen, a dismissed toast stayed over the open tab, so `blockArea` in `e2e/helpers.ts` no longer clicks a tab that's already selected.
 
 ---
 
@@ -370,10 +420,13 @@ The diff was re-read stage by stage. Checks against the Definition of Done (Sect
 - PRD: risk RK11 added (Atlassian guidance on API tokens).
 - Task list: all tasks checked.
 - FR18–FR29 (2026-10-21): README (Workday settings, repeating tasks, what stays on this device), CHANGELOG 0.2.0, data model and backup format above, and the test mapping in Section 2.1.
+- FR30–FR34 (2026-10-21): README (due dates, at-risk markers, first run), CHANGELOG (Unreleased), data model, onboarding keys and backup format above, decisions in Section 1.6, test mapping in Section 2.1. Design spec: the at-risk button's accessible name, D9 width and the workday save-error copy are marked "changed during build".
 
 ---
 
 ## 6. Definition of Done
+
+Re-checked on 2026-10-21 after FR30–FR34: each new criterion maps to a test in Section 2.1. Lint, typecheck, build, 775 unit/component tests and 179 Playwright tests pass. A secrets search over the diff found nothing. No new endpoints or network calls: due dates, risk and onboarding are all local. Schema v5 and backup format v3 are additive (Section 1.2). No new `TODO`/`FIXME`, and no dependencies added or changed.
 
 Re-checked on 2026-10-21 after FR18–FR29. Every box still holds: each new criterion maps to a test in Section 2.1, and the full suite, lint, typecheck and build pass. A secrets search over the new files found nothing, and there are no new endpoints (all new data is local). Schema v3 and v4 are additive (Section 1.2), with no new `TODO`/`FIXME`.
 
