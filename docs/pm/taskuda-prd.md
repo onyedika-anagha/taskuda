@@ -3,13 +3,14 @@
 **Track:** A (new project, multiple third-party integrations)
 **Status:** Definition of Ready — passed with waiver W1 (see Section 9)
 **Owner:** umpiremed@gmail.com
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-21
 
 ### Revision history
 | Date | Change |
 |---|---|
 | 2026-10-18 | First version. Definition of Ready passed. |
 | 2026-10-20 | Added FR18–FR29, M4–M5 and RK11–RK16. These were adopted from the external "My Work Day" PRD after checking them against the built v1, and are in v1 launch scope as Should. Changed AC11.1 so carryover goes to the next **working** day. Ideas that conflict with Taskuda's scope are listed in Out of Scope (items 13–22). |
+| 2026-10-21 | Added FR30–FR34 (due dates, at-risk markers, day progress and the at-risk list, intro slides, a fuller first-run setup), M6, RK18–RK22 and waiver W2, all in v1 as Should. Extended AC17 and AC18.2. Renumbered the second RK11 (Jira API tokens) to RK17. Out of Scope items 23–29 added. Item 20 (over-filled blocks) is unchanged: the new markers are about single tasks, not how full a block is. |
 
 ---
 
@@ -25,6 +26,8 @@ The **"Parallel Professional"**: one person working for several employers or cli
 - Existing task apps are either too heavy (team project tools) or don't understand "one person, many employers" (personal to-do apps).
 - Repeating work (a daily standup note, a weekly client update, a monthly report) has to be typed in again every time, or it gets forgotten.
 - Long, unbroken screen sessions strain the eyes. Nothing reminds the person to look away, and they have no sense of how long they've spent in the planner itself.
+- Some work has a deadline, and some planned work quietly slips (a 10:00 task not started at 10:30, a task carried over for the fourth time). Today the canvas looks the same either way, so the person only notices once it's too late.
+- A new user lands on a form with no explanation of how Taskuda works, can add only one company, and has to find the working-day settings on their own.
 
 ### Why now
 The owner is currently juggling several roles and feels this pain every day. Taskuda is a free, non-commercial personal tool. It costs nothing to run because each user brings their own storage (Google Drive) and their own AI key.
@@ -43,6 +46,7 @@ If Taskuda works, the owner will use it every working day for 4 straight weeks, 
 | M3 | **EOD reporting time**: time from "Start closeout" to "Report copied" | Waived (see Waiver W1) | **Median ≤ 5 minutes** over the 4-week window | Two timestamps saved locally for each closeout. |
 | M4 | **Eye-break follow-through**: share of eye-break prompts the user confirms with "Done" | 0% (no eye-break prompts exist today) | **≥ 70%** over the 4-week window, while eye breaks are on | Local log of each prompt shown and how it ended (Done, snoozed, dismissed, or missed). |
 | M5 | **In-app time budget**: share of working days where time spent in Taskuda stays within the user's daily budget | Not measured today (no in-app time is recorded) | **≥ 80% of working days** over the 4-week window, while a budget is set | Local daily total of the time Taskuda is visible on screen on this device. |
+| M6 | **Deadlines met**: share of tasks with a due date that are marked Done by their due date and time | Not measured today (tasks have no due dates) | **≥ 85%** over the 4-week window, counting tasks whose due moment falls in the window | Due date and time on the task, plus the Done timestamp in the local activity log. |
 
 **Measurement constraint:** there is no analytics server. All metrics are calculated on the user's device from the local activity log. The app shows them on a simple stats view in Settings, so the owner can read them without any external tool.
 
@@ -77,6 +81,11 @@ If Taskuda works, the owner will use it every working day for 4 straight weeks, 
 24. **Time left** in the current time block
 25. **Eye-break reminders** at a set interval during set hours
 26. **In-app time budget** with a gentle warning (no lock)
+27. Optional **due date** (with optional time) on a task
+28. **At-risk markers** on notes: Overdue, Overran, Running late, Due today, Stuck
+29. **Day progress** ("4 of 9 done") and an **at-risk list** for the day being viewed
+30. **Intro slides** on first run, which can be skipped and shown again from Settings
+31. **First-run setup**: several companies, working days and close-out reminder, then Drive backup; every step can be skipped
 
 ### Out of Scope (v1)
 1. Asana and Trello sync (v2)
@@ -101,6 +110,13 @@ If Taskuda works, the owner will use it every working day for 4 straight weeks, 
 20. A warning for over-filled blocks. With blocks this long, it would almost never trigger.
 21. Eye-break or reminder alerts while the browser is closed or the device is asleep (same limit as item 10).
 22. Teams, shared workspaces, time tracking, invoicing and a template marketplace, as proposed in the My Work Day PRD (see items 6–8).
+23. Due dates on repeating tasks. The due date field is hidden while Repeat is on.
+24. Sending due dates to Google Calendar or Jira, or reading due dates from Jira.
+25. Sound, voice, toast or notification alerts when a task becomes at risk. FR31 and FR32 only show markers and a list (RK13).
+26. Showing at-risk tasks from other days on the day being viewed. The at-risk list covers one day.
+27. Due dates or at-risk states in EOD reports. Reports go to employers; risk is the user's own planning signal.
+28. Connecting Calendar, Jira, AI or voice during first-run setup. These stay in Settings.
+29. Showing the intro or setup on a device that already has tasks or companies (the current first-run rule stays).
 
 ---
 
@@ -139,6 +155,11 @@ If Taskuda works, the owner will use it every working day for 4 straight weeks, 
 | FR27 | As a user, I want to see how much time is left in the current time block, so I can pace myself without working it out. |
 | FR28 | As a user, I want a reminder to rest my eyes at a set interval during my working hours, so long screen sessions strain my eyes less. |
 | FR29 | As a user, I want to set a daily budget for time spent in Taskuda and get a gentle warning when I go over, so I notice when planning itself is eating my day. |
+| FR30 | As a user, I want to give a task an optional due date and time, so work with a deadline is visibly different from work without one. |
+| FR31 | As a user, I want a note to show when its task is overdue, overran its time, is running late, is due today, or keeps getting carried over, so I notice slipping work while I can still act. |
+| FR32 | As a user, I want to see how many of the day's tasks are done and open a list of the tasks at risk, so I can check the state of my day in one glance. |
+| FR33 | As a new user, I want a short intro that explains how Taskuda works, which I can skip and see again later, so I understand the app before I set it up. |
+| FR34 | As a new user, I want first-run setup to let me add all my companies and set my working days and close-out time, with every step skippable, so Taskuda fits my week from the first day. |
 
 ### 4.2 Non-functional requirements
 
@@ -171,6 +192,7 @@ If Taskuda works, the owner will use it every working day for 4 straight weeks, 
 - **Voice:** Web Speech API, so quality and availability depend on the browser.
 - **Cost:** $0 extra. No paid services.
 - **Data format changes (FR18–FR29):** recurring rules, eye-break events and daily in-app time are new kinds of local data. The local database and the backup file format both get a new version. Older backups and export files (format version 1) must still restore. Whether eye-break and in-app time data are backed up or kept on one device only is an engineering decision; record it in the implementation notes.
+- **Data format changes (FR30, FR34):** the due date is a new task field, so the local database and the backup file format get a new version. The app is still in development, so this is low risk, but older backups and export files (format versions 1 and 2) must still restore, with no due date on their tasks. At-risk states are worked out from the current time and are never saved.
 - **Alerts only run while Taskuda is open:** eye breaks, the closeout nudge and snoozed reminders use the same engine as FR9, so they can't fire while the browser is closed or the device is asleep (Out of Scope item 21).
 
 ### Assumptions
@@ -208,7 +230,12 @@ If Taskuda works, the owner will use it every working day for 4 straight weeks, 
 | RK14 | **Eye-break timing is unreliable** when the tab is in the background or the device sleeps | Breaks are late or missed; M4 is understated | Never promise alerts when the browser is closed. A prompt missed in the background shows once when the user comes back, and is logged as missed, not as a failure to follow through (AC28.5). | Owner |
 | RK15 | **The in-app time number is mistaken for total screen time** | The user trusts a number that leaves out every other app | The copy always says "time in Taskuda on this device" (AC29.5). Device-wide screen time is out of scope (item 18). | Owner |
 | RK16 | **Database or backup migration breaks existing data** when the new data types are added | Data loss for the owner, who is already using the app | Additive changes only. Restoring and importing a format-1 backup is tested (AC20.7). Export a backup before deploying. | Owner |
-| RK11 | **Jira API tokens (found during build, 2026-10-19):** Atlassian's docs say apps that collect API tokens don't meet its security requirements and recommend OAuth 2.0 (3LO) or Forge. Acceptable for personal use with the user's own token, not for a public release. | Blocks a public launch of the Jira feature | Keep the token encrypted (NFR5), the proxy locked down (NFR6). Before going public, move Jira to OAuth 2.0 (3LO) or flag the Jira feature off. | Owner (Security stage) |
+| RK17 | **Jira API tokens (found during build, 2026-10-19; was numbered RK11 by mistake):** Atlassian's docs say apps that collect API tokens don't meet its security requirements and recommend OAuth 2.0 (3LO) or Forge. Acceptable for personal use with the user's own token, not for a public release. | Blocks a public launch of the Jira feature | Keep the token encrypted (NFR5), the proxy locked down (NFR6). Before going public, move Jira to OAuth 2.0 (3LO) or flag the Jira feature off. | Owner (Security stage) |
+| RK18 | **Warning overload:** so many notes show risk markers that the user stops reading them | FR31 stops helping, and the canvas feels stressful | One marker per note, in a fixed priority order (AC31.2). A 10-minute grace before "Running late". Done tasks never show one. No sounds or toasts (Out of Scope item 25). | Owner |
+| RK19 | **Time-based states are wrong** around midnight, the Evening block (which runs to 04:59), or after the device wakes from sleep | Wrong or stale warnings, and the user stops trusting them | States use the same local day keys as the rest of the app and are recomputed every minute and when the tab becomes visible again (AC31.6). Unit tests with fixed clocks at the boundaries. | Owner |
+| RK20 | **The due-date data change breaks older backups** | Restore fails | Additive change only. Restoring and importing format 1 and 2 files is tested (AC30.6). | Owner |
+| RK21 | **Onboarding feels long**, so new users skip it and miss the setup | Companies and working days left unset | At most 4 intro slides and 3 setup steps. Skip on every slide and step. Sensible defaults when skipped (AC34.3). | Owner |
+| RK22 | **Restore replaces what was just set up:** a returning user adds companies, then restores a backup | The companies just entered are lost | The last intro slide offers "I already use Taskuda", which goes straight to the backup step. The D4 restore confirmation still applies. | Owner |
 
 ---
 
@@ -219,7 +246,7 @@ All Must and Should items are **in v1 launch scope**. "Should" means it is built
 | Priority | Requirements |
 |----------|--------------|
 | **Must** | FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR10, FR11, FR12, FR13, FR14, FR16, FR17, NFR1–NFR10 |
-| **Should** | FR8 (Calendar sync), FR9 (voice engine), FR15 (Jira), FR18–FR29 (added 2026-10-20; built in the RK11 order) |
+| **Should** | FR8 (Calendar sync), FR9 (voice engine), FR15 (Jira), FR18–FR29 (added 2026-10-20; built in the RK11 order), FR30–FR34 (added 2026-10-21; built in this order: FR30, FR31, FR32, FR34, FR33) |
 | **Could** | CR1: "Bring your own Google client ID" setting. CR2: manual export/import of all data as a file. |
 | **Won't (v1)** | Everything in Section 3 "Out of Scope" |
 
@@ -318,10 +345,11 @@ Each criterion must be verifiable by someone other than the owner.
 **FR17 — Local metrics view**
 - AC17.1 Settings shows M1 (silently-dropped count), M2 (current streak of consecutive closeouts on working days), and M3 (median minutes from closeout start to report copy), calculated from local logs.
 - AC17.2 Settings shows M4 (share of eye-break prompts marked Done in the window) when eye breaks are on, and M5 (share of working days within budget in the window) when a budget is set. When the feature is off, its tile says it is off instead of showing 0%.
+- AC17.3 Settings shows M6 (share of tasks with a due date in the window that were marked Done by their due moment). With no such tasks, the tile says "No due dates yet" instead of showing 0%.
 
 **FR18 — Undo delete**
 - AC18.1 After a task is deleted (D1 confirmed), a toast offers **Undo** for 10 seconds.
-- AC18.2 Undo brings the task back with the same title, notes, company, day, block, position, start time, duration, status, carryover count and Jira link.
+- AC18.2 Undo brings the task back with the same title, notes, company, day, block, position, start time, duration, status, carryover count, Jira link and due date *(due date added 2026-10-21)*.
 - AC18.3 The activity log records the deletion and then the restore, so a restored task is not counted as deleted for M1.
 - AC18.4 If the task had a calendar event, the event is deleted as in AC8.4, and an undone task gets an event again at the next sync, with no duplicate.
 - AC18.5 The Undo button can be reached with the keyboard and is announced to screen readers.
@@ -394,6 +422,49 @@ Each criterion must be verifiable by someone other than the owner.
 - AC29.4 Stats shows today's time in Taskuda and the 7-day average.
 - AC29.5 Every place that shows this number says it is time in Taskuda on this device, not total screen time.
 
+**FR30 — Due dates**
+- AC30.1 The task editor has an optional due date. It is hidden behind an "Add due date" control until used. A due time is optional too. With no time, the task is due at the end of that day (23:59).
+- AC30.2 A task with a due date shows it on the note in short form: "Due today", "Due tomorrow", "Due Fri, Oct 24", with the time when one is set ("Due today 5:00 PM").
+- AC30.3 A due date that has already passed can still be saved. The editor shows that it has passed, but saving is not blocked.
+- AC30.4 The due date can be removed, and removing it clears both the date and the time.
+- AC30.5 Carryover (AC11.1) and Undo (AC18.2) keep the due date. Repeating tasks can't have one (Out of Scope item 23).
+- AC30.6 Due dates are included in the Drive backup and export files. Backups and files in format versions 1 and 2 still restore and import, and their tasks have no due date.
+
+**FR31 — At-risk markers**
+- AC31.1 A task that isn't Done is at risk in these cases:
+  - **Overdue:** its due moment has passed.
+  - **Overran:** it is on today, has a start time, and start time + duration has passed (no duration counts as 30 minutes, as in AC25.1).
+  - **Running late:** it is on today, has a start time, is still To Do, and the start time was 10 minutes or more ago.
+  - **Due today:** its due moment is later today.
+  - **Stuck:** it has been carried over 3 times or more (the same rule as AC26.3).
+- AC31.2 A note shows at most one at-risk marker, picked in this order: Overdue, Overran, Running late, Due today, Stuck. When a note shows Overdue or Due today, that replaces its plain due-date text (AC30.2).
+- AC31.3 Done tasks and notes on past days never show a marker.
+- AC31.4 The marker uses an icon and text, not color alone, and is part of the note's screen-reader label.
+- AC31.5 In closeout step 1, each unfinished task shows its marker next to its title.
+- AC31.6 Markers update within 1 minute as time passes, and right away when the tab becomes visible again or the task changes, without a reload.
+- AC31.7 Becoming at risk never plays a sound, speaks, shows a toast or sends a notification (Out of Scope item 25).
+
+**FR32 — Day progress and the at-risk list**
+- AC32.1 When the day being viewed has at least one task, its header shows progress, for example "4 of 9 done". It updates as soon as a status changes.
+- AC32.2 When at least one task on the day being viewed is at risk (AC31.1), the header shows an "At risk · 2" button. With none, the button isn't shown.
+- AC32.3 The button opens a list of those tasks with their marker, company and time, sorted by the AC31.2 order, then by start time. Choosing a task opens it in the task editor.
+- AC32.4 The list and the progress text can be used with the keyboard and a screen reader. A count change is not announced on its own, to avoid interruptions.
+
+**FR33 — Intro slides**
+- AC33.1 On first run (the same rule as S1 today), 4 short slides explain Taskuda before setup: one board of sticky notes for every employer; plan by Morning, Afternoon and Evening and get reminders; close out the day so nothing gets dropped; copy a ready report, with data kept on the device and in the user's own Drive.
+- AC33.2 Slides can be moved with Next and Back buttons, by swiping on touch screens and with the arrow keys. Dots show the current slide. Every slide has Skip, which goes to setup.
+- AC33.3 The last slide has "Get started" (setup step 1) and "I already use Taskuda" (setup's backup step, to restore).
+- AC33.4 Settings → About has "Show intro again". It shows the slides only, then returns to Settings, and changes no data.
+- AC33.5 The slides work offline and follow `prefers-reduced-motion`.
+
+**FR34 — First-run setup**
+- AC34.1 Setup has 3 steps: Companies, Workday, Backup. The step indicator shows "Step N of 3" correctly. Finding a backup shows the restore choice inside the Backup step, not as an extra step.
+- AC34.2 The Companies step lets the user add several companies. Each one added appears in a list with its color and name and can be removed before continuing. Each new company starts with the next unused palette color. Duplicate names are rejected, as in Settings.
+- AC34.3 The Workday step sets working days (default Monday–Friday, at least one) and the close-out reminder (default 5:30 PM, or Off), with the same rules as AC19.1 and AC21.1. Skip keeps the defaults.
+- AC34.4 The Backup step keeps today's behavior: connect Drive, "Not now", and restore when a backup is found (AC7.4 confirmation applies).
+- AC34.5 If Taskuda is closed during setup, the next open continues setup at the step it was on, without the intro, and keeps what was saved.
+- AC34.6 Finishing setup opens Today with the toast "You're all set. Press N or + to add your first task." ("Tap + to add your first task." on touch screens).
+
 **Non-functional checks**
 - NFR3: measured with Lighthouse or the browser performance tools on a repeat visit.
 - NFR8: automated accessibility check (for example axe) shows no WCAG 2.1 AA violations on the main screens.
@@ -414,7 +485,14 @@ Each criterion must be verifiable by someone other than the owner.
 
 Re-checked on 2026-10-20 after adding FR18–FR29: each one has acceptance criteria (Section 8), a priority (Section 7) and risks (RK11–RK16). The new metrics M4 and M5 have a baseline and a target. Items cut from the My Work Day ideas are listed in Out of Scope.
 
+Re-checked on 2026-10-21 after adding FR30–FR34: each one has acceptance criteria (Section 8), a priority (Section 7) and risks (RK18–RK22). M6 has a baseline and a target. Onboarding (FR33, FR34) has no quantified metric; see waiver W2. Exclusions are listed in Out of Scope items 23–29.
+
 ### Waiver W1: M3 baseline (current EOD reporting time)
 Reason: The owner chose not to provide a baseline number. The target (median ≤ 5 minutes) is an absolute target and can be measured without a baseline, but the improvement can't be stated as a before/after reduction.
 Owner: umpiremed@gmail.com
 Revisit by: Post-launch review (end of the 4-week measurement window). Optionally time 3 manual EOD reports before switching to Taskuda.
+
+### Waiver W2: success metric for onboarding (FR33, FR34)
+Reason: Onboarding happens once per device, and there is no analytics server (Section 2), so completion rates can't be gathered across users. A single device's first run is not a meaningful sample.
+Owner: umpiremed@gmail.com
+Revisit by: When Google OAuth testing mode has 5 or more test users. Then ask each one whether they finished setup or skipped it, and how many companies they had after their first day.

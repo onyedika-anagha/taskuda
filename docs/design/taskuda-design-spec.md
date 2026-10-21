@@ -3,9 +3,11 @@
 **Track:** A
 **Upstream:** [docs/pm/taskuda-prd.md](../pm/taskuda-prd.md) (Definition of Ready passed, waiver W1)
 **Status:** Definition of Ready — passed (see Section 11)
-**Last updated:** 2026-10-20
+**Last updated:** 2026-10-21
 
 **Revision 2026-10-20:** added design for PRD FR18–FR29: flows F14–F17, the S7h Workday settings section, dialog D8, new states on S2, S3 and S7f, microcopy, and DAC15–DAC21.
+
+**Revision 2026-10-21:** added design for PRD FR30–FR34. F1 is rewritten (intro, then a 3-step setup). New: flows F18–F19, S1 split into S1a Intro and S1b Setup, the S2 day summary row and risk markers, the S3 due date, dialog D9 At-risk list, the M6 tile, "Show intro again" in S7g, and DAC22–DAC29.
 
 Requirement IDs (FR, NFR, AC, CR) refer to the PRD. Screen IDs (S), flow IDs (F), and component names are defined here.
 
@@ -51,6 +53,11 @@ Requirement IDs (FR, NFR, AC, CR) refer to the PRD. Screen IDs (S), flow IDs (F)
 | FR27 Time left in block | Should | S2 (block header / mobile tab strip) | — |
 | FR28 Eye-break reminders | Should | S2 (eye-break toast), S7h Workday, S7f Stats (M4) | F15 |
 | FR29 In-app time budget | Should | S2 (budget banner), S7h Workday, S7f Stats (M5, time in Taskuda) | F17 |
+| FR30 Due dates | Should | S3 Task Editor (Due date), S2 (due text on notes), S7f Stats (M6) | F18 |
+| FR31 At-risk markers | Should | S2 (RiskMarker on notes), S5 step 1 | F19 |
+| FR32 Day progress + at-risk list | Should | S2 (day summary row), D9 At-risk list | F19 |
+| FR33 Intro slides | Should | S1a Intro, S7g About ("Show intro again") | F1, F20 |
+| FR34 First-run setup | Should | S1b Setup (Companies, Workday, Backup) | F1 |
 
 Day navigation (DayNavigator on S2) has no requirement of its own. It is needed for AC8.3 (events appear "on the right day") and AC11.1 (carried tasks appear on the next day).
 
@@ -59,11 +66,31 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 ## 2. User Flows
 
 ### F1 — First run
-1. User opens Taskuda for the first time → **S1 Welcome**.
-2. Step 1 "Add your first company": name + color → Continue. *Alt:* "Skip for now". Tasks can exist with no company.
-3. Step 2 "Back up to Google Drive" → Connect (Google consent) → connected. *Build note:* connecting here looks for an existing backup before making the first one, so a fresh empty backup never becomes the "newest" over the real one. *Alt:* "Not now", so data stays on this device only and S2 shows a "Not backed up" indicator. *Failure:* consent cancelled or denied → inline error, retry or skip.
-4. Step 3 "Restore existing data?" (only shown if a Drive backup is found) → F8.
-5. → **S2 Today** with empty states.
+*Rewritten 2026-10-21 for FR33–FR34.*
+1. User opens Taskuda for the first time → **S1a Intro**, slide 1 of 4. Next / swipe / → moves on; Back / ← goes back. *Alt:* "Skip" on any slide → step 2.
+2. Last slide: "Get started" → **S1b Setup** step 1. *Alt:* "I already use Taskuda" → setup step 3 (Backup), so a returning user restores before entering anything (PRD RK22).
+3. Step 1 **Companies**: type a name (next unused color is preselected; can be changed) → "Add company" or Enter → it joins the list above the form, the form clears and keeps focus. Repeat as needed. Each listed company has a Remove button. → "Continue" (shown once ≥ 1 company). *Alt:* "Skip for now" (always shown). *Failure:* duplicate name → inline field error; save failed → inline error, input kept.
+4. Step 2 **Workday**: working days (Mon–Fri preselected) and close-out reminder (5:30 PM preselected, or Off) → "Continue" saves. *Alt:* "Skip" keeps the defaults. *Failure:* last working day unselected → the WeekdayPicker keeps it selected and shows the hint.
+5. Step 3 **Backup**: as before: Connect (Google consent) → looks for an existing backup before making the first one. Backup found → the restore choice appears inside this step (Restore → F8 / Start fresh). *Alt:* "Not now". *Failure:* consent cancelled or denied → inline error, Try again or Skip.
+6. → **S2 Today** with empty states and the toast "You're all set…".
+7. *Interrupted:* the tab is closed during setup → the next open goes straight to the step it was on (no intro), with saved companies and settings in place.
+
+### F18 — Add a due date (FR30)
+1. In S3, user presses "Add due date" → Due date (date input, focused) and Due time (optional) appear, with a "Remove due date" button.
+2. Pick a date → Save. The note shows "Due Fri, Oct 24".
+3. *Alt:* the chosen date has passed → hint under the field "This date has passed. The task will show as overdue." Save still works.
+4. *Alt:* Repeat is set to anything but "Doesn't repeat" → the due date section is replaced by "Repeating tasks don't have due dates." If a due date was already entered, it is dropped when Repeat changes, and the hint says so.
+
+### F19 — Check what's at risk (FR31, FR32)
+1. On S2, the day summary row shows "4 of 9 done" and, when something is at risk, "At risk · 2".
+2. Press "At risk · 2" → **D9 At-risk list** opens, sorted Overdue → Overran → Running late → Due today → Stuck, then by start time.
+3. Choose a task → D9 closes, S3 opens for that task. User changes the time, the due date or the status → Save → the note's marker updates right away, and so does the count.
+4. *Alt:* every task stops being at risk while D9 is open → D9 shows "Nothing at risk right now." with Close.
+5. *Alt (closeout):* in S5 step 1, each unfinished task shows its marker next to the title; nothing else changes.
+
+### F20 — Show intro again (FR33)
+1. S7g About → "Show intro again" → S1a in replay mode.
+2. Slides behave as in F1. The last slide has only "Done"; Skip and Done both return to S7g About. No data changes.
 
 ### F2 — Add a task
 1. On S2, user presses **+ Add task** (or key `N`, or the empty-block "Add a task" link, which preselects that block).
@@ -180,14 +207,24 @@ Day navigation (DayNavigator on S2) has no requirement of its own. It is needed 
 
 Dialogs (D1–D7) are listed after the screens.
 
-### S1 Welcome (first run, 3 steps)
+### S1a Intro (first run, and replay from S7g; 4 slides)
 | State | Spec |
 |---|---|
-| Default | Step indicator "1 of 3", step content, primary + skip actions |
-| Loading | During Google consent/backup check: button spinner, label "Connecting…" |
+| Default | Taskuda wordmark, slide illustration (built from real UI pieces: StickyNotes, a block header, a report snippet; no images to load), heading, one or two lines of body, dots, Back (hidden on slide 1) / Next, Skip top-right |
+| Loading | N/A — static content, part of the welcome bundle |
 | Empty | N/A — always has content |
-| Error | Inline Alert under the step with the specific error + retry |
-| Success | Step marked done, auto-advance; final step routes to S2 |
+| Error | N/A — no data or network involved |
+| Success | Last slide: "Get started" + "I already use Taskuda" (first run) or "Done" (replay) |
+
+### S1b Setup (first run, 3 steps; was "S1 Welcome")
+| State | Spec |
+|---|---|
+| Default | Step indicator "Step 1 of 3 · Companies" (… "Workday", … "Backup"), step content, primary + skip actions |
+| Loading | Saving a company or the workday: button spinner (rarely visible). Google consent/backup check: button spinner, label "Connecting…" |
+| Empty | Companies step with no companies yet: no list, just the form, and only "Skip for now" (no Continue) |
+| Error | Field errors (duplicate company name). Inline Alert under the step with the specific error + retry (save failed, Google consent) |
+| Success | Company added: it appears in the list and is announced ("Acme added"). Step done → next step. Backup step done → S2 Today + "You're all set" toast |
+| Backup found | Inside step 3: "Found a backup from Oct 17" with Restore / Start fresh (no step 4) |
 
 ### S2 Today (main canvas)
 | State | Spec |
@@ -203,11 +240,16 @@ Dialogs (D1–D7) are listed after the screens.
 | Notices (FR21, FR29) | Above the blocks, in the existing notices area, in this order: storage error → offline → nudge banner → budget banner. At most two banners show at once; the budget banner waits if two are already showing. |
 | Note markers (FR20, FR25) | Repeats marker (repeat icon + "Repeats daily" / "Working days" / "Weekly" / "Monthly"). Overlap marker (warning icon + "Overlaps with Client call"; "Overlaps with 2 tasks" when more than one). Shown next to the existing carried-over and calendar markers. |
 | Alert toasts (FR22, FR28) | Reminder and eye-break toasts stay until the user acts or closes them. Only one eye-break toast at a time. |
+| Day summary row (FR32) | A thin row between the notices area and the blocks, on every screen size: DayProgress "4 of 9 done" (left) and, when ≥ 1 task is at risk, the "At risk · 2" button (right). Hidden when the day has no tasks. Past days show progress only (no risk, AC31.3). |
+| Due text (FR30) | Notes with a due date show it in the marker row ("Due Fri, Oct 24"), with a calendar-clock icon. Replaced by the RiskMarker when the task is Overdue or Due today. |
+| Risk markers (FR31) | At most one RiskMarker per note, first in the marker row, in the AC31.2 order. Overdue and Overran use the strong style; Running late, Due today and Stuck use the standard style (Section 10). Stuck replaces the carried-over marker ("Stuck · carried over ×4") so the count isn't shown twice. |
 
 ### S3 Task Editor (Dialog on ≥768px, bottom Sheet on <768px)
 | State | Spec |
 |---|---|
-| Default | Fields: Title*, Company, Block, Repeat (+ WeekdayPicker or "On day" when needed), Start time, Duration, Notes, Jira link (if Jira connected); Save, Cancel; Delete (edit mode only) |
+| Default | Fields: Title*, Company, Block, Repeat (+ WeekdayPicker or "On day" when needed), Start time, Duration, Due date (collapsed to an "Add due date" button until used; then Due date + Due time (optional) + Remove due date), Notes, Jira link (if Jira connected); Save, Cancel; Delete (edit mode only) |
+| Due date passed (FR30) | Hint under Due date: "This date has passed. The task will show as overdue." Doesn't block Save |
+| Repeating (FR30) | Due date section replaced by muted text "Repeating tasks don't have due dates." |
 | Loading | Save button spinner (rarely visible) |
 | Empty | Create mode: empty fields, title focused, Repeat = Doesn't repeat |
 | Error | Inline field errors (including "Pick at least one day."); save-failed toast with input kept |
@@ -223,6 +265,7 @@ Dialogs (D1–D7) are listed after the screens.
 | Error | Step 3: no key / offline / provider error (F5.4). Step 4: clipboard error |
 | Success | Finish → closes, S2 "Day closed" banner, toast "Day closed. 3 tasks carried to tomorrow." |
 | Already closed | Opening again shows "You closed out today at 6:12 PM." + "View report" + "Close out again" (replaces the earlier log entry for that day) |
+| Risk markers (FR31) | Step 1: each unfinished task shows its RiskMarker after its title (AC31.5). No other change to the step |
 
 ### S6 Report
 | State | Spec |
@@ -243,9 +286,9 @@ Sections: **S7a Companies, S7h Workday, S7b Integrations, S7c Backup, S7d AI & S
 | S7c Backup | Drive status, "Last backed up …", Back up now, Restore from Drive, Export / Import (CR2) | "Backing up…" | Not connected: "Your data is only on this device." + Connect | "Backup failed" + Try again | "Backed up just now" |
 | S7d AI & Security | Provider, SecretField, model, Test key, Remove; Passphrase: "Change passphrase", "Reset secrets" | Test key spinner | No key: "No AI key added. AI recommendations are off." | Key rejected / test failed | "Key works" |
 | S7e Voice | Voice on/off, reminder lead time (Off, 5, 10, 15 min), voice choice, "Play test" | N/A | N/A | Unsupported: "Your browser can't speak reminders. You'll still see them on screen." (controls disabled) | Test plays |
-| S7f Stats | Five MetricTiles (M1–M5; M4/M5 show "Off" with a link to Workday when that feature is off) + one-line explanation each. "Time in Taskuda" line (today + 7-day average, "on this device"). **Carry-over** subsection: rate per company and overall, "Needs attention" callouts, list of tasks carried 3+ times | N/A (local) | Before first closeout: "Your stats appear after your first closeout." Carry-over with no past tasks: "Carry-over stats appear once you have past days." | N/A — calculated locally; if logs can't be read, same as storage error on S2 | N/A |
+| S7f Stats | Six MetricTiles (M1–M6; M6 shows "No due dates yet" when no task with a due date falls in the window; M4/M5 show "Off" with a link to Workday when that feature is off) + one-line explanation each. "Time in Taskuda" line (today + 7-day average, "on this device"). **Carry-over** subsection: rate per company and overall, "Needs attention" callouts, list of tasks carried 3+ times | N/A (local) | Before first closeout: "Your stats appear after your first closeout." Carry-over with no past tasks: "Carry-over stats appear once you have past days." | N/A — calculated locally; if logs can't be read, same as storage error on S2 | N/A |
 | S7h Workday | Working days (WeekdayPicker), Close-out reminder (Off / time), Quiet hours (switch + from/to times), Eye breaks (switch, interval Select, from/to times), Daily time budget (Off / 1–4 h). Each saves on change. | N/A (local) | N/A — always has defaults | All working days unticked: the last one can't be unticked, with the hint "Keep at least one working day." Quiet-hours or eye-break start = end: "Start and end can't be the same." | Toast "Saved" (one per change, merged) |
-| S7g About | Version, Install button (if available), Privacy summary, link to privacy page | N/A | N/A | N/A | N/A |
+| S7g About | Version, Install button (if available), "Show intro again" (FR33, opens S1a replay), Privacy summary, link to privacy page | N/A | N/A | N/A | N/A |
 
 ### Dialogs
 | ID | Purpose | States |
@@ -258,6 +301,7 @@ Sections: **S7a Companies, S7h Workday, S7b Integrations, S7c Backup, S7d AI & S
 | D5 Unlock | Passphrase field, Unlock, "Restore without keys" | Default, Loading, Error (wrong passphrase), Success |
 | D6 Set Passphrase | Passphrase + confirm + warning copy | Default, Error (mismatch / too short, min 8 chars), Success |
 | D7 Link Jira Issue | Key/URL input → preview → Link | Default, Loading ("Looking up issue…"), Error (not found / no access / offline), Success (preview card) |
+| D9 At-risk list (FR32) | Title + one row per at-risk task: RiskMarker, title, CompanyChip, start time. Rows are buttons. Dialog on ≥768px, bottom Sheet on <768px (ResponsiveDialog) | Default (list). Empty: "Nothing at risk right now." + Close (only reachable when the count drops to 0 while open). Loading: N/A (local, already loaded for S2). Error: N/A (local). Success: choosing a row closes D9 and opens S3 for that task |
 
 ---
 
@@ -268,12 +312,15 @@ App shell
 ├── S2 Today (home, "/")            ← default route; DayNavigator switches date ("/day/2026-10-19")
 │   ├── S3 Task Editor (overlay)
 │   ├── S5 Closeout (overlay, resumable)
-│   └── D1, D2, D7, D8 (overlays)
+│   └── D1, D2, D7, D8, D9 (overlays)
 ├── S6 Report ("/report", optional ?date=)
 ├── S7 Settings ("/settings/<section>")
-│   └── S7a–S7h (S7h = "/settings/workday")
-└── S1 Welcome ("/welcome", first run only; redirects to "/" afterwards)
+│   └── S7a–S7h (S7h = "/settings/workday"; S7g "Show intro again" → "/intro")
+├── S1a Intro → S1b Setup ("/welcome", first run only; redirects to "/" afterwards)
+└── S1a Intro, replay ("/intro"; Skip/Done → "/settings/about")
 ```
+
+- **First run:** "/welcome" shows S1a, then S1b. When setup was interrupted (F1 step 7), "/welcome" opens S1b at the saved step. Browser Back inside "/welcome" moves to the previous slide/step instead of leaving; on slide 1 it does nothing.
 
 - **App bar (all main screens):** Logo/name → S2 Today. DayNavigator (‹ prev, date label, next ›, "Today"). + Add task. Report. Close out day. SyncStatusIndicator. Settings (gear).
 - **Mobile (<768px):** app bar holds DayNavigator + Settings; Add task is a floating button (bottom-right); Report and Close out day are in a bottom action bar.
@@ -324,6 +371,18 @@ App shell
 | NoticeBanner | [NEW] | S2 nudge and budget banners | Alert plus one or two actions and a dismiss. Wraps Alert so the two banners look and behave the same |
 | AlertToast actions | [REUSE] | Reminder, eye-break, undo toasts | Sonner toasts with action buttons and `duration: Infinity` (10 s for undo) |
 | CarryoverInsights | [NEW] | S7f | Per-company rates, callouts and the carried 3+ list; MetricTile only holds one number |
+| ResponsiveDialog | [REUSE] | D9 | Already in the project (Dialog ≥768px, Sheet <768px) |
+| CompanyForm, ColorSwatchPicker, CompanyChip | [REUSE] | S1b step 1 | Existing Taskuda components |
+| WeekdayPicker | [REUSE] | S1b step 2 | Existing Taskuda component |
+| StepCard | [REUSE] | S1b | Existing welcome step wrapper |
+| DueDateField | [NEW] | S3 | Collapsed "Add due date" → date + optional time + remove, with the passed-date hint and the repeating rule; no shadcn date-and-time field fits |
+| RiskMarker | [NEW] | StickyNote, D9, S5 step 1 | One icon + text pill with two visual strengths; the existing note markers are plain text and have no strong style |
+| DayProgress | [NEW] | S2 day summary row | "4 of 9 done" with a thin progress bar; no existing progress component |
+| AtRiskButton | [NEW] | S2 day summary row | Count button that opens D9 and carries the accessible name "2 tasks at risk"; hidden at 0 |
+| IntroCarousel | [NEW] | S1a | Slides with dots, Back/Next, swipe (uses the existing useSwipe hook) and arrow keys; shadcn has no carousel in this project, and adding Embla for 4 static slides isn't worth the dependency |
+| IntroSlide | [NEW] | S1a | Illustration + heading + body for one slide |
+| SetupCompanyList | [NEW] | S1b step 1 | List of companies added so far, each with Remove; Settings' S7a list has rename/recolor/delete menus that are too heavy for setup |
+| SetupStepIndicator | [NEW] | S1b | "Step 1 of 3 · Companies"; replaces the hard-coded "Step N of 3" text |
 
 ---
 
@@ -340,6 +399,13 @@ App shell
 - **Drag start (all devices):** dragging starts from the note's drag handle (grip icon), so the note body scrolls normally on touch and keeps no nested controls inside a draggable element. Changed during build from "long-press on the note".
 - Minimum supported width: 320px with no horizontal scrolling.
 - **New pieces (FR18–FR29):** NoticeBanner actions wrap below the text under 480px. WeekdayPicker shows single letters (M T W T F S S) under 400px and three-letter names above, with full day names as accessible labels either way. In S7h, TimeRangeField stacks its two inputs under 400px. Action toasts put their buttons on a second line on mobile.
+- **New pieces (FR30–FR34):**
+  - **S2 day summary row:** one line on every width. Under 360px the progress bar is hidden and only the "4 of 9 done" text shows. The At-risk button stays right-aligned and keeps a 44px target.
+  - **RiskMarker:** wraps to its own line in the marker row when the note is narrow. The text is never truncated, because the reason is the whole point.
+  - **S3 DueDateField:** date and time side by side at ≥400px, stacked below that.
+  - **D9:** bottom Sheet under 768px (max 80% of the screen height, scrolls), Dialog (max 480px wide) above.
+  - **S1a Intro:** full-height layout. The illustration sits above the text under 768px and beside it at ≥1024px. Dots and buttons are pinned to the bottom on mobile, respecting safe areas. Swipe works on touch only. Arrow keys work everywhere.
+  - **S1b Setup:** the existing single column (max 576px). The company list scrolls inside the step once it has more than 5 companies.
 
 ---
 
@@ -371,6 +437,11 @@ Target: **WCAG 2.1 AA**.
 - **WeekdayPicker:** each toggle has `aria-pressed` and a full day name ("Monday"). The group is labeled ("Working days" / "Repeat on").
 - **Markers:** repeats and overlap markers have text labels and are part of the note's `aria-label`, for example "Client call, Acme, 2:00 PM, In Progress, repeats weekly, overlaps with Standup".
 - **Eye-break prompts** contain no flashing or motion, and with `prefers-reduced-motion` they appear with no animation.
+- **RiskMarker (FR31):** icon + text, never color alone. Its text has ≥ 4.5:1 contrast against the marker's own background in light and dark, on all 10 note tints (DAC28). The note's `aria-label` includes it, for example "Client call, Acme, 10:00 AM, To Do, running late". The marker is not a live region: markers changing as time passes are not announced.
+- **Day summary row (FR32):** DayProgress is plain text with a decorative bar (`aria-hidden`). The At-risk button's accessible name is "2 tasks at risk. Show list" ("1 task at risk…"). Count changes are not announced (AC32.4). D9 follows the overlay rules: focus goes to the first row, Esc closes it, and focus returns to the button (or to the editor's trigger once a task is chosen).
+- **DueDateField (FR30):** "Add due date" is a button. After it's pressed, focus moves to the date input. The passed-date hint is tied to the input with `aria-describedby`. "Remove due date" returns focus to the "Add due date" button.
+- **IntroCarousel (FR33):** a region with `aria-roledescription="carousel"` and label "About Taskuda". Each slide is a group labeled "Slide 2 of 4". Only the current slide is in the accessibility tree. Dots are buttons ("Go to slide 3", `aria-current="step"` on the current one). ←/→ move between slides when focus is inside the carousel. Slides never advance on their own. When the slide changes, focus moves to the new slide's heading. With `prefers-reduced-motion`, slides switch with no sliding animation. Touch targets for dots are 44×44px, even though each dot is drawn smaller.
+- **S1b Setup (FR34):** the step indicator is in the page heading's accessible text ("Step 1 of 3, Companies"). Adding a company announces "Acme added" through the polite live region and keeps focus in the name field. Remove buttons are labeled "Remove Acme"; after removing, focus moves to the next row's Remove, or to the name field when the list is empty.
 
 ---
 
@@ -402,12 +473,20 @@ Target: **WCAG 2.1 AA**.
 | Eye-break toast | Time for an eye break. Look at something far away for 20 seconds. — Done · Snooze 5 min. Missed: (missed while you were away) appended |
 | Eye-break voice line | "Time for an eye break." |
 | Budget banner / toast | You've spent 2 h in Taskuda today, past your 2 h budget. A short break might help. — Dismiss |
+| Due text (FR30) | Due today · Due tomorrow · Due Fri, Oct 24. With a time: Due today 5:00 PM · Due Fri, Oct 24, 5:00 PM |
+| Risk markers (FR31) | **Overdue** · due Oct 20 (same day: Overdue · due 5:00 PM) · **Overran** · ended 2:30 PM · Running late · 10:00 AM · Due today · Due today 5:00 PM · Stuck · carried over ×4 |
+| Risk markers, spoken (in the note label) | overdue, due October 20 · overran, ended 2:30 PM · running late, was due to start at 10:00 AM · due today at 5:00 PM · stuck, carried over 4 times |
+| Day progress (FR32) | 4 of 9 done · All 9 done · 0 of 3 done |
+| At-risk button | At risk · 2. Accessible name: 2 tasks at risk. Show list |
+| D9 At-risk list | Title: At risk today (other days: At risk on Wed, Oct 22). Row: (marker) · (title) · (company) · (time). Empty: Nothing at risk right now. — Close |
+| Setup done toast (FR34) | You're all set. Press N or + to add your first task. Touch screens: You're all set. Tap + to add your first task. |
 
 ### S3 Task Editor
 | Element | Copy |
 |---|---|
 | Titles | New task · Edit task |
-| Fields | Title · Company · Time of day · Repeat · Start time (optional) · Duration (optional) · Notes (optional) · Jira issue (optional) |
+| Fields | Title · Company · Time of day · Repeat · Start time (optional) · Duration (optional) · Due date · Due time (optional) · Notes (optional) · Jira issue (optional) |
+| Due date (FR30) | Button: + Add due date. Remove: Remove due date. Passed hint: This date has passed. The task will show as overdue. Repeating: Repeating tasks don't have due dates. When Repeat is turned on with a due date set: Due date removed. Repeating tasks don't have due dates. |
 | Repeat options | Doesn't repeat · Every day · Every working day · Weekly · Monthly. Weekly: Repeat on (weekdays). Monthly: On day (1–31). Hint for 29–31: In shorter months, it moves to the last day. Error: Pick at least one day. |
 | Overlap warning | Overlaps with Client call (2:00–2:30 PM). You can still save. |
 | Company empty option | No company |
@@ -486,20 +565,30 @@ Target: **WCAG 2.1 AA**.
 | Security | Change passphrase · Reset secrets (removes your AI key and Jira token from this device and your backup) |
 | Voice | Spoken reminders · Remind me before a task starts: Off / 5 / 10 / 15 minutes · Voice · Play test. Unsupported: Your browser can't speak reminders. You'll still see them on screen. |
 | Voice lines | "Up next at 2:00 PM: Client call." (time includes AM/PM, changed during build) · "Starting now: Client call." · Cheers (random): "Nice work." / "Done. On to the next." / "That's one off the list." |
-| Stats | Tasks dropped without a decision · Closeout streak (working days) · Median time to report · Eye breaks taken · Days within time budget. Off tiles: Eye breaks are off. — Turn on in Workday / No time budget set. — Set one in Workday. Empty: Your stats appear after your first closeout. |
+| Stats | Tasks dropped without a decision · Closeout streak (working days) · Median time to report · Eye breaks taken · Days within time budget · Deadlines met (explanation: Tasks with a due date that were done on time, last 4 weeks. Empty: No due dates yet.). Off tiles: Eye breaks are off. — Turn on in Workday / No time budget set. — Set one in Workday. Empty: Your stats appear after your first closeout. |
 | Time in Taskuda | Time in Taskuda today: 1 h 12 min · 7-day average: 54 min (on this device, not total screen time) |
 | Carry-over | Heading: Carry-over, last 4 weeks · Row: Acme — 40% carried over · Overall — 22% · Callout: Needs attention: Acme — 40% of tasks carried over in the last 4 weeks. · List heading: Carried over 3+ times · Row: Write onboarding doc (Acme) — carried 4 times · Empty: Carry-over stats appear once you have past days. |
-| About | Install Taskuda · Version (number) · Your data stays on your device and in your own Google Drive. Taskuda has no server that stores your tasks or keys. |
+| About | Install Taskuda · Show intro again · Version (number) · Your data stays on your device and in your own Google Drive. Taskuda has no server that stores your tasks or keys. |
 | Update toast | Taskuda updated. Reload to get the latest version. — Reload |
 | Install prompt | Install Taskuda for one-click access. — Install · Not now |
 
-### S1 Welcome
+### S1a Intro (FR33)
+| Slide | Copy |
+|---|---|
+| 1 | **One board for every job.** Each employer gets a color, and every task is a sticky note, so you can see whose work is whose at a glance. |
+| 2 | **Plan by time of day.** Put tasks in Morning, Afternoon or Evening. Taskuda reminds you before timed tasks start and flags work that's slipping. |
+| 3 | **Close out. Drop nothing.** At the end of the day, decide what happens to every unfinished task. Whatever you carry over is waiting for you on your next working day. |
+| 4 | **Your report, ready to send.** Copy an end-of-day report for Slack, Teams, Jira or email in one click. Your tasks stay on this device and in your own Google Drive. |
+| Controls | Skip · Back · Next. Last slide (first run): Get started · I already use Taskuda. Last slide (replay): Done. Dots: Go to slide (n). Region label: About Taskuda |
+
+### S1b Setup (FR34)
 | Step | Copy |
 |---|---|
-| Intro | **Plan your day across every job.** Sticky notes for each employer, and a ready-to-send report at the end of the day. |
-| Step 1 | **Add your first company** — Who do you work for? You can add more later. — Continue · Skip for now |
-| Step 2 | **Back up to Google Drive** — Your tasks are saved on this device. Back them up to your own Drive so you never lose them. — Connect Google Drive · Not now. Error: Google sign-in was cancelled. You can connect later in Settings. — Try again · Skip |
-| Step 3 | **Found a backup from Oct 17** — Restore it to pick up where you left off? — Restore · Start fresh |
+| Indicator | Step 1 of 3 · Companies · Step 2 of 3 · Workday · Step 3 of 3 · Backup |
+| Step 1 | **Who do you work for?** — Add each employer or client. Their color tags your tasks. Fields: Company name · Color. Button: Add company. After adding: Acme added (announced). Row action: Remove (Remove Acme). Footer: Continue (once ≥ 1 company) · Skip for now. Error: You already have a company called Acme. Save failed: Couldn't save Acme. Try again. |
+| Step 2 | **Your workday** — Taskuda carries tasks over, keeps your streak and reminds you on these days. Fields: Working days · Remind me to close out at: Off / (time). Hint: Keep at least one working day. Footer: Continue · Skip (keeps Monday–Friday and 5:30 PM) |
+| Step 3 | **Back up to Google Drive** — Your tasks are saved on this device. Back them up to your own Drive so you never lose them. — Connect Google Drive · Not now. Error: Google sign-in was cancelled. You can connect later in Settings. — Try again · Skip |
+| Step 3, backup found | **Found a backup from Oct 17** — Restore it to pick up where you left off? — Restore · Start fresh |
 
 ---
 
@@ -528,6 +617,14 @@ Target: **WCAG 2.1 AA**.
 | DAC19 | From the nudge banner, the closeout opens with 1 interaction. | e2e test |
 | DAC20 | The time-left text changes to the next block within 60 s of a block boundary. | Component test with fake timers |
 | DAC21 | Every number shown for in-app time is labeled "on this device" or "in Taskuda" on the same screen. | Copy review + component test |
+| DAC22 | Adding a due date to a new task adds ≤ 2 interactions to DAC1 (Add due date, pick a date). | e2e test |
+| DAC23 | A RiskMarker appears or changes within 60 s of the moment its rule becomes true, and within 1 s of the tab becoming visible again. | Component test with fake timers |
+| DAC24 | No note ever shows more than one RiskMarker, for every combination of the AC31.1 states. | Unit test over all combinations |
+| DAC25 | From S2, opening an at-risk task in the editor takes 2 interactions (At risk, then the task). | e2e test |
+| DAC26 | The intro can be left in 1 interaction from any slide. A brand-new user can reach S2 in ≤ 5 interactions by skipping everything (Skip, Skip for now, Skip, Not now). | e2e test |
+| DAC27 | Adding each company in setup takes ≤ 2 interactions after typing the name (Enter or Add company; the color is preselected), and focus stays in the name field. | e2e test |
+| DAC28 | RiskMarker text has ≥ 4.5:1 contrast on its background, in both styles, light and dark, on all 10 note tints. | Contrast check script (extends DAC11) |
+| DAC29 | S1a, S1b (each step) and D9 are added to the DAC8 width checks and the DAC10 axe run with 0 violations. | Playwright screenshots + axe |
 
 ---
 
@@ -538,6 +635,9 @@ Target: **WCAG 2.1 AA**.
 - **Company palette:** 10 fixed hues (for example teal, coral, amber, violet, sky, rose, lime, indigo, orange, slate), each with a light note tint, a strong edge color, and dark-theme variants, all passing DAC11.
 - **Status:** Done notes are desaturated with a struck-through title and a check (not dimmed with opacity, which would break text contrast); In Progress notes get a thicker top edge and a ◉ icon.
 - **Light and dark themes,** following the system setting.
+- **Risk markers (FR31):** a small pill on a near-opaque neutral background (paper white / charcoal) so it reads the same on every company tint. **Strong style** (Overdue, Overran): the destructive red for icon and text, semibold. **Standard style** (Running late, Due today, Stuck): the note's text color, medium weight. Icons: Overdue `CircleAlert`, Overran `TimerOff`, Running late `Clock`, Due today and plain due text `CalendarClock`, Stuck `Repeat`. Only two strengths, so the canvas stays calm (PRD RK18).
+- **Day summary row:** quiet, muted text. The progress bar is 4px tall and uses the foreground color at low opacity, with no company colors. The At-risk button is an outline button with the `CircleAlert` icon.
+- **Intro illustrations:** made from real Taskuda pieces (a few sticky notes in company colors, a block header with "1 h 20 min left", a report snippet), slightly scaled down. That way the intro shows the actual product and needs no image downloads.
 - Visual craft (exact tokens, spacing scale) is finalized during build with the `frontend-design` / `ui-ux-pro-max` skills, within the constraints above.
 
 ---
@@ -555,6 +655,8 @@ Target: **WCAG 2.1 AA**.
 
 Re-checked on 2026-10-20 for FR18–FR29: each has a Traceability row; S7h and D8 have their states; all new copy is final; new components are tagged; accessibility, responsive behavior and DAC15–DAC21 are specified.
 
+Re-checked on 2026-10-21 for FR30–FR34: each has a Traceability row. S1a, S1b, the new S2/S3/S5 states and D9 have their states. All new copy is final (Section 8). New components are tagged. Accessibility, responsive behavior and DAC22–DAC29 are specified.
+
 ### Notes for the Software Engineer stage
 These are engineering decisions the design depends on. They are noted here, not decided:
 - Default model for each AI provider (S7d preset). **Decided:** Gemini `gemini-3.5-flash-lite` (Google's recommendation for new projects, Oct 2026); OpenRouter `openrouter/auto`. The model is a text field so users can change it without an app update.
@@ -564,3 +666,7 @@ These are engineering decisions the design depends on. They are noted here, not 
 - *(FR20)* How occurrences are stored: created when a day is opened, or computed from the series on the fly. The design only needs AC20.2–AC20.5 to hold, and every occurrence to behave like a normal task once it exists (status, move, carryover, calendar). **Decided:** real tasks, created when today or a future day is shown (and on each reminder check for today). A carried copy stands in for that day's occurrence.
 - *(FR28, FR29)* Whether the eye-break log and the daily in-app time are backed up to Drive or kept on this device only (like `device.*` settings). In-app time is per device by definition. **Decided:** both stay on this device; neither is in backups or export files. Their settings are backed up.
 - *(FR22, FR28)* Snoozed reminders and eye-break timing after a reload: keep pending snoozes across a reload, or drop them. **Decided:** pending reminder and eye-break snoozes survive a reload. The eye-break interval restarts from when Taskuda was opened.
+- *(FR30)* How the due date is stored: a local date plus an optional local time (matching `dayKey` / `startTime`), or a single timestamp. The design needs "no time = end of that day" and needs local-time display.
+- *(FR31)* Where the risk rules live: a pure function of (task, now, today's day key) so DAC24 can test every combination without rendering, and so S2, D9 and S5 share it.
+- *(FR34, AC34.5)* How the setup position survives a closed tab. The current first-run check treats "has a company" as "welcome done". That has to change, or adding a company and closing the tab skips the rest of setup.
+- *(FR17, M6)* Which timestamp counts as "done on time": the latest change to Done in the activity log, compared with the due moment.
