@@ -185,6 +185,36 @@ describe('backup snapshot', () => {
     ])
   })
 
+  it('rejects malformed dates and times from an untrusted file, so Today never crashes on them', async () => {
+    await createTask({ title: 'Invoice', dayKey: DAY, block: 'morning' })
+    const good = await createBackupFile()
+    for (const bad of [
+      { dueDate: 'not-a-date' },
+      { dayKey: '2026-13-40' },
+      { startTime: '25:00' },
+      { dueTime: '9am' },
+    ]) {
+      const file = { ...good, data: { ...good.data, tasks: [{ ...good.data.tasks[0], ...bad }] } }
+      expect(() => parseBackupFile(JSON.stringify(file))).toThrow(BackupUnreadableError)
+    }
+  })
+
+  it('rejects a vault with an unsafe PBKDF2 iteration count', async () => {
+    const good = await createBackupFile()
+    const vault = {
+      id: 'vault',
+      version: 1,
+      kdf: { name: 'PBKDF2', hash: 'SHA-256', iterations: 1, salt: 'c2FsdA==' },
+      passphraseWrappedKey: { iv: 'a', data: 'b' },
+      keyCheck: { iv: 'a', data: 'b' },
+      secrets: {},
+      updatedAt: 1,
+    }
+    expect(() => parseBackupFile(JSON.stringify({ ...good, data: { ...good.data, vault } }))).toThrow(
+      BackupUnreadableError,
+    )
+  })
+
   it('leaves the eye-break log and time in Taskuda on this device (task 18.2)', async () => {
     await db.eyeBreakLog.add({ at: 1, dayKey: DAY, outcome: 'done' })
     await db.screenTime.put({ dayKey: DAY, ms: 60_000 })

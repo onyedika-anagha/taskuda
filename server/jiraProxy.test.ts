@@ -148,18 +148,47 @@ describe('Jira proxy (NFR6, AC15.4)', () => {
     ).toBe(502)
   })
 
-  it('never logs requests (no tokens in logs)', async () => {
+  it('never logs allowed requests, and logs refusals without tokens or bodies (NFR4)', async () => {
     const log = vi.spyOn(console, 'log')
     const error = vi.spyOn(console, 'error')
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     await handleJiraProxy(proxyRequest(ISSUE), { allowedOrigin: ORIGIN }, new RateLimiter(), upstream())
+    expect(warn).not.toHaveBeenCalled()
+
     await handleJiraProxy(
       proxyRequest({ ...ISSUE, site: 'evil.com' }),
       { allowedOrigin: ORIGIN },
       new RateLimiter(),
       upstream(),
     )
+    await handleJiraProxy(
+      proxyRequest(ISSUE, { origin: 'https://evil.example' }),
+      { allowedOrigin: ORIGIN },
+      new RateLimiter(),
+      upstream(),
+    )
+    expect(warn.mock.calls.map((c) => c[0])).toEqual([
+      '[jira-proxy] refused 400: target not allowed',
+      '[jira-proxy] refused 403: origin not allowed',
+    ])
+    const logged = JSON.stringify(warn.mock.calls)
+    expect(logged).not.toContain('Basic')
+    expect(logged).not.toContain('evil.com')
     expect(log).not.toHaveBeenCalled()
     expect(error).not.toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
+  it('refuses a declared oversized body before reading it', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const response = await handleJiraProxy(
+      proxyRequest(ISSUE, { 'content-length': String(MAX_BODY_BYTES + 1) }),
+      { allowedOrigin: ORIGIN },
+      new RateLimiter(),
+      upstream(),
+    )
+    expect(response.status).toBe(413)
+    vi.restoreAllMocks()
   })
 
   it('allows only the endpoints Taskuda uses', () => {

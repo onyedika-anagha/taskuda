@@ -7,8 +7,15 @@ import type { RecurringSeries } from '@/types/recurring'
 import type { SettingRecord } from '@/types/settings'
 import type { Task } from '@/types/task'
 import type { VaultRecord } from '@/types/vault'
+import { isValidDayKey } from '@/utils/dates'
+import { isValidTime } from '@/utils/timeBlocks'
 
 const encrypted = z.object({ iv: z.string(), data: z.string() })
+
+// Backup files are untrusted input (Drive or a file the user picks). Dates and times are checked
+// here, because the app parses them while rendering and a malformed one would crash Today.
+const dayKey = z.string().refine(isValidDayKey, 'Invalid day.')
+const time = z.string().refine(isValidTime, 'Invalid time.')
 
 const task = z
   .object({
@@ -16,10 +23,10 @@ const task = z
     title: z.string(),
     notes: z.string(),
     companyId: z.string().nullable(),
-    dayKey: z.string(),
+    dayKey,
     block: z.enum(['morning', 'afternoon', 'evening']),
     order: z.number(),
-    startTime: z.string().nullable(),
+    startTime: time.nullable(),
     durationMinutes: z.number().nullable(),
     status: z.enum(['todo', 'in_progress', 'done']),
     carriedOverCount: z.number(),
@@ -30,8 +37,8 @@ const task = z
     // Version 1 files have no series (PRD AC20.7).
     seriesId: z.string().nullable().default(null),
     // Version 1 and 2 files have no due dates (PRD AC30.6).
-    dueDate: z.string().nullable().default(null),
-    dueTime: z.string().nullable().default(null),
+    dueDate: dayKey.nullable().default(null),
+    dueTime: time.nullable().default(null),
     createdAt: z.number(),
     updatedAt: z.number(),
   })
@@ -47,7 +54,7 @@ const series = z
     notes: z.string(),
     companyId: z.string().nullable(),
     block: z.enum(['morning', 'afternoon', 'evening']),
-    startTime: z.string().nullable(),
+    startTime: time.nullable(),
     durationMinutes: z.number().nullable(),
     jiraIssue: z.object({ key: z.string(), title: z.string(), status: z.string() }).nullable(),
     pattern: z.discriminatedUnion('kind', [
@@ -56,9 +63,9 @@ const series = z
       z.object({ kind: z.literal('weekly'), weekdays: z.array(weekday).min(1) }),
       z.object({ kind: z.literal('monthly'), dayOfMonth: z.number().int().min(1).max(31) }),
     ]),
-    startDayKey: z.string(),
-    endedFromDayKey: z.string().nullable(),
-    skippedDayKeys: z.array(z.string()),
+    startDayKey: dayKey,
+    endedFromDayKey: dayKey.nullable(),
+    skippedDayKeys: z.array(dayKey),
     createdAt: z.number(),
     updatedAt: z.number(),
   })
@@ -103,7 +110,8 @@ const vault = z
     kdf: z.object({
       name: z.literal('PBKDF2'),
       hash: z.literal('SHA-256'),
-      iterations: z.number(),
+      // A crafted value could make the key weak (too few) or hang the unlock (too many).
+      iterations: z.number().int().min(100_000).max(10_000_000),
       salt: z.string(),
     }),
     passphraseWrappedKey: encrypted,

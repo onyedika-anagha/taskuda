@@ -109,9 +109,9 @@ docs/                    PRD, design spec, implementation notes
 
 ## Privacy and security in short
 
-- Tasks, repeating series, companies, closeouts and settings live in IndexedDB on the device; Drive holds an encrypted-keys backup in the app-data folder only Taskuda can see.
+- Tasks, repeating series, companies, closeouts and settings live in IndexedDB on the device. The Drive backup sits in the app-data folder only Taskuda can see: your AI key and Jira token in it are encrypted, but task content is not, so it's protected by your Google account.
 - The eye-break log and time in Taskuda never leave the device: they are not in backups or export files.
 - AI keys and the Jira token are encrypted with AES-256-GCM. The data key is wrapped by a PBKDF2 (600k) passphrase key for backups and by a non-extractable device key, so the passphrase is needed once per device.
 - AI requests contain only task titles, statuses, time blocks, companies, carryovers, the day rating and reflection — never notes or Jira details — and go straight to the chosen provider.
 - Google access tokens stay in memory (no refresh tokens in a browser-only app).
-- The Jira proxy forwards only to `*.atlassian.net` allow-listed endpoints, only for `ALLOWED_ORIGIN`, and logs nothing.
+- The Jira proxy forwards only to `*.atlassian.net` allow-listed endpoints, only for `ALLOWED_ORIGIN`. It never logs allowed requests; a refused one logs a single line with the reason, never the body or credentials.

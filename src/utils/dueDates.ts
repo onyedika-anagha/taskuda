@@ -1,8 +1,8 @@
 import { endOfDay, format } from 'date-fns'
 import type { Task } from '@/types/task'
-import { addDaysToKey, fromDayKey } from './dates'
+import { addDaysToKey, fromDayKey, isValidDayKey } from './dates'
 import { formatTime } from './taskPresentation'
-import { timeToMinutes } from './timeBlocks'
+import { isValidTime, timeToMinutes } from './timeBlocks'
 
 type Due = Pick<Task, 'dueDate' | 'dueTime'>
 
@@ -16,7 +16,8 @@ export function localMoment(dayKey: string, time: string): number {
 
 /** When the task is due; with no time, the end of that day (PRD AC30.1). `null` without a due date. */
 export function dueMoment({ dueDate, dueTime }: Due): number | null {
-  if (!dueDate) return null
+  // Fail safe: a malformed value means "no due date", never a crash while rendering.
+  if (!dueDate || !isValidDayKey(dueDate) || (dueTime && !isValidTime(dueTime))) return null
   return dueTime ? localMoment(dueDate, dueTime) : endOfDay(fromDayKey(dueDate)).getTime()
 }
 

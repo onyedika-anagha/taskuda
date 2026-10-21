@@ -38,4 +38,10 @@ describe('dueDates', () => {
     expect(dueSpokenLabel({ dueDate: TODAY, dueTime: '17:00' }, TODAY)).toBe('due today at 5:00 PM')
     expect(dueSpokenLabel({ dueDate: '2026-10-23', dueTime: null }, TODAY)).toBe('due Friday, October 23')
   })
+
+  it('treats a malformed due date or time as no due date instead of throwing', () => {
+    expect(dueMoment({ dueDate: 'not-a-date', dueTime: null })).toBeNull()
+    expect(dueMoment({ dueDate: TODAY, dueTime: '9am' })).toBeNull()
+    expect(isDuePassed({ dueDate: 'not-a-date', dueTime: null }, Date.now())).toBe(false)
+  })
 })
