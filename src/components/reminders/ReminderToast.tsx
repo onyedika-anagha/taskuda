@@ -1,6 +1,7 @@
-import { BellIcon, XIcon } from 'lucide-react'
+import { BellIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SNOOZE_MINUTES, type SnoozeMinutes } from '@/types/voice'
+import { ActionToast } from './ActionToast'
 
 interface ReminderToastProps {
   text: string
@@ -9,36 +10,24 @@ interface ReminderToastProps {
   onClose: () => void
 }
 
-/**
- * A task reminder that stays until the user acts (PRD AC22.1, AC22.4). Sonner toasts hold only one
- * action, so this is a custom toast. It never takes focus by itself (design DAC18).
- */
+/** A task reminder with Snooze 5 min, Snooze 15 min and Mark done (PRD AC22.1, AC22.4). */
 export function ReminderToast({ text, onSnooze, onDone, onClose }: ReminderToastProps) {
   return (
-    <div className="grid w-full gap-3 rounded-(--radius) border bg-popover p-4 text-sm text-popover-foreground shadow-lg sm:w-(--width)">
-      <div className="flex items-start gap-2">
-        <BellIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-        <p className="flex-1 font-medium">{text}</p>
-        <Button variant="ghost" size="icon" className="-m-2 size-11" aria-label="Close" onClick={onClose}>
-          <XIcon aria-hidden="true" />
+    <ActionToast icon={BellIcon} text={text} onClose={onClose}>
+      {SNOOZE_MINUTES.map((minutes) => (
+        <Button
+          key={minutes}
+          variant="outline"
+          size="sm"
+          className="min-h-11"
+          onClick={() => onSnooze(minutes)}
+        >
+          Snooze {minutes} min
         </Button>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {SNOOZE_MINUTES.map((minutes) => (
-          <Button
-            key={minutes}
-            variant="outline"
-            size="sm"
-            className="min-h-11"
-            onClick={() => onSnooze(minutes)}
-          >
-            Snooze {minutes} min
-          </Button>
-        ))}
-        <Button size="sm" className="min-h-11" onClick={onDone}>
-          Mark done
-        </Button>
-      </div>
-    </div>
+      ))}
+      <Button size="sm" className="min-h-11" onClick={onDone}>
+        Mark done
+      </Button>
+    </ActionToast>
   )
 }

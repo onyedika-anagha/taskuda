@@ -296,15 +296,15 @@ Adopted from the My Work Day PRD. These are Should items in v1 scope, built on `
   - [x] 17.6 Build `CarryoverInsights` in `StatsSection` with company names (never ids), percentages, callouts, the 3+ list, and the empty state (AC26.4)
   - [x] 17.7 Tests: overlap unit tests (touching ends don't overlap, no duration, done ignored); metric unit tests; component tests for marker labels and the editor warning; Stats component test. Also fixed: the close-out nudge e2e test polls for the spoken line (the banner and voice come from separate ticks)
 
-- [ ] 18.0 Add eye-break reminders and the in-app time budget, with M4 and M5 in Stats (FR28, FR29, DAC21)
-  - [ ] 18.1 Add eye-break settings (off by default; interval 20/30/45/60, default 20; hours default 9:00 AM–5:00 PM) and the daily budget (Off/1–4 h) to Workday settings and `WorkdaySection`
-  - [ ] 18.2 Add a new database version with an eye-break log table (time, outcome) and a daily in-app time table (day key → ms). Decide whether each is backed up (design notes) and record it in the implementation notes
-  - [ ] 18.3 `services/eyeBreaks/eyeBreakPlan.ts`: pure function for the next prompt (interval since the last prompt, working days, eye-break hours, quiet hours), missed prompts on return, and replacing an open prompt as missed (AC28.2, AC28.4, AC28.5, AC23.3)
-  - [ ] 18.4 `EyeBreakScheduler` mounted in the app shell: toast with Done / Snooze 5 min, voice line, "(missed while you were away)", outcome logged (AC28.2, AC28.3)
-  - [ ] 18.5 `screenTimeTracker.ts` + `ScreenTimeTracker`: count only visible time (`visibilitychange`), save at least once a minute and when hidden (AC29.1)
-  - [ ] 18.6 Budget warning: pure decision for the first warning and at most one per extra hour; toast + budget banner in `CanvasNotices`; Dismiss; nothing blocked (AC29.3)
-  - [ ] 18.7 M4 and M5 in `utils/metrics.ts`; two new MetricTiles with "Off" states linking to Workday; "Time in Taskuda today / 7-day average (on this device, not total screen time)" (AC17.2, AC29.4, AC29.5, DAC21)
-  - [ ] 18.8 Tests: eye-break plan decision table with fake timers; tracker counts only visible time; budget warning repeats once per extra hour; metric unit tests; Stats labels (DAC21); e2e eye-break Done and Snooze
+- [x] 18.0 Add eye-break reminders and the in-app time budget, with M4 and M5 in Stats (FR28, FR29, DAC21)
+  - [x] 18.1 Add eye-break settings (off by default; interval 20/30/45/60, default 20; hours default 9:00 AM–5:00 PM) and the daily budget (Off/1–4 h) to Workday settings and `WorkdaySection`
+  - [x] 18.2 Add a new database version with an eye-break log table (time, outcome) and a daily in-app time table (day key → ms). Decide whether each is backed up (design notes) and record it in the implementation notes. Decided: neither is backed up (per-device, and minute-by-minute writes would keep marking the backup as changed); backup format stays v1 until 19.11
+  - [x] 18.3 `services/eyeBreaks/eyeBreakPlan.ts`: pure function for the next prompt (interval since the last prompt, working days, eye-break hours, quiet hours), missed prompts on return, and replacing an open prompt as missed (AC28.2, AC28.4, AC28.5, AC23.3)
+  - [x] 18.4 `EyeBreakScheduler` mounted in the app shell: toast with Done / Snooze 5 min, voice line, "(missed while you were away)", outcome logged (AC28.2, AC28.3). Built as one `WellbeingScheduler` (with 18.5), and `ActionToast` shared with reminder toasts
+  - [x] 18.5 `screenTimeTracker.ts` + `ScreenTimeTracker`: count only visible time (`visibilitychange`), save at least once a minute and when hidden (AC29.1)
+  - [x] 18.6 Budget warning: pure decision for the first warning and at most one per extra hour; toast + budget banner in `CanvasNotices`; Dismiss; nothing blocked (AC29.3)
+  - [x] 18.7 M4 and M5 in `utils/metrics.ts`; two new MetricTiles with "Off" states linking to Workday; "Time in Taskuda today / 7-day average (on this device, not total screen time)" (AC17.2, AC29.4, AC29.5, DAC21)
+  - [x] 18.8 Tests: eye-break plan decision table with fake timers; tracker counts only visible time; budget warning repeats once per extra hour; metric unit tests; Stats labels (DAC21); e2e eye-break Done and Snooze. Also: the nudge voice e2e waits up to 20 s (a reminder tick can be skipped under load)
 
 - [ ] 19.0 Add recurring tasks, with a new database version and backup format v2 (FR20, F14, D8, DAC17)
   - [ ] 19.1 Decide how occurrences are stored (created when a today/future day is opened vs computed) and record it in the implementation notes. Recommended: create real tasks, one per series per day, so every existing task feature just works

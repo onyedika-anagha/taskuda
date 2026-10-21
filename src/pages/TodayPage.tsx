@@ -2,7 +2,7 @@ import { CanvasSkeleton } from '@/components/canvas/CanvasSkeleton'
 import { CompanyTip, PastDayNotice, StorageErrorNotice } from '@/components/canvas/CanvasNotices'
 import { BottomActionBar, DayActions } from '@/components/canvas/DayActions'
 import { DayClosedBanner } from '@/components/canvas/DayClosedBanner'
-import { CloseoutNudgeBanner } from '@/components/canvas/CloseoutNudgeBanner'
+import { CanvasBanners } from '@/components/canvas/CanvasBanners'
 import { DayNavigator } from '@/components/canvas/DayNavigator'
 import { ReminderCatchup } from '@/components/canvas/ReminderCatchup'
 import { TaskCanvas } from '@/components/canvas/TaskCanvas'
@@ -67,7 +67,7 @@ export function TodayPage() {
     >
       <InstallPrompt />
       {nav.isToday ? <ReminderCatchup /> : null}
-      {storageBlocked ? <StorageErrorNotice /> : <CloseoutNudgeBanner />}
+      {storageBlocked ? <StorageErrorNotice /> : <CanvasBanners />}
       {nav.isPast ? <PastDayNotice dayKey={nav.dayKey} /> : null}
       {closeout ? <DayClosedBanner dayKey={nav.dayKey} finishedAt={closeout.finishedAt} /> : null}
       {tasks?.length === 0 && companies?.length === 0 && !readOnly ? <CompanyTip /> : null}

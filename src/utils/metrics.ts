@@ -1,5 +1,6 @@
 import type { Closeout } from '@/types/closeout'
 import type { Task } from '@/types/task'
+import type { EyeBreakLogEntry, ScreenTimeDay } from '@/types/wellbeing'
 import type { Weekday } from '@/types/workday'
 import { addDaysToKey, isWorkingDay } from './dates'
 
@@ -54,4 +55,38 @@ export function medianMinutesToReport(closeouts: Closeout[], todayKey: string): 
   if (!minutes.length) return null
   const mid = Math.floor(minutes.length / 2)
   return minutes.length % 2 ? minutes[mid] : (minutes[mid - 1] + minutes[mid]) / 2
+}
+
+/** M4: eye-break prompts marked Done in the window, of those that ended (PRD AC17.2). `null` with none. */
+export function eyeBreakFollowThrough(log: EyeBreakLogEntry[], todayKey: string): number | null {
+  const start = windowStart(todayKey)
+  // A snooze isn't an ending: the prompt comes back and gets its own outcome.
+  const ended = log.filter((e) => e.dayKey >= start && e.dayKey <= todayKey && e.outcome !== 'snoozed')
+  if (!ended.length) return null
+  return ended.filter((e) => e.outcome === 'done').length / ended.length
+}
+
+/**
+ * M5: past working days in the window with time in Taskuda that stayed within the budget
+ * (PRD AC17.2). Today is still running, so it doesn't count yet. `null` with no such days.
+ */
+export function daysWithinBudget(
+  days: ScreenTimeDay[],
+  todayKey: string,
+  budgetHours: number,
+  workingDays: readonly Weekday[],
+): number | null {
+  const start = windowStart(todayKey)
+  const counted = days.filter(
+    (d) => d.dayKey >= start && d.dayKey < todayKey && d.ms > 0 && isWorkingDay(d.dayKey, workingDays),
+  )
+  if (!counted.length) return null
+  return counted.filter((d) => d.ms <= budgetHours * 3_600_000).length / counted.length
+}
+
+/** AC29.4: average time in Taskuda per day over the 7 full days before today; days not opened count as 0. */
+export function sevenDayAverageMs(days: ScreenTimeDay[], todayKey: string): number {
+  const start = addDaysToKey(todayKey, -7)
+  const total = days.filter((d) => d.dayKey >= start && d.dayKey < todayKey).reduce((sum, d) => sum + d.ms, 0)
+  return total / 7
 }

@@ -4,6 +4,10 @@ import { saveCloseout } from '@/services/db/closeoutRepository'
 import { createCompany } from '@/services/db/companyRepository'
 import { db } from '@/services/db/database'
 import { createTask } from '@/services/db/taskRepository'
+import { logEyeBreak } from '@/services/db/eyeBreakRepository'
+import { addScreenTime } from '@/services/db/screenTimeRepository'
+import { setDailyBudgetHours, setEyeBreaks, setWorkingDays } from '@/services/workday/workdaySettings'
+import { DEFAULT_EYE_BREAKS } from '@/types/workday'
 import { makeTask } from '@/test/factories'
 import { renderWithApp } from '@/test/renderWithApp'
 import { resetDatabase } from '@/test/resetDatabase'
@@ -35,6 +39,67 @@ describe('Stats (S7f, PRD FR17)', () => {
     expect(dropped.nextElementSibling).toHaveTextContent('1')
     expect(screen.getByText('Closeout streak (working days)').nextElementSibling).toHaveTextContent(/^[01]$/)
     expect(screen.getByText('Median time to report').nextElementSibling).toHaveTextContent('4.0 min')
+  })
+
+  describe('M4, M5 and time in Taskuda (PRD AC17.2, FR29)', () => {
+    const closeOutToday = () =>
+      saveCloseout({
+        dayKey: todayKey(),
+        startedAt: 0,
+        finishedAt: 1,
+        reportCopiedAt: null,
+        rating: 4,
+        reflection: '',
+        outcomes: {},
+      })
+
+    it('AC17.2 shows M4 and M5 as Off, with a link to Workday, while the features are off', async () => {
+      await closeOutToday()
+      renderWithApp('/settings/stats')
+      const eye = await screen.findByText('Eye breaks taken')
+      expect(eye.nextElementSibling).toHaveTextContent('Off')
+      expect(screen.getByText('Eye breaks are off.')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Turn on in Workday' })).toHaveAttribute(
+        'href',
+        '/settings/workday',
+      )
+      expect(screen.getByText('Days within time budget').nextElementSibling).toHaveTextContent('Off')
+      expect(screen.getByRole('link', { name: 'Set one in Workday' })).toHaveAttribute(
+        'href',
+        '/settings/workday',
+      )
+    })
+
+    it('AC17.2 shows M4 and M5 from the local logs when on', async () => {
+      await closeOutToday()
+      await setWorkingDays([0, 1, 2, 3, 4, 5, 6])
+      await setEyeBreaks({ ...DEFAULT_EYE_BREAKS, enabled: true })
+      await setDailyBudgetHours(2)
+      await logEyeBreak('done')
+      await logEyeBreak('done')
+      await logEyeBreak('done')
+      await logEyeBreak('missed')
+      const today = todayKey()
+      await addScreenTime(
+        new Map([
+          [addDaysToKey(today, -1), 3_600_000],
+          [addDaysToKey(today, -2), 3 * 3_600_000],
+        ]),
+      )
+
+      renderWithApp('/settings/stats')
+      expect((await screen.findByText('Eye breaks taken')).nextElementSibling).toHaveTextContent('75%')
+      expect(screen.getByText('Days within time budget').nextElementSibling).toHaveTextContent('50%')
+    })
+
+    it('AC29.4 / AC29.5 / DAC21 labels in-app time as on this device, not total screen time', async () => {
+      await addScreenTime(new Map([[todayKey(), 72 * 60_000]]))
+      renderWithApp('/settings/stats')
+      const line = await screen.findByText(/^Time in Taskuda today:/)
+      expect(line).toHaveTextContent(
+        'Time in Taskuda today: 1 h 12 min · 7-day average: 0 min (on this device, not total screen time)',
+      )
+    })
   })
 
   describe('Carry-over (PRD FR26)', () => {

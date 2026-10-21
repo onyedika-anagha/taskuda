@@ -41,8 +41,10 @@ Layers (workspace code-separation rule): `pages/` compose components; `component
 | `calendarMappings` | `taskId` (`&eventId`) | Yes | task↔event links, sync times, tombstones |
 | `vault` | `'vault'` | Yes | PBKDF2 params, passphrase-wrapped data key, key check, encrypted secrets |
 | `deviceKeys` | `'device'` | **Never** | non-extractable AES key + device-wrapped data key |
+| `eyeBreakLog` | `++id` (`dayKey`) | **No** (this device only) | eye-break prompt outcomes: done / snoozed / dismissed / missed (metric M4) |
+| `screenTime` | `dayKey` | **No** (this device only) | ms Taskuda was visible that day (metric M5, time in Taskuda) |
 
-Schema versions: **v1** (first six tables) and **v2** (adds `vault`, `deviceKeys`). Both are additive.
+Schema versions: **v1** (first six tables), **v2** (adds `vault`, `deviceKeys`) and **v3** (adds `eyeBreakLog`, `screenTime`). All are additive.
 
 **Migration reversibility:** IndexedDB/Dexie can't be downgraded in place; a lower version number throws `VersionError`. Rollback path: export a backup file (Settings → Backup), deploy the older build, clear site data, then import. The backup format is versioned (`version: 1`) and validated with Zod.
 
@@ -141,7 +143,18 @@ These are recorded in the design spec where they change it.
   - **Several overlaps in the editor:** the design spec only gives copy for one task. With more than one, the warning lists them: "Overlaps with 2 tasks: Client call (2:00–2:30 PM), Standup (2:15–2:45 PM). You can still save." The warning is linked to the Duration field with `aria-describedby`.
   - **Carry-over logic** lives in `utils/carryoverInsights.ts`, not `utils/metrics.ts` (the task list named metrics.ts), to keep each file to one job. It reuses `windowStart`. "Needs attention" only names real companies. Tasks without a company show as "No company" in the rates but are never called out. The 3+ list shows only the latest open copy (`carriedToTaskId === null`), read from the window start onward.
   - **Stats layout:** Carry-over shows even before the first closeout, since it has its own empty state.
-- **Voice e2e race fixed (2026-10-20):** the nudge banner and the spoken nudge come from separate ticks, so the test now polls for the spoken line instead of reading it once.
+- **Voice e2e race fixed (2026-10-20):** the nudge banner and the spoken nudge come from separate ticks, so the test now polls for the spoken line instead of reading it once. On 2026-10-21 the wait went up to 20 s: a tick is skipped while the previous one still runs, so under load the next one is a full tick (15 s) later.
+- **Eye breaks and the time budget (FR28, FR29, added 2026-10-21):**
+  - **Backup decision (task 18.2):** `eyeBreakLog` and `screenTime` stay on this device and are **not** in backups, so the backup format stays at version 1 for now. Reasons: in-app time is per device by definition (AC29.5). Both tables change every minute or so, and `trackBackedUpChanges` would mark the backup as changed each time, which would keep Drive syncing. The cost: M4 and M5 start over on a new device or after a restore. Their settings (`workday.eyeBreaks`, `workday.dailyBudgetHours`) *are* backed up.
+  - **Interval anchor:** the next prompt is one interval after the latest of the last prompt, the start of today's eye-break hours, and when this tab opened Taskuda. Prompts only count time while Taskuda is open (AC28.2), so opening it mid-morning doesn't fire one straight away. A reload restarts the interval. The last-prompt time and a pending snooze are kept in `localStorage`, like reminder snoozes.
+  - **Outcomes:** Done, Close (dismissed) and Snooze (snoozed) are logged from the toast. A prompt that came due in the background is logged as missed when it shows on return, and its buttons don't log it again. A prompt replaced by the next one is logged as missed (F15.5). Prompts skipped during quiet hours aren't logged (AC23.3), and missed prompts aren't spoken.
+  - **M4** = Done ÷ (Done + dismissed + missed) over the window. A snooze isn't an ending: the prompt comes back and gets its own outcome. Without this, snooze-then-Done would count as 50%.
+  - **M5** = past working days in the window that have time recorded and stayed at or under the budget, as a share of those days. Today doesn't count until it's over, and days Taskuda wasn't opened are left out.
+  - **7-day average** = total over the 7 full days before today ÷ 7. Days Taskuda wasn't opened count as 0.
+  - **Tracker:** `createScreenTimeTracker` counts only visible time (`visibilitychange`). It saves every 30 s while visible, and on hide and `pagehide`, splitting a session that crosses midnight. Storage errors are ignored.
+  - **Budget warning:** the level is the whole hours spent once at or over the budget, so it warns at 2 h, then 3 h, then 4 h (AC29.3). The warned and dismissed levels are per-device, per-day `localStorage` marks. The banner shows the current level until it's dismissed and comes back at the next level.
+  - **Banners:** `CanvasBanners` shows the nudge, then the budget banner. The budget banner waits while the offline notice and the nudge already show (at most two).
+  - **Structure:** one `WellbeingScheduler` (eye-break ticks + screen-time tracking) is mounted next to `ReminderScheduler`, rather than separate `EyeBreakScheduler` and `ScreenTimeTracker` components. `ActionToast` is the shared shell of the reminder and eye-break toasts.
 - **Past days that were never closed out can still be closed out.**
 - **Voice lines say "2:00 PM".**
 - **First-run Drive connect** checks for an existing backup before uploading a new one.

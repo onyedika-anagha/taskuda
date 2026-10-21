@@ -4,6 +4,7 @@ import { BackupScheduler } from '@/components/backup/BackupScheduler'
 import { CalendarSyncScheduler } from '@/components/calendar/CalendarSyncScheduler'
 import { LiveAnnouncer } from '@/components/common/LiveAnnouncer'
 import { ReminderScheduler } from '@/components/reminders/ReminderScheduler'
+import { WellbeingScheduler } from '@/components/reminders/WellbeingScheduler'
 import { VaultPrompts } from '@/components/security/VaultPrompts'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -24,6 +25,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <BackupScheduler />
         <CalendarSyncScheduler />
         <ReminderScheduler />
+        <WellbeingScheduler />
       </TooltipProvider>
     </ThemeProvider>
   )

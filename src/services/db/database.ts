@@ -6,6 +6,7 @@ import type { Company } from '@/types/company'
 import type { SettingRecord } from '@/types/settings'
 import type { Task } from '@/types/task'
 import type { DeviceKeyRecord, VaultRecord } from '@/types/vault'
+import type { EyeBreakLogEntry, ScreenTimeDay } from '@/types/wellbeing'
 
 export const DATABASE_NAME = 'taskuda'
 
@@ -18,6 +19,8 @@ export type TaskudaDatabase = Dexie & {
   calendarMappings: EntityTable<CalendarMapping, 'taskId'>
   vault: EntityTable<VaultRecord, 'id'>
   deviceKeys: EntityTable<DeviceKeyRecord, 'id'>
+  eyeBreakLog: EntityTable<EyeBreakLogEntry, 'id'>
+  screenTime: EntityTable<ScreenTimeDay, 'dayKey'>
 }
 
 export const db = new Dexie(DATABASE_NAME) as TaskudaDatabase
@@ -36,4 +39,12 @@ db.version(1).stores({
 db.version(2).stores({
   vault: 'id',
   deviceKeys: 'id',
+})
+
+// v3 (PRD FR28, FR29): the eye-break log for M4 and the daily time in Taskuda for M5. Both stay on
+// this device: in-app time is per device by definition, and they change every minute, which would
+// keep marking the backup as changed.
+db.version(3).stores({
+  eyeBreakLog: '++id, dayKey',
+  screenTime: 'dayKey',
 })

@@ -81,6 +81,18 @@ describe('backup snapshot', () => {
     expect(() => parseBackupFile(text)).toThrow(BackupUnreadableError)
   })
 
+  it('leaves the eye-break log and time in Taskuda on this device (task 18.2)', async () => {
+    await db.eyeBreakLog.add({ at: 1, dayKey: DAY, outcome: 'done' })
+    await db.screenTime.put({ dayKey: DAY, ms: 60_000 })
+    const backup = await createBackupFile()
+    expect(backup.data).not.toHaveProperty('eyeBreakLog')
+    expect(backup.data).not.toHaveProperty('screenTime')
+
+    await restoreBackupFile(parseBackupFile(JSON.stringify(backup)))
+    expect(await db.eyeBreakLog.count()).toBe(1)
+    expect(await db.screenTime.get(DAY)).toEqual({ dayKey: DAY, ms: 60_000 })
+  })
+
   it('a rejected backup changes nothing', async () => {
     await createTask({ title: 'Safe', dayKey: DAY, block: 'morning' })
     expect(() => parseBackupFile('{"format":"taskuda-backup"}')).toThrow(BackupUnreadableError)

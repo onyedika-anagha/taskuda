@@ -2,6 +2,9 @@ import type { Page } from '@playwright/test'
 import { expect, test } from './fixtures'
 import { blockArea, expectNoA11yViolations, expectNoHorizontalScroll } from './helpers'
 
+/** Longer than one reminder tick (15 s), in case a tick was skipped. */
+const TICK_WAIT = 20_000
+
 const spokenLines = (page: Page) =>
   page.evaluate(() => (window as unknown as { taskudaSpoken: string[] }).taskudaSpoken)
 
@@ -113,8 +116,37 @@ test('AC21.2 / DAC19 the close-out nudge opens the closeout in one click', async
   await page.clock.fastForward('01:20')
   const banner = page.locator('[data-slot="notice"]')
   await expect(banner).toContainText('It’s 5:30 PM. Ready to close out your day?')
-  // The banner and the spoken alert come from separate ticks, so either can land first.
-  await expect.poll(() => spokenLines(page)).toContain('It’s 5:30 PM. Time to close out your day.')
+  // The banner and the spoken alert come from separate ticks, so either can land first. A tick is
+  // skipped while the previous one still runs, so under load the next can be one tick (15 s) later.
+  await expect
+    .poll(() => spokenLines(page), { timeout: TICK_WAIT })
+    .toContain('It’s 5:30 PM. Time to close out your day.')
   await banner.getByRole('button', { name: 'Close out day' }).click()
   await expect(page.getByRole('dialog', { name: /^Close out / })).toBeVisible()
+})
+
+test('AC28.2 / AC28.3 eye break: Done closes the prompt, and Snooze brings it back in 5 minutes', async ({
+  page,
+}) => {
+  // Tuesday, Oct 20, 2026, inside the default eye-break hours (9:00 AM–5:00 PM).
+  await setUp(page, new Date(2026, 9, 20, 10, 0))
+  await page.goto('/settings/workday')
+  await page.getByRole('switch', { name: /Eye breaks/ }).click()
+  await expect(page.getByLabel('Remind me to rest my eyes')).toContainText('Every 20 minutes')
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1, name: /, today$/ })).toBeVisible()
+
+  const prompt = page.getByText('Time for an eye break. Look at something far away for 20 seconds.')
+  await page.clock.fastForward('20:05')
+  await expect(prompt).toBeVisible({ timeout: TICK_WAIT })
+  await expect.poll(() => spokenLines(page)).toContain('Time for an eye break.')
+  await page.getByRole('button', { name: 'Done', exact: true }).click()
+  await expect(prompt).toBeHidden()
+
+  await page.clock.fastForward('20:05')
+  await expect(prompt).toBeVisible({ timeout: TICK_WAIT })
+  await page.getByRole('button', { name: 'Snooze 5 min' }).click()
+  await expect(prompt).toBeHidden()
+  await page.clock.fastForward('05:05')
+  await expect(prompt).toBeVisible({ timeout: TICK_WAIT })
 })

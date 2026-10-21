@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { makeTask } from '@/test/factories'
 import type { Closeout } from '@/types/closeout'
 import { DEFAULT_WORKING_DAYS as MON_FRI } from '@/types/workday'
-import { closeoutStreak, medianMinutesToReport, silentlyDroppedCount } from './metrics'
+import type { EyeBreakLogEntry, EyeBreakOutcome } from '@/types/wellbeing'
+import {
+  closeoutStreak,
+  daysWithinBudget,
+  eyeBreakFollowThrough,
+  medianMinutesToReport,
+  sevenDayAverageMs,
+  silentlyDroppedCount,
+} from './metrics'
 
 // 2026-10-21 is a Wednesday.
 const TODAY = '2026-10-21'
@@ -84,5 +92,55 @@ describe('M3 medianMinutesToReport', () => {
 
   it('is null without any copied report', () => {
     expect(medianMinutesToReport([closeout('2026-10-19', null)], TODAY)).toBeNull()
+  })
+})
+
+const HOUR = 3_600_000
+const entry = (dayKey: string, outcome: EyeBreakOutcome): EyeBreakLogEntry => ({ at: 0, dayKey, outcome })
+
+describe('M4 eyeBreakFollowThrough', () => {
+  it('is null with no ended prompts', () => {
+    expect(eyeBreakFollowThrough([entry(TODAY, 'snoozed')], TODAY)).toBeNull()
+  })
+
+  it('shares Done among prompts that ended in the window; snoozes are not endings', () => {
+    const log = [
+      entry(TODAY, 'done'),
+      entry(TODAY, 'snoozed'),
+      entry('2026-10-20', 'done'),
+      entry('2026-10-20', 'dismissed'),
+      entry('2026-10-19', 'missed'),
+      entry('2026-09-01', 'missed'), // outside the window
+    ]
+    expect(eyeBreakFollowThrough(log, TODAY)).toBe(0.5)
+  })
+})
+
+describe('M5 daysWithinBudget', () => {
+  it('counts past working days with time in Taskuda; today and days off are left out', () => {
+    const days = [
+      { dayKey: '2026-10-20', ms: 2 * HOUR }, // Tue, exactly on budget: within
+      { dayKey: '2026-10-19', ms: 3 * HOUR }, // Mon, over
+      { dayKey: '2026-10-18', ms: 5 * HOUR }, // Sun, not a working day
+      { dayKey: TODAY, ms: 9 * HOUR }, // still running
+      { dayKey: '2026-10-16', ms: 0 },
+    ]
+    expect(daysWithinBudget(days, TODAY, 2, MON_FRI)).toBe(0.5)
+  })
+
+  it('is null before any past working day has time recorded', () => {
+    expect(daysWithinBudget([{ dayKey: TODAY, ms: HOUR }], TODAY, 2, MON_FRI)).toBeNull()
+  })
+})
+
+describe('AC29.4 sevenDayAverageMs', () => {
+  it('averages the 7 full days before today, counting days not opened as 0', () => {
+    const days = [
+      { dayKey: '2026-10-20', ms: 5 * HOUR },
+      { dayKey: '2026-10-14', ms: 2 * HOUR },
+      { dayKey: '2026-10-13', ms: 9 * HOUR }, // 8 days ago
+      { dayKey: TODAY, ms: 9 * HOUR },
+    ]
+    expect(sevenDayAverageMs(days, TODAY)).toBe(HOUR)
   })
 })

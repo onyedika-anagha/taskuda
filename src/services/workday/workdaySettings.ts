@@ -1,10 +1,15 @@
 import { ValidationError } from '@/services/db/errors'
 import { getSetting, setSetting } from '@/services/db/settingsRepository'
 import {
+  BUDGET_HOURS,
   DEFAULT_CLOSEOUT_REMINDER,
+  DEFAULT_EYE_BREAKS,
   DEFAULT_QUIET_HOURS,
   DEFAULT_WORKING_DAYS,
+  EYE_BREAK_INTERVALS,
   WEEKDAYS,
+  type BudgetHours,
+  type EyeBreakSettings,
   type QuietHours,
   type Weekday,
   type WorkdaySettings,
@@ -16,6 +21,8 @@ const KEYS = {
   workingDays: 'workday.workingDays',
   closeoutReminder: 'workday.closeoutReminder',
   quietHours: 'workday.quietHours',
+  eyeBreaks: 'workday.eyeBreaks',
+  dailyBudgetHours: 'workday.dailyBudgetHours',
 } as const
 
 /** Valid, unique weekdays in display order; anything else in storage is dropped. */
@@ -58,7 +65,11 @@ export async function getQuietHours(): Promise<QuietHours> {
   if (!value || typeof value !== 'object') return { ...DEFAULT_QUIET_HOURS }
   const { start, end } = value
   const validRange =
-    typeof start === 'string' && typeof end === 'string' && isValidTime(start) && isValidTime(end) && start !== end
+    typeof start === 'string' &&
+    typeof end === 'string' &&
+    isValidTime(start) &&
+    isValidTime(end) &&
+    start !== end
   return validRange
     ? { enabled: value.enabled === true, start, end }
     : { ...DEFAULT_QUIET_HOURS, enabled: value.enabled === true }
@@ -74,11 +85,60 @@ export async function setQuietHours(quietHours: QuietHours): Promise<void> {
   })
 }
 
+function isEyeBreakInterval(value: unknown): value is EyeBreakSettings['intervalMinutes'] {
+  return EYE_BREAK_INTERVALS.includes(value as EyeBreakSettings['intervalMinutes'])
+}
+
+/** PRD AC28.1: off by default, every 20 minutes, 9:00 AM–5:00 PM. Bad stored values fall back. */
+export async function getEyeBreaks(): Promise<EyeBreakSettings> {
+  const value = await getSetting<Partial<EyeBreakSettings> | null>(KEYS.eyeBreaks, null)
+  if (!value || typeof value !== 'object') return { ...DEFAULT_EYE_BREAKS }
+  const { start, end } = value
+  const validRange =
+    typeof start === 'string' &&
+    typeof end === 'string' &&
+    isValidTime(start) &&
+    isValidTime(end) &&
+    start !== end
+  return {
+    enabled: value.enabled === true,
+    intervalMinutes: isEyeBreakInterval(value.intervalMinutes)
+      ? value.intervalMinutes
+      : DEFAULT_EYE_BREAKS.intervalMinutes,
+    start: validRange ? start : DEFAULT_EYE_BREAKS.start,
+    end: validRange ? end : DEFAULT_EYE_BREAKS.end,
+  }
+}
+
+export async function setEyeBreaks(eyeBreaks: EyeBreakSettings): Promise<void> {
+  checkRange(eyeBreaks.start, eyeBreaks.end)
+  if (!isEyeBreakInterval(eyeBreaks.intervalMinutes)) throw new ValidationError('Pick an interval.')
+  await setSetting(KEYS.eyeBreaks, {
+    enabled: eyeBreaks.enabled,
+    intervalMinutes: eyeBreaks.intervalMinutes,
+    start: eyeBreaks.start,
+    end: eyeBreaks.end,
+  })
+}
+
+/** PRD AC29.2: 1–4 hours, or `null` for Off (the default). */
+export async function getDailyBudgetHours(): Promise<BudgetHours | null> {
+  const value = await getSetting<unknown>(KEYS.dailyBudgetHours, null)
+  return BUDGET_HOURS.includes(value as BudgetHours) ? (value as BudgetHours) : null
+}
+
+export async function setDailyBudgetHours(hours: BudgetHours | null): Promise<void> {
+  if (hours !== null && !BUDGET_HOURS.includes(hours)) throw new ValidationError('Pick a budget.')
+  await setSetting(KEYS.dailyBudgetHours, hours)
+}
+
 export async function getWorkdaySettings(): Promise<WorkdaySettings> {
-  const [workingDays, closeoutReminder, quietHours] = await Promise.all([
+  const [workingDays, closeoutReminder, quietHours, eyeBreaks, dailyBudgetHours] = await Promise.all([
     getWorkingDays(),
     getCloseoutReminder(),
     getQuietHours(),
+    getEyeBreaks(),
+    getDailyBudgetHours(),
   ])
-  return { workingDays, closeoutReminder, quietHours }
+  return { workingDays, closeoutReminder, quietHours, eyeBreaks, dailyBudgetHours }
 }

@@ -3,16 +3,28 @@ import { TimeRangeField } from '@/components/common/TimeRangeField'
 import { WeekdayPicker } from '@/components/common/WeekdayPicker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Switch } from '@/components/ui/switch'
 import { useWorkdaySettings } from '@/hooks/useWorkdaySettings'
 import {
   setCloseoutReminder,
+  setDailyBudgetHours,
+  setEyeBreaks,
   setQuietHours,
   setWorkingDays,
 } from '@/services/workday/workdaySettings'
-import { DEFAULT_CLOSEOUT_REMINDER } from '@/types/workday'
+import {
+  BUDGET_HOURS,
+  DEFAULT_CLOSEOUT_REMINDER,
+  EYE_BREAK_INTERVALS,
+  type BudgetHours,
+  type EyeBreakInterval,
+} from '@/types/workday'
 import { isValidTime } from '@/utils/timeBlocks'
+
+/** Select value for "Off" in the budget picker. */
+const BUDGET_OFF = 'off'
 
 /** Same id for every change, so quick edits merge into one "Saved" toast (design S7h). */
 const SAVED_TOAST_ID = 'workday-saved'
@@ -37,7 +49,7 @@ function SettingHeading({ title, description }: { title: string; description: st
   )
 }
 
-/** S7h Workday (PRD FR19, FR21, FR23; FR28 and FR29 add their settings here). */
+/** S7h Workday (PRD FR19, FR21, FR23, FR28, FR29). */
 export function WorkdaySection() {
   const settings = useWorkdaySettings()
 
@@ -119,6 +131,87 @@ export function WorkdaySection() {
                 onChange={(range) => void save(() => setQuietHours({ ...settings.quietHours, ...range }))}
               />
             ) : null}
+          </div>
+
+          <div className="grid gap-3">
+            <div className="flex items-start justify-between gap-4">
+              <Label htmlFor="eye-breaks-on" className="grid gap-1 font-normal">
+                <span className="font-medium">Eye breaks</span>
+                <span className="text-sm text-muted-foreground">
+                  On working days, only while Taskuda is open.
+                </span>
+              </Label>
+              <Switch
+                id="eye-breaks-on"
+                checked={settings.eyeBreaks.enabled}
+                onCheckedChange={(enabled) =>
+                  void save(() => setEyeBreaks({ ...settings.eyeBreaks, enabled }))
+                }
+              />
+            </div>
+            {settings.eyeBreaks.enabled ? (
+              <>
+                <div className="grid gap-1.5">
+                  <Label htmlFor="eye-break-interval">Remind me to rest my eyes</Label>
+                  <Select
+                    value={String(settings.eyeBreaks.intervalMinutes)}
+                    onValueChange={(value) =>
+                      void save(() =>
+                        setEyeBreaks({
+                          ...settings.eyeBreaks,
+                          intervalMinutes: Number(value) as EyeBreakInterval,
+                        }),
+                      )
+                    }
+                  >
+                    <SelectTrigger id="eye-break-interval" className="min-h-11 w-full min-[400px]:w-56">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EYE_BREAK_INTERVALS.map((minutes) => (
+                        <SelectItem key={minutes} value={String(minutes)}>
+                          Every {minutes} minutes
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <TimeRangeField
+                  legend="Eye-break hours"
+                  value={settings.eyeBreaks}
+                  onChange={(range) => void save(() => setEyeBreaks({ ...settings.eyeBreaks, ...range }))}
+                />
+              </>
+            ) : null}
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label htmlFor="daily-budget" className="grid gap-1 font-normal">
+              <span className="font-medium">Daily time budget</span>
+              <span className="text-sm text-muted-foreground">
+                Warn me after this much time in Taskuda. Counts only time Taskuda is on screen on this device.
+              </span>
+            </Label>
+            <Select
+              value={settings.dailyBudgetHours === null ? BUDGET_OFF : String(settings.dailyBudgetHours)}
+              onValueChange={(value) =>
+                void save(() =>
+                  setDailyBudgetHours(value === BUDGET_OFF ? null : (Number(value) as BudgetHours)),
+                )
+              }
+            >
+              <SelectTrigger id="daily-budget" className="min-h-11 w-full min-[400px]:w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={BUDGET_OFF}>Off</SelectItem>
+                {BUDGET_HOURS.map((hours) => (
+                  <SelectItem key={hours} value={String(hours)}>
+                    {hours} h
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )}
