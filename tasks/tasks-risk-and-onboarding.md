@@ -141,16 +141,16 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 3.6 Add `deadlinesMet()` to `metrics.ts` (the latest change to Done in the activity log against the due moment, 4-week window), with unit tests
   - [x] 3.7 Add the M6 tile to `useMetrics` and `StatsSection` with the "No due dates yet." empty state; update the Stats tests
 
-- [ ] 4.0 First-run setup (FR34)
-  - [ ] 4.1 Write `services/onboarding/onboardingProgress.ts` (saved step, intro seen, setup done) on `safeStorage`, with tests
-  - [ ] 4.2 Change `useFirstRun` so a device with setup in progress goes back to "/welcome" even when it already has a company (AC34.5); a device with data and no progress record still counts as done (Out of Scope item 29)
-  - [ ] 4.3 Add `nextUnusedColorId()` to `companyPalette.ts`, with a test
-  - [ ] 4.4 Build `SetupCompanyList` and rework `CompanyStep`: add several companies, the form clears and keeps focus, "Acme added" is announced, Remove with the focus rules, Continue only once ≥ 1 company exists, Skip for now always shown, the duplicate-name error
-  - [ ] 4.5 Build `WorkdayStep` with `WeekdayPicker` and the close-out reminder, saving through the existing workday settings service; Skip keeps the defaults
-  - [ ] 4.6 Show the restore choice inside the Backup step instead of as a separate step; keep the existing connect, error and restore behavior
-  - [ ] 4.7 Build `SetupStepIndicator` and remove the hard-coded "Step N of 3"
-  - [ ] 4.8 Rework `useWelcomeFlow`: steps companies → workday → backup, save the step on every change, resume, finish shows the "You're all set" toast (touch-screen variant through `useMediaQuery`) and goes to "/"
-  - [ ] 4.9 Tests for `useWelcomeFlow`, `CompanyStep`, `WorkdayStep` and `WelcomePage`, including resume after a remount
+- [x] 4.0 First-run setup (FR34)
+  - [x] 4.1 Write `services/onboarding/onboardingProgress.ts` (saved step, intro seen, setup done) on `safeStorage`, with tests
+  - [x] 4.2 Change `useFirstRun` so a device with setup in progress goes back to "/welcome" even when it already has a company (AC34.5); a device with data and no progress record still counts as done (Out of Scope item 29)
+  - [x] 4.3 Add `nextUnusedColorId()` to `companyPalette.ts`, with a test
+  - [x] 4.4 Build `SetupCompanyList` and rework `CompanyStep`: add several companies, the form clears and keeps focus, "Acme added" is announced, Remove with the focus rules, Continue only once ≥ 1 company exists, Skip for now always shown, the duplicate-name error
+  - [x] 4.5 Build `WorkdayStep` with `WeekdayPicker` and the close-out reminder, saving through the existing workday settings service; Skip keeps the defaults
+  - [x] 4.6 Show the restore choice inside the Backup step instead of as a separate step; keep the existing connect, error and restore behavior
+  - [x] 4.7 Build `SetupStepIndicator` and remove the hard-coded "Step N of 3"
+  - [x] 4.8 Rework `useWelcomeFlow`: steps companies → workday → backup, save the step on every change, resume, finish shows the "You're all set" toast (touch-screen variant through `useMediaQuery`) and goes to "/"
+  - [x] 4.9 Tests for `useWelcomeFlow`, `CompanyStep`, `WorkdayStep` and `WelcomePage`, including resume after a remount
 
 - [ ] 5.0 Intro slides (FR33)
   - [ ] 5.1 Write `useIntroCarousel` (index, next, back, go to, ←/→ keys, swipe through `useSwipe`), with tests

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { COMPANY_PALETTE, NO_COMPANY_SHADES, getPaletteColor, isPaletteColorId } from './companyPalette'
+import {
+  COMPANY_PALETTE,
+  NO_COMPANY_SHADES,
+  getPaletteColor,
+  isPaletteColorId,
+  nextUnusedColorId,
+} from './companyPalette'
 import { contrastRatio } from './contrast'
 
 describe('company palette', () => {
@@ -31,5 +37,11 @@ describe('company palette', () => {
     expect(isPaletteColorId('teal')).toBe(true)
     expect(isPaletteColorId('chartreuse')).toBe(false)
     expect(getPaletteColor('chartreuse').id).toBe('slate')
+  })
+
+  it('AC34.2 picks the first color no company uses yet', () => {
+    expect(nextUnusedColorId([])).toBe(COMPANY_PALETTE[0].id)
+    expect(nextUnusedColorId([COMPANY_PALETTE[0].id, COMPANY_PALETTE[2].id])).toBe(COMPANY_PALETTE[1].id)
+    expect(nextUnusedColorId(COMPANY_PALETTE.map((c) => c.id))).toBe(COMPANY_PALETTE[0].id)
   })
 })

@@ -99,3 +99,9 @@ export function isPaletteColorId(id: string): boolean {
 export function getPaletteColor(id: string): PaletteColor {
   return COMPANY_PALETTE.find((c) => c.id === id) ?? FALLBACK_COLOR
 }
+
+/** The first palette color no company uses yet, so each new company in setup stands out (AC34.2). */
+export function nextUnusedColorId(usedColorIds: Iterable<string>): string {
+  const used = new Set(usedColorIds)
+  return COMPANY_PALETTE.find((c) => !used.has(c.id))?.id ?? DEFAULT_COMPANY_COLOR_ID
+}

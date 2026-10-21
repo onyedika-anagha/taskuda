@@ -11,9 +11,13 @@ import { ColorSwatchPicker } from './ColorSwatchPicker'
 interface CompanyFormProps {
   defaultValues: CompanyFormValues
   onSubmit: (values: CompanyFormValues) => Promise<void>
-  onCancel: () => void
+  /** No Cancel button when left out (setup puts its own actions under the form). */
+  onCancel?: () => void
+  /** Clear the form for the next company after a save, keeping focus in Name (design S1b). */
+  resetTo?: (saved: CompanyFormValues) => CompanyFormValues
   submitLabel?: string
   cancelLabel?: string
+  nameLabel?: string
 }
 
 export function CompanyForm({
@@ -22,12 +26,16 @@ export function CompanyForm({
   onCancel,
   submitLabel = 'Save',
   cancelLabel = 'Cancel',
+  resetTo,
+  nameLabel = 'Name',
 }: CompanyFormProps) {
   const {
     register,
     control,
     handleSubmit,
     setError,
+    reset,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<CompanyFormValues>({
     resolver: zodResolver(companyFormSchema),
@@ -38,6 +46,10 @@ export function CompanyForm({
   async function submit(values: CompanyFormValues) {
     try {
       await onSubmit(values)
+      if (resetTo) {
+        reset(resetTo(values))
+        setFocus('name')
+      }
     } catch (error) {
       if (error instanceof DuplicateCompanyNameError || error instanceof ValidationError) {
         setError('name', { message: error.message }, { shouldFocus: true })
@@ -49,7 +61,7 @@ export function CompanyForm({
 
   return (
     <form onSubmit={handleSubmit(submit)} noValidate className="grid gap-4">
-      <FormField id="company-name" label="Name" error={errors.name?.message}>
+      <FormField id="company-name" label={nameLabel} error={errors.name?.message}>
         <Input
           id="company-name"
           autoComplete="organization"
@@ -74,9 +86,11 @@ export function CompanyForm({
       ) : null}
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Button type="button" variant="outline" size="lg" onClick={onCancel}>
-          {cancelLabel}
-        </Button>
+        {onCancel ? (
+          <Button type="button" variant="outline" size="lg" onClick={onCancel}>
+            {cancelLabel}
+          </Button>
+        ) : null}
         <Button type="submit" size="lg" disabled={isSubmitting}>
           {submitLabel}
         </Button>
