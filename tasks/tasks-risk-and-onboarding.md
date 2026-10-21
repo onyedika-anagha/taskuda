@@ -132,14 +132,14 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 2.10 Extend the contrast check so both marker styles reach ≥ 4.5:1 in light and dark (DAC28); adjust the tokens in `index.css` if not
   - [x] 2.11 Confirm no sound, speech, toast or notification is ever triggered by a risk change (AC31.7): a test with the speech and toast fakes
 
-- [ ] 3.0 Day progress, the at-risk list and M6 (FR32, AC17.3)
-  - [ ] 3.1 Build `DayProgress` ("4 of 9 done", "All 9 done", bar `aria-hidden`, bar hidden under 360px)
-  - [ ] 3.2 Build `AtRiskButton` (hidden at 0; accessible name "2 tasks at risk. Show list"; 44px target)
-  - [ ] 3.3 Build `AtRiskDialog` (D9) on `ResponsiveDialog`: titles for today and other days, rows sorted by `atRiskTasks()`, the "Nothing at risk right now." state, focus rules; choosing a row closes D9 and opens the task in the editor through `canvasUiStore`
-  - [ ] 3.4 Build `DaySummaryRow`; compose it and D9 in `TodayPage` between the notices and the canvas; hide it when the day has no tasks; past days show progress only
-  - [ ] 3.5 Component tests for the three pieces, and a `TodayPage` test that a status change updates the count right away (AC32.1)
-  - [ ] 3.6 Add `deadlinesMet()` to `metrics.ts` (the latest change to Done in the activity log against the due moment, 4-week window), with unit tests
-  - [ ] 3.7 Add the M6 tile to `useMetrics` and `StatsSection` with the "No due dates yet." empty state; update the Stats tests
+- [x] 3.0 Day progress, the at-risk list and M6 (FR32, AC17.3)
+  - [x] 3.1 Build `DayProgress` ("4 of 9 done", "All 9 done", bar `aria-hidden`, bar hidden under 360px)
+  - [x] 3.2 Build `AtRiskButton` (hidden at 0; accessible name "2 tasks at risk. Show list"; 44px target)
+  - [x] 3.3 Build `AtRiskDialog` (D9) on `ResponsiveDialog`: titles for today and other days, rows sorted by `atRiskTasks()`, the "Nothing at risk right now." state, focus rules; choosing a row closes D9 and opens the task in the editor through `canvasUiStore`
+  - [x] 3.4 Build `DaySummaryRow`; compose it and D9 in `TodayPage` between the notices and the canvas; hide it when the day has no tasks; past days show progress only
+  - [x] 3.5 Component tests for the three pieces, and a `TodayPage` test that a status change updates the count right away (AC32.1)
+  - [x] 3.6 Add `deadlinesMet()` to `metrics.ts` (the latest change to Done in the activity log against the due moment, 4-week window), with unit tests
+  - [x] 3.7 Add the M6 tile to `useMetrics` and `StatsSection` with the "No due dates yet." empty state; update the Stats tests
 
 - [ ] 4.0 First-run setup (FR34)
   - [ ] 4.1 Write `services/onboarding/onboardingProgress.ts` (saved step, intro seen, setup done) on `safeStorage`, with tests

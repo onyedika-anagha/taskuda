@@ -21,6 +21,22 @@ describe('Stats (S7f, PRD FR17)', () => {
     expect(await screen.findByText('Your stats appear after your first closeout.')).toBeInTheDocument()
   })
 
+  it('AC17.3 shows M6 as "No due dates yet" until a due date comes due', async () => {
+    await saveCloseout({
+      dayKey: todayKey(),
+      startedAt: 0,
+      finishedAt: 1,
+      reportCopiedAt: null,
+      rating: 4,
+      reflection: '',
+      outcomes: {},
+    })
+    renderWithApp('/settings/stats')
+    const tile = await screen.findByText('Deadlines met')
+    expect(tile.nextElementSibling).toHaveTextContent('—')
+    expect(screen.getByText('No due dates yet.')).toBeInTheDocument()
+  })
+
   it('AC17.1 shows M1, M2 and M3 from local data', async () => {
     const today = todayKey()
     await saveCloseout({

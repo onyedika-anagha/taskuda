@@ -6,6 +6,7 @@ import type { EyeBreakLogEntry, EyeBreakOutcome } from '@/types/wellbeing'
 import {
   closeoutStreak,
   daysWithinBudget,
+  deadlinesMet,
   eyeBreakFollowThrough,
   medianMinutesToReport,
   sevenDayAverageMs,
@@ -142,5 +143,39 @@ describe('AC29.4 sevenDayAverageMs', () => {
       { dayKey: TODAY, ms: 9 * HOUR },
     ]
     expect(sevenDayAverageMs(days, TODAY)).toBe(HOUR)
+  })
+})
+
+describe('M6 deadlinesMet (PRD AC17.3)', () => {
+  const now = new Date(2026, 9, 21, 12, 0).getTime()
+  const at = (day: string, h: number) => {
+    const [y, m, d] = day.split('-').map(Number)
+    return new Date(y, m - 1, d, h).getTime()
+  }
+
+  it('is null with no due dates in the window', () => {
+    expect(deadlinesMet([makeTask()], new Map(), now)).toBeNull()
+  })
+
+  it('counts tasks done by their due moment against those that came due', () => {
+    const onTime = makeTask({ id: 'a', status: 'done', dueDate: '2026-10-20' })
+    const late = makeTask({ id: 'b', status: 'done', dueDate: '2026-10-19', dueTime: '09:00' })
+    const missed = makeTask({ id: 'c', status: 'todo', dueDate: '2026-10-18' })
+    const notYet = makeTask({ id: 'd', status: 'todo', dueDate: '2026-10-22' })
+    const doneAt = new Map([
+      ['a', at('2026-10-20', 15)],
+      ['b', at('2026-10-19', 10)],
+    ])
+    expect(deadlinesMet([onTime, late, missed, notYet], doneAt, now)).toBeCloseTo(1 / 3)
+  })
+
+  it('counts a carried task once, by its latest copy', () => {
+    const original = makeTask({ id: 'o', dueDate: '2026-10-20', carriedToTaskId: 'copy' })
+    const copy = makeTask({ id: 'copy', status: 'done', dueDate: '2026-10-20', carriedFromTaskId: 'o' })
+    expect(deadlinesMet([original, copy], new Map([['copy', at('2026-10-20', 11)]]), now)).toBe(1)
+  })
+
+  it('leaves out due dates before the 4-week window', () => {
+    expect(deadlinesMet([makeTask({ dueDate: '2026-09-01' })], new Map(), now)).toBeNull()
   })
 })

@@ -4,6 +4,7 @@ import { BottomActionBar, DayActions } from '@/components/canvas/DayActions'
 import { DayClosedBanner } from '@/components/canvas/DayClosedBanner'
 import { CanvasBanners } from '@/components/canvas/CanvasBanners'
 import { DayNavigator } from '@/components/canvas/DayNavigator'
+import { DaySummaryRow } from '@/components/canvas/DaySummaryRow'
 import { ReminderCatchup } from '@/components/canvas/ReminderCatchup'
 import { TaskCanvas } from '@/components/canvas/TaskCanvas'
 import { LazyCloseoutDialog } from '@/components/closeout/LazyCloseoutDialog'
@@ -76,6 +77,9 @@ export function TodayPage() {
       {nav.isPast ? <PastDayNotice dayKey={nav.dayKey} /> : null}
       {closeout ? <DayClosedBanner dayKey={nav.dayKey} finishedAt={closeout.finishedAt} /> : null}
       {tasks?.length === 0 && companies?.length === 0 && !readOnly ? <CompanyTip /> : null}
+      {storageBlocked ? null : (
+        <DaySummaryRow dayKey={nav.dayKey} risks={risks} companiesById={companiesById} />
+      )}
 
       {tasks === undefined && !storageBlocked ? (
         <CanvasSkeleton />

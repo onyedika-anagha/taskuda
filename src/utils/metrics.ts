@@ -1,8 +1,10 @@
+import { format } from 'date-fns'
 import type { Closeout } from '@/types/closeout'
 import type { Task } from '@/types/task'
 import type { EyeBreakLogEntry, ScreenTimeDay } from '@/types/wellbeing'
 import type { Weekday } from '@/types/workday'
-import { addDaysToKey, isWorkingDay } from './dates'
+import { addDaysToKey, fromDayKey, isWorkingDay } from './dates'
+import { dueMoment } from './dueDates'
 
 /** The PRD's 4-week measurement window. */
 export const METRIC_WINDOW_DAYS = 28
@@ -89,4 +91,21 @@ export function sevenDayAverageMs(days: ScreenTimeDay[], todayKey: string): numb
   const start = addDaysToKey(todayKey, -7)
   const total = days.filter((d) => d.dayKey >= start && d.dayKey < todayKey).reduce((sum, d) => sum + d.ms, 0)
   return total / 7
+}
+
+/**
+ * M6 (PRD AC17.3): tasks whose due moment falls in the window and has passed, done by then. Only the
+ * latest copy of a carried task counts, so carrying a task over isn't counted as a miss twice.
+ * `doneAt` is each task's latest change to Done (activity log). `null` with no such tasks.
+ */
+export function deadlinesMet(tasks: Task[], doneAt: ReadonlyMap<string, number>, now: number): number | null {
+  const today = format(now, 'yyyy-MM-dd')
+  const from = fromDayKey(windowStart(today)).getTime()
+  const counted = tasks.filter((t) => {
+    const due = dueMoment(t)
+    return due !== null && due >= from && due < now && t.carriedToTaskId === null
+  })
+  if (!counted.length) return null
+  const met = counted.filter((t) => t.status === 'done' && (doneAt.get(t.id) ?? t.updatedAt) <= dueMoment(t)!)
+  return met.length / counted.length
 }

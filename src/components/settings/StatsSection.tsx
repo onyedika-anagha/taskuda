@@ -19,7 +19,7 @@ function WorkdayLink({ children }: { children: string }) {
   )
 }
 
-/** S7f Stats: M1–M5 (PRD FR17), time in Taskuda (FR29) and carry-over insights (FR26), from this device's data. */
+/** S7f Stats: M1–M6 (PRD FR17), time in Taskuda (FR29) and carry-over insights (FR26), from this device's data. */
 export function StatsSection() {
   const metrics = useMetrics()
 
@@ -81,6 +81,15 @@ export function StatsSection() {
                   action={<WorkdayLink>Set one in Workday</WorkdayLink>}
                 />
               )}
+              <MetricTile
+                label="Deadlines met"
+                value={metrics.deadlineRate === null ? '—' : formatRate(metrics.deadlineRate)}
+                explanation={
+                  metrics.deadlineRate === null
+                    ? 'No due dates yet.'
+                    : 'Tasks with a due date that were done on time, last 4 weeks. Goal: 85% or more.'
+                }
+              />
             </dl>
           )}
           <TimeInTaskuda todayMs={metrics.todayMs} averageMs={metrics.averageMs} />
