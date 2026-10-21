@@ -1,6 +1,7 @@
 import { RestoreDialogs } from '@/components/backup/RestoreDialogs'
 import { CompanyStep } from '@/components/welcome/CompanyStep'
 import { DriveStep } from '@/components/welcome/DriveStep'
+import { IntroCarousel } from '@/components/welcome/IntroCarousel'
 import { RestoreStep } from '@/components/welcome/RestoreStep'
 import { SetupStepIndicator } from '@/components/welcome/SetupStepIndicator'
 import { WorkdayStep } from '@/components/welcome/WorkdayStep'
@@ -9,12 +10,20 @@ import { useRestoreFlow } from '@/hooks/useRestoreFlow'
 import { useWelcomeFlow } from '@/hooks/useWelcomeFlow'
 import { downloadBackup } from '@/services/backup/driveBackup'
 
-/** S1b Setup (first run only): composes the steps. */
+/** S1a Intro then S1b Setup (first run only): composes the slides and the steps. */
 export function WelcomePage() {
   const flow = useWelcomeFlow()
   const drive = useDriveConnection()
   const restore = useRestoreFlow({ onDone: () => flow.finish({ announce: false }) })
   const { step } = flow
+
+  if (step.name === 'intro') {
+    return (
+      <main className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 py-6">
+        <IntroCarousel mode="first-run" onFinish={flow.startSetup} onRestore={flow.toRestore} />
+      </main>
+    )
+  }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col gap-6 px-4 py-10">

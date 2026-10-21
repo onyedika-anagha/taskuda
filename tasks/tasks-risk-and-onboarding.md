@@ -152,14 +152,14 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 4.8 Rework `useWelcomeFlow`: steps companies → workday → backup, save the step on every change, resume, finish shows the "You're all set" toast (touch-screen variant through `useMediaQuery`) and goes to "/"
   - [x] 4.9 Tests for `useWelcomeFlow`, `CompanyStep`, `WorkdayStep` and `WelcomePage`, including resume after a remount
 
-- [ ] 5.0 Intro slides (FR33)
-  - [ ] 5.1 Write `useIntroCarousel` (index, next, back, go to, ←/→ keys, swipe through `useSwipe`), with tests
-  - [ ] 5.2 Build `IntroSlide` and `introSlides.tsx` with the four slides' copy and illustrations built from real Taskuda components (no image files)
-  - [ ] 5.3 Build `IntroCarousel`: carousel region semantics, only the current slide exposed, dots as buttons with `aria-current`, focus moves to the new heading, Skip on every slide, no auto-advance, reduced motion
-  - [ ] 5.4 First run: show the intro before setup in `WelcomePage`; "Get started" → Companies; "I already use Taskuda" → Backup; Skip → Companies; mark the intro seen
-  - [ ] 5.5 Add `IntroPage` and the lazy "/intro" route for replay (last slide shows "Done"; Skip and Done go back to "/settings/about"; no data changes)
-  - [ ] 5.6 Add "Show intro again" to `AboutSection`
-  - [ ] 5.7 Component tests for `IntroCarousel` (keyboard, dots, Skip, focus) and a test that replay changes no data
+- [x] 5.0 Intro slides (FR33)
+  - [x] 5.1 Write `useIntroCarousel` (index, next, back, go to, ←/→ keys, swipe through `useSwipe`), with tests
+  - [x] 5.2 Build `IntroSlide` and `introSlides.tsx` with the four slides' copy and illustrations built from real Taskuda components (no image files)
+  - [x] 5.3 Build `IntroCarousel`: carousel region semantics, only the current slide exposed, dots as buttons with `aria-current`, focus moves to the new heading, Skip on every slide, no auto-advance, reduced motion
+  - [x] 5.4 First run: show the intro before setup in `WelcomePage`; "Get started" → Companies; "I already use Taskuda" → Backup; Skip → Companies; mark the intro seen
+  - [x] 5.5 Add `IntroPage` and the lazy "/intro" route for replay (last slide shows "Done"; Skip and Done go back to "/settings/about"; no data changes)
+  - [x] 5.6 Add "Show intro again" to `AboutSection`
+  - [x] 5.7 Component tests for `IntroCarousel` (keyboard, dots, Skip, focus) and a test that replay changes no data
 
 - [ ] 6.0 Verification and docs
   - [ ] 6.1 `e2e/risk.spec.ts`: add a due date (DAC22), markers appear and change with a mocked clock (DAC23), open an at-risk task in 2 interactions (DAC25)

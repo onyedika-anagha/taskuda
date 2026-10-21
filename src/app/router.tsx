@@ -17,6 +17,7 @@ export const routes: RouteObject[] = [
     path: '/settings/:section',
     lazy: async () => ({ Component: (await import('@/pages/SettingsPage')).SettingsPage }),
   },
+  { path: '/intro', lazy: async () => ({ Component: (await import('@/pages/IntroPage')).IntroPage }) },
   { path: '/welcome', lazy: async () => ({ Component: (await import('@/pages/WelcomePage')).WelcomePage }) },
   { path: '*', element: <Navigate to="/" replace /> },
 ]

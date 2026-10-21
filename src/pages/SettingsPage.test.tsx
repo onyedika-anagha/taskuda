@@ -6,7 +6,16 @@ import { resetDatabase } from '@/test/resetDatabase'
 import { setViewport } from '@/test/viewport'
 
 // Design spec S7, in nav order.
-const SECTION_LABELS = ['Companies', 'Workday', 'Integrations', 'Backup', 'AI & Security', 'Voice', 'Stats', 'About']
+const SECTION_LABELS = [
+  'Companies',
+  'Workday',
+  'Integrations',
+  'Backup',
+  'AI & Security',
+  'Voice',
+  'Stats',
+  'About',
+]
 
 describe('Settings layout (S7, design spec Section 6)', () => {
   beforeEach(async () => {

@@ -1,10 +1,12 @@
 import { CheckIcon } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { useInstallStore } from '@/stores/installStore'
 
-/** S7g About: version, install, privacy summary. */
+/** S7g About: version, install, the intro again (PRD AC33.4), privacy summary. */
 export function AboutSection() {
+  const navigate = useNavigate()
   const { canInstall, install } = useInstallPrompt()
   const installed = useInstallStore((s) => s.installed)
 
@@ -34,6 +36,9 @@ export function AboutSection() {
             Taskuda is installed on this device.
           </p>
         ) : null}
+        <Button variant="outline" className="min-h-11 justify-self-start" onClick={() => navigate('/intro')}>
+          Show intro again
+        </Button>
       </div>
     </section>
   )

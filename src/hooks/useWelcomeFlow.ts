@@ -5,6 +5,8 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { listBackupVersions, type BackupVersion } from '@/services/backup/driveBackup'
 import {
   getSetupStep,
+  isIntroSeen,
+  markIntroSeen,
   markSetupDone,
   saveSetupStep,
   type SetupStep,
@@ -12,7 +14,8 @@ import {
 import { useBackupStore } from '@/stores/backupStore'
 
 export interface WelcomeStep {
-  name: SetupStep
+  /** `intro` comes first on a new device (PRD FR33) and is never saved as a setup step. */
+  name: SetupStep | 'intro'
   /** Backup step only: Drive already holds a backup, so the restore choice shows (design F1.6). */
   latest?: BackupVersion
 }
@@ -20,16 +23,22 @@ export interface WelcomeStep {
 const ALL_SET = 'You’re all set. Press N or + to add your first task.'
 const ALL_SET_TOUCH = 'You’re all set. Tap + to add your first task.'
 
-/** S1b Setup: companies → workday → backup (restore if found) → today (PRD FR34, design F1). */
+function firstStep(): WelcomeStep['name'] {
+  // Resumes where a closed tab left setup, without the intro again (AC34.5).
+  return getSetupStep() ?? (isIntroSeen() ? 'companies' : 'intro')
+}
+
+/** S1a Intro → S1b Setup: companies → workday → backup (restore if found) → today (design F1). */
 export function useWelcomeFlow() {
   const navigate = useNavigate()
   const backupNow = useBackupStore((s) => s.backupNow)
   const touch = useMediaQuery('(pointer: coarse)')
-  // Resumes where a closed tab left setup (AC34.5).
-  const [step, setStep] = useState<WelcomeStep>(() => ({ name: getSetupStep() ?? 'companies' }))
+  const [step, setStep] = useState<WelcomeStep>(() => ({ name: firstStep() }))
 
-  // Saved from the first step on, so a company added before a closed tab doesn't skip setup.
-  useEffect(() => saveSetupStep(step.name), [step.name])
+  // Saved from the first setup step on, so a company added before a closed tab doesn't skip setup.
+  useEffect(() => {
+    if (step.name !== 'intro') saveSetupStep(step.name)
+  }, [step.name])
 
   function goTo(next: SetupStep) {
     setStep({ name: next })
@@ -44,6 +53,16 @@ export function useWelcomeFlow() {
 
   return {
     step,
+    /** Skip and Get started (AC33.2–AC33.3). */
+    startSetup() {
+      markIntroSeen()
+      goTo('companies')
+    },
+    /** "I already use Taskuda": straight to the backup step to restore (PRD RK22). */
+    toRestore() {
+      markIntroSeen()
+      goTo('backup')
+    },
     toWorkday: () => goTo('workday'),
     toBackup: () => goTo('backup'),
     /** After connecting: look for an existing backup before making a new one. */

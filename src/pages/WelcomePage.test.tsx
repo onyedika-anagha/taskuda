@@ -14,9 +14,9 @@ import { resetVaultState } from '@/test/resetVault'
 
 describe('Welcome (S1)', () => {
   beforeEach(async () => {
-    for (const key of ['taskuda.welcomeDone', 'taskuda.setupStep', 'taskuda.introSeen']) {
-      window.localStorage.removeItem(key)
-    }
+    for (const key of ['taskuda.welcomeDone', 'taskuda.setupStep']) window.localStorage.removeItem(key)
+    // These tests cover setup; the intro has its own block below.
+    window.localStorage.setItem('taskuda.introSeen', '1')
     forgetAccessToken()
     useBackupStore.setState({ status: { state: 'loading' }, connected: false })
     await resetVaultState()
@@ -202,5 +202,51 @@ describe('Welcome (S1)', () => {
     await user.click(await screen.findByRole('button', { name: 'Start fresh' }))
     await waitFor(() => expect(router.state.location.pathname).toBe('/'))
     await waitFor(() => expect(drive.files).toHaveLength(2))
+  })
+})
+
+describe('Intro (S1a, PRD FR33)', () => {
+  beforeEach(() => {
+    for (const key of ['taskuda.welcomeDone', 'taskuda.setupStep', 'taskuda.introSeen']) {
+      window.localStorage.removeItem(key)
+    }
+  })
+
+  it('AC33.1 a new device sees the intro before setup', async () => {
+    const { router } = renderWithApp('/')
+    expect(await screen.findByRole('region', { name: 'About Taskuda' })).toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Slide 1 of 4' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'One board for every job.' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/welcome')
+  })
+
+  it('DAC26 Skip goes straight to setup and the intro isn’t shown again', async () => {
+    const first = renderWithApp('/welcome')
+    await first.user.click(await screen.findByRole('button', { name: 'Skip' }))
+    expect(await screen.findByRole('heading', { name: 'Step 1 of 3 · Companies' })).toBeInTheDocument()
+    first.unmount()
+
+    renderWithApp('/welcome')
+    expect(await screen.findByRole('heading', { name: 'Step 1 of 3 · Companies' })).toBeInTheDocument()
+  })
+
+  it('AC33.3 “I already use Taskuda” goes to the backup step', async () => {
+    const { user } = renderWithApp('/welcome')
+    await user.click(await screen.findByRole('button', { name: 'Go to slide 4' }))
+    await user.click(screen.getByRole('button', { name: 'I already use Taskuda' }))
+    expect(await screen.findByRole('heading', { name: 'Step 3 of 3 · Backup' })).toBeInTheDocument()
+  })
+
+  it('AC33.4 Settings → About replays the intro and returns there, changing nothing', async () => {
+    window.localStorage.setItem('taskuda.welcomeDone', '1')
+    const { user, router } = renderWithApp('/settings/about')
+    await user.click(await screen.findByRole('button', { name: 'Show intro again' }))
+    await screen.findByRole('region', { name: 'About Taskuda' })
+    await user.click(screen.getByRole('button', { name: 'Go to slide 4' }))
+    expect(screen.queryByRole('button', { name: 'I already use Taskuda' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Done' }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/settings/about'))
+    expect(await listCompanies()).toEqual([])
+    expect(window.localStorage.getItem('taskuda.setupStep')).toBeNull()
   })
 })
