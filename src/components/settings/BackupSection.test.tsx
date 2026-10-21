@@ -172,6 +172,6 @@ describe('Backup settings (S7c)', () => {
     expect(await screen.findByText('Backup file saved')).toBeInTheDocument()
     expect(click).toHaveBeenCalledTimes(1)
     const blob = createObjectURL.mock.calls[0][0]
-    expect(JSON.parse(await blob.text())).toMatchObject({ format: 'taskuda-backup', version: 2 })
+    expect(JSON.parse(await blob.text())).toMatchObject({ format: 'taskuda-backup', version: 3 })
   })
 })

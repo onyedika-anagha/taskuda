@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useDraftOverlaps } from '@/hooks/useDraftOverlaps'
+import { useDueDateField } from '@/hooks/useDueDateField'
 import { NO_COMPANY, taskFormSchema, type TaskFormValues } from '@/schemas/taskForm'
 import type { Company } from '@/types/company'
 import { TIME_BLOCKS, type Task } from '@/types/task'
+import { DueDateField } from './DueDateField'
 import { JiraIssueField } from './JiraIssueField'
 import { OverlapWarning } from './OverlapWarning'
 import { RepeatField } from './RepeatField'
@@ -52,6 +54,7 @@ export function TaskEditorForm({
     mode: 'onTouched',
   })
   const overlaps = useDraftOverlaps(control, dayTasks, editing)
+  const due = useDueDateField(control, setValue)
   const durationError = errors.durationMinutes?.message
 
   return (
@@ -147,6 +150,10 @@ export function TaskEditorForm({
           </FormField>
           {/* Doesn't block Save (PRD AC25.3). */}
           <OverlapWarning id="task-overlap" overlaps={overlaps} />
+        </div>
+
+        <div className="sm:col-span-2">
+          <DueDateField due={due} register={register} errors={errors} />
         </div>
       </div>
 

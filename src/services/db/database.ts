@@ -66,3 +66,17 @@ db.version(4)
         task.seriesId ??= null
       }),
   )
+
+// v5 (PRD FR30): optional due date and time on tasks, null for every existing task. No new index:
+// at-risk states are worked out from the day's tasks already in memory. Backup format version 3.
+db.version(5)
+  .stores({})
+  .upgrade((tx) =>
+    tx
+      .table('tasks')
+      .toCollection()
+      .modify((task: { dueDate?: string | null; dueTime?: string | null }) => {
+        task.dueDate ??= null
+        task.dueTime ??= null
+      }),
+  )

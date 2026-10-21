@@ -54,7 +54,7 @@ test('CR2 export to a file and import it back', async ({ page }) => {
   expect(download.suggestedFilename()).toMatch(/^taskuda-backup-\d{4}-\d{2}-\d{2}\.json$/)
   const path = await download.path()
   const text = await readFile(path, 'utf8')
-  expect(JSON.parse(text)).toMatchObject({ format: 'taskuda-backup', version: 2 })
+  expect(JSON.parse(text)).toMatchObject({ format: 'taskuda-backup', version: 3 })
 
   // Wipe the task, then import the file.
   await page.goto('/')

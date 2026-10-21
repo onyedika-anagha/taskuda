@@ -20,6 +20,12 @@ describe('eventMapping', () => {
     })
   })
 
+  it('PRD Out of Scope 24: never sends the due date to Calendar', () => {
+    const base = { ...makeTask({ dayKey: '2026-10-19' }), startTime: '14:00' }
+    const withDue = { ...base, dueDate: '2026-10-24', dueTime: '17:00' }
+    expect(taskToEvent(withDue)).toEqual(taskToEvent(base))
+  })
+
   it('gives events without a duration 30 minutes, crossing midnight correctly', () => {
     const event = taskToEvent({ ...makeTask({ dayKey: '2026-10-19' }), startTime: '23:45' })
     expect(event.end?.dateTime).toBe('2026-10-20T00:15:00')

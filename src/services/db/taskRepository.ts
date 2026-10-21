@@ -30,6 +30,13 @@ function checkDuration(durationMinutes: number | null | undefined): void {
   }
 }
 
+/** A due time needs a due date (PRD AC30.1). */
+function checkDue(dueDate: string | null | undefined, dueTime: string | null | undefined): void {
+  if (dueDate != null && !isValidDayKey(dueDate)) throw new ValidationError('Use a valid due date.')
+  if (dueTime != null && !isValidTime(dueTime)) throw new ValidationError('Use a valid due time.')
+  if (dueTime != null && dueDate == null) throw new ValidationError('Pick a due date for this time.')
+}
+
 async function getTaskOrThrow(id: string): Promise<Task> {
   const task = await db.tasks.get(id)
   if (!task) throw new RecordNotFoundError('Task', id)
@@ -62,6 +69,7 @@ export async function createTask(input: NewTaskInput): Promise<Task> {
   if (!TIME_BLOCKS.includes(input.block)) throw new ValidationError('Invalid time of day.')
   checkStartTime(input.startTime)
   checkDuration(input.durationMinutes)
+  checkDue(input.dueDate, input.dueTime)
   const title = cleanTitle(input.title)
 
   return db.transaction('rw', db.tasks, db.activityLog, async () => {
@@ -83,6 +91,8 @@ export async function createTask(input: NewTaskInput): Promise<Task> {
       source: input.source ?? 'manual',
       jiraIssue: input.jiraIssue ?? null,
       seriesId: input.seriesId ?? null,
+      dueDate: input.dueDate ?? null,
+      dueTime: input.dueDate ? (input.dueTime ?? null) : null,
       createdAt: now,
       updatedAt: now,
     }
@@ -102,6 +112,8 @@ export async function updateTask(id: string, patch: TaskPatch): Promise<Task> {
   return db.transaction('rw', db.tasks, db.activityLog, async () => {
     const task = await getTaskOrThrow(id)
     const updated: Task = { ...task, ...changes, updatedAt: Date.now() }
+    if (changes.dueDate !== undefined || changes.dueTime !== undefined)
+      checkDue(updated.dueDate, updated.dueTime)
     await db.tasks.put(updated)
     await appendActivity('task_updated', id, task.dayKey, { fields: Object.keys(changes) })
     return updated

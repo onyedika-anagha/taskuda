@@ -120,6 +120,8 @@ export async function changeSeriesFrom(
   pattern: RepeatPattern | null,
 ): Promise<void> {
   if (pattern) checkPattern(pattern)
+  // Series never carry a due date (PRD Out of Scope item 23).
+  const { dueDate: _dueDate, dueTime: _dueTime, ...templatePatch } = patch
   const workingDays = await getWorkingDays()
   await db.transaction('rw', TABLES, async () => {
     const old = await getSeriesOrThrow(task.seriesId)
@@ -131,7 +133,7 @@ export async function changeSeriesFrom(
     let next: RecurringSeries | null = null
     if (pattern) {
       next = {
-        ...newSeries({ ...templateOf(task), ...patch, block }, pattern, task.dayKey),
+        ...newSeries({ ...templateOf(task), ...templatePatch, block }, pattern, task.dayKey),
         endedFromDayKey:
           old.endedFromDayKey !== null && old.endedFromDayKey > task.dayKey ? old.endedFromDayKey : null,
         skippedDayKeys: old.skippedDayKeys.filter((day) => day > task.dayKey),

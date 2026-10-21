@@ -135,4 +135,69 @@ describe('TaskEditorForm', () => {
       expect(screen.queryByText('In shorter months, it moves to the last day.')).not.toBeInTheDocument()
     })
   })
+
+  describe('Due date (PRD FR30, design F18)', () => {
+    it('DAC22 adds a due date in 2 interactions, with focus moving to the date', async () => {
+      const onSubmit = renderForm()
+      await userEvent.type(screen.getByLabelText('Title'), 'Invoice')
+      await userEvent.click(screen.getByRole('button', { name: 'Add due date' }))
+      const date = screen.getByLabelText('Due date')
+      expect(date).toHaveFocus()
+      await userEvent.type(date, '2099-10-24')
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ dueDate: '2099-10-24', dueTime: '' }),
+        expect.anything(),
+      )
+    })
+
+    it('AC30.4 Remove clears the date and time and returns focus to Add due date', async () => {
+      const onSubmit = renderForm()
+      await userEvent.type(screen.getByLabelText('Title'), 'Invoice')
+      await userEvent.click(screen.getByRole('button', { name: 'Add due date' }))
+      await userEvent.type(screen.getByLabelText('Due date'), '2099-10-24')
+      await userEvent.type(screen.getByLabelText('Due time (optional)'), '17:00')
+      await userEvent.click(screen.getByRole('button', { name: 'Remove due date' }))
+      expect(screen.getByRole('button', { name: 'Add due date' })).toHaveFocus()
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ dueDate: '', dueTime: '' }),
+        expect.anything(),
+      )
+    })
+
+    it('AC30.3 a passed date shows a hint and still saves', async () => {
+      const onSubmit = renderForm()
+      await userEvent.type(screen.getByLabelText('Title'), 'Invoice')
+      await userEvent.click(screen.getByRole('button', { name: 'Add due date' }))
+      const date = screen.getByLabelText('Due date')
+      await userEvent.type(date, '2020-01-01')
+      expect(date).toHaveAccessibleDescription('This date has passed. The task will show as overdue.')
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expect(onSubmit).toHaveBeenCalled()
+    })
+
+    it('AC30.5 repeating tasks have no due date', async () => {
+      renderForm()
+      await userEvent.click(screen.getByRole('button', { name: 'Add due date' }))
+      await userEvent.type(screen.getByLabelText('Due date'), '2099-10-24')
+      await userEvent.click(screen.getByRole('combobox', { name: 'Repeat' }))
+      await userEvent.click(await screen.findByRole('option', { name: 'Every day' }))
+      expect(screen.queryByLabelText('Due date')).not.toBeInTheDocument()
+      expect(screen.getByText('Due date removed. Repeating tasks don’t have due dates.')).toBeInTheDocument()
+    })
+
+    it('opens with the due date shown when the task has one', () => {
+      render(
+        <TaskEditorForm
+          defaultValues={{ ...emptyTaskForm('morning'), title: 'Invoice', dueDate: '2099-10-24' }}
+          companies={[]}
+          isEdit
+          onSubmit={vi.fn<(values: TaskFormValues) => Promise<void>>()}
+          onCancel={() => {}}
+        />,
+      )
+      expect(screen.getByLabelText('Due date')).toHaveValue('2099-10-24')
+    })
+  })
 })

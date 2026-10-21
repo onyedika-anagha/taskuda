@@ -27,7 +27,7 @@ describe('backup snapshot', () => {
     expect((await listTasksForDay(DAY)).map((t) => t.title)).toEqual(['Kept in backup'])
     expect((await listCompanies()).map((c) => c.name)).toEqual(['Acme'])
     expect(await getSetting('voice.leadMinutes', 0)).toBe(10)
-    expect(backup).toMatchObject({ format: 'taskuda-backup', version: 2, createdAt: 1000 })
+    expect(backup).toMatchObject({ format: 'taskuda-backup', version: 3, createdAt: 1000 })
   })
 
   it('never includes the device key, and keeps this device’s identity and Drive settings', async () => {
@@ -130,6 +130,59 @@ describe('backup snapshot', () => {
     await restoreBackupFile(parsed)
     expect(await listTasksForDay(DAY)).toEqual([expect.objectContaining({ id: 'old', seriesId: null })])
     expect(await db.recurringSeries.count()).toBe(0)
+  })
+
+  it('AC30.6 backs up due dates (format version 3)', async () => {
+    await createTask({
+      title: 'Invoice',
+      dayKey: DAY,
+      block: 'morning',
+      dueDate: '2026-10-24',
+      dueTime: '17:00',
+    })
+    const backup = parseBackupFile(JSON.stringify(await createBackupFile()))
+    expect(backup.version).toBe(3)
+    await db.tasks.clear()
+
+    await restoreBackupFile(backup)
+    expect((await listTasksForDay(DAY))[0]).toMatchObject({ dueDate: '2026-10-24', dueTime: '17:00' })
+  })
+
+  it('AC30.6 / RK20 still restores a version 2 file made before due dates', async () => {
+    const current = await createBackupFile(1000)
+    const v2 = {
+      ...current,
+      version: 2,
+      data: {
+        ...current.data,
+        tasks: [
+          {
+            id: 'v2',
+            title: 'From version 2',
+            notes: '',
+            companyId: null,
+            dayKey: DAY,
+            block: 'morning',
+            order: 1000,
+            startTime: null,
+            durationMinutes: null,
+            status: 'todo',
+            carriedOverCount: 0,
+            carriedFromTaskId: null,
+            carriedToTaskId: null,
+            source: 'manual',
+            jiraIssue: null,
+            seriesId: null,
+            createdAt: 1,
+            updatedAt: 1,
+          },
+        ],
+      },
+    }
+    await restoreBackupFile(parseBackupFile(JSON.stringify(v2)))
+    expect(await listTasksForDay(DAY)).toEqual([
+      expect.objectContaining({ id: 'v2', dueDate: null, dueTime: null }),
+    ])
   })
 
   it('leaves the eye-break log and time in Taskuda on this device (task 18.2)', async () => {

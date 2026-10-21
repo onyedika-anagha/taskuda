@@ -59,6 +59,28 @@ describe('taskRepository', () => {
       )
     })
 
+    it('AC30.1 saves an optional due date and time', async () => {
+      const task = await createTask({
+        title: 'Invoice',
+        dayKey: DAY,
+        block: 'morning',
+        dueDate: '2026-10-24',
+        dueTime: '17:00',
+      })
+      expect(task).toMatchObject({ dueDate: '2026-10-24', dueTime: '17:00' })
+      const plain = await createTask({ title: 'Plain', dayKey: DAY, block: 'morning' })
+      expect(plain).toMatchObject({ dueDate: null, dueTime: null })
+    })
+
+    it('AC30.1 rejects a due time without a due date, and invalid due values', async () => {
+      await expect(
+        createTask({ title: 'A', dayKey: DAY, block: 'morning', dueTime: '17:00' }),
+      ).rejects.toThrow(ValidationError)
+      await expect(
+        createTask({ title: 'A', dayKey: DAY, block: 'morning', dueDate: '2026-13-40' }),
+      ).rejects.toThrow(ValidationError)
+    })
+
     it('appends new tasks to the end of their block', async () => {
       await createTask({ title: 'First', dayKey: DAY, block: 'morning' })
       await createTask({ title: 'Evening', dayKey: DAY, block: 'evening' })
@@ -83,6 +105,19 @@ describe('taskRepository', () => {
         type: 'task_updated',
         data: { fields: ['title', 'notes', 'startTime'] },
       })
+    })
+
+    it('AC30.4 removes a due date and its time together', async () => {
+      const task = await createTask({
+        title: 'Invoice',
+        dayKey: DAY,
+        block: 'morning',
+        dueDate: '2026-10-24',
+        dueTime: '17:00',
+      })
+      const updated = await updateTask(task.id, { dueDate: null, dueTime: null })
+      expect(updated).toMatchObject({ dueDate: null, dueTime: null })
+      await expect(updateTask(task.id, { dueTime: '09:00' })).rejects.toThrow(ValidationError)
     })
 
     it('throws RecordNotFoundError for a missing task', async () => {
@@ -205,6 +240,18 @@ describe('taskRepository', () => {
       expect(await titles('afternoon')).toEqual(['First', 'A', 'Last'])
     })
 
+    it('AC18.2 / AC30.5 keeps the due date', async () => {
+      const task = await createTask({
+        title: 'Invoice',
+        dayKey: DAY,
+        block: 'morning',
+        dueDate: '2026-10-24',
+        dueTime: '09:30',
+      })
+      const restored = await restoreTask(await deleteTask(task.id))
+      expect(restored).toMatchObject({ dueDate: '2026-10-24', dueTime: '09:30' })
+    })
+
     it('AC18.3 records the restore after the deletion', async () => {
       const a = await createTask({ title: 'A', dayKey: DAY, block: 'morning' })
       await restoreTask(await deleteTask(a.id))
@@ -260,6 +307,17 @@ describe('taskRepository', () => {
         carriedFromTaskId: a.id,
       })
       expect((await getTask(a.id))?.carriedToTaskId).toBe(copy.id)
+    })
+
+    it('AC30.5 keeps the due date on the carried copy', async () => {
+      const task = await createTask({
+        title: 'Invoice',
+        dayKey: DAY,
+        block: 'morning',
+        dueDate: '2026-10-19',
+      })
+      const copy = await carryOverTask(task.id, NEXT_DAY)
+      expect(copy).toMatchObject({ dueDate: '2026-10-19', dueTime: null })
     })
 
     it('AC11.2 counts how many times a task has been carried', async () => {

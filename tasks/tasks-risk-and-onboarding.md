@@ -104,20 +104,20 @@ Update the file after completing each sub-task, not just after completing an ent
 
 ## Tasks
 
-- [ ] 0.0 Create feature branch
-  - [ ] 0.1 Commit or set aside the uncommitted work on `feature/taskuda-v1` (ask the owner how to split it)
-  - [ ] 0.2 Create and check out `feature/risk-and-onboarding` from `feature/taskuda-v1`
+- [x] 0.0 Create feature branch
+  - [x] 0.1 Commit or set aside the uncommitted work on `feature/taskuda-v1` (ask the owner how to split it)
+  - [x] 0.2 Create and check out `feature/risk-and-onboarding` from `feature/taskuda-v1`
 
-- [ ] 1.0 Due dates (FR30)
-  - [ ] 1.1 Add `dueDate` and `dueTime` to `Task`, `NewTaskInput` and `TaskPatch`; update `makeTask` in the test factories
-  - [ ] 1.2 Add database version 5 in `database.ts`, filling both fields with `null` on existing tasks (no new index needed)
-  - [ ] 1.3 Save the due fields in `createTask` and `updateTask`; check that `carryOverTask` copies them and `restoreTask` keeps them (AC30.5, AC18.2), with repository tests
-  - [ ] 1.4 Write `utils/dueDates.ts`: due moment (no time = 23:59 local), `isDuePassed`, short labels ("Due today", "Due tomorrow", "Due Fri, Oct 24", with time) and spoken labels, with unit tests
-  - [ ] 1.5 Bump the backup format to version 3 in `backupFile.ts` and `backupSnapshot.ts`; versions 1 and 2 parse with `dueDate: null, dueTime: null`; tests for all three (AC30.6)
-  - [ ] 1.6 Add the due fields to `taskForm.ts` and `taskFormMapping.ts`: a time needs a date; switching Repeat on clears the due date; mapping tests
-  - [ ] 1.7 Build `DueDateField` (collapsed button, date + optional time, Remove, passed-date hint with `aria-describedby`, repeating-task text, focus moves as in design Section 7), with component tests
-  - [ ] 1.8 Add `DueDateField` to `TaskEditorForm` after Duration; editor tests for add, remove, past date and repeating
-  - [ ] 1.9 Confirm Calendar sync and Jira ignore the due fields (Out of Scope item 24); add one assertion to the calendar mapping test
+- [x] 1.0 Due dates (FR30)
+  - [x] 1.1 Add `dueDate` and `dueTime` to `Task`, `NewTaskInput` and `TaskPatch`; update `makeTask` in the test factories
+  - [x] 1.2 Add database version 5 in `database.ts`, filling both fields with `null` on existing tasks (no new index needed)
+  - [x] 1.3 Save the due fields in `createTask` and `updateTask`; check that `carryOverTask` copies them and `restoreTask` keeps them (AC30.5, AC18.2), with repository tests
+  - [x] 1.4 Write `utils/dueDates.ts`: due moment (no time = 23:59 local), `isDuePassed`, short labels ("Due today", "Due tomorrow", "Due Fri, Oct 24", with time) and spoken labels, with unit tests
+  - [x] 1.5 Bump the backup format to version 3 in `backupFile.ts` and `backupSnapshot.ts`; versions 1 and 2 parse with `dueDate: null, dueTime: null`; tests for all three (AC30.6)
+  - [x] 1.6 Add the due fields to `taskForm.ts` and `taskFormMapping.ts`: a time needs a date; switching Repeat on clears the due date; mapping tests
+  - [x] 1.7 Build `DueDateField` (collapsed button, date + optional time, Remove, passed-date hint with `aria-describedby`, repeating-task text, focus moves as in design Section 7), with component tests
+  - [x] 1.8 Add `DueDateField` to `TaskEditorForm` after Duration; editor tests for add, remove, past date and repeating
+  - [x] 1.9 Confirm Calendar sync and Jira ignore the due fields (Out of Scope item 24); add one assertion to the calendar mapping test
 
 - [ ] 2.0 At-risk rules and markers (FR31)
   - [ ] 2.1 Add `types/risk.ts` (`RiskKind`, `TaskRisk` with kind and the time it refers to)

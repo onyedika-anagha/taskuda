@@ -16,6 +16,8 @@ describe('taskFormMapping', () => {
       durationMinutes: null,
       notes: '',
       jiraIssue: null,
+      dueDate: null,
+      dueTime: null,
     })
   })
 
@@ -30,12 +32,37 @@ describe('taskFormMapping', () => {
       durationMinutes: 45,
       notes: 'Agenda',
       jiraIssue: null,
+      dueDate: null,
+      dueTime: null,
     })
   })
 
   it('maps "No company" to null', () => {
     expect(taskToForm(makeTask()).companyId).toBe(NO_COMPANY)
     expect(formToPatch({ ...emptyTaskForm('evening'), title: 'x' }).companyId).toBeNull()
+  })
+
+  describe('Due date (PRD FR30)', () => {
+    it('round-trips a due date and time', () => {
+      const values = taskToForm(makeTask({ dueDate: '2026-10-24', dueTime: '17:00' }))
+      expect(values).toMatchObject({ dueDate: '2026-10-24', dueTime: '17:00' })
+      expect(formToPatch(values)).toMatchObject({ dueDate: '2026-10-24', dueTime: '17:00' })
+    })
+
+    it('AC30.5 drops the due date when the task repeats', () => {
+      const values = {
+        ...emptyTaskForm('morning'),
+        title: 'Standup',
+        repeat: 'daily' as const,
+        dueDate: '2026-10-24',
+      }
+      expect(formToPatch(values)).toMatchObject({ dueDate: null, dueTime: null })
+    })
+
+    it('AC30.4 an empty date clears the time too', () => {
+      const values = { ...emptyTaskForm('morning'), title: 'A', dueDate: '', dueTime: '17:00' }
+      expect(formToPatch(values)).toMatchObject({ dueDate: null, dueTime: null })
+    })
   })
 
   describe('Repeat (PRD AC20.1, design F14.2)', () => {

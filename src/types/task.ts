@@ -37,6 +37,10 @@ export interface Task {
   jiraIssue: JiraIssueLink | null
   /** The repeating series this task is an occurrence of (PRD FR20); carried copies keep it. */
   seriesId: string | null
+  /** Local day the task is due, `yyyy-MM-dd` (PRD FR30). Repeating tasks never have one. */
+  dueDate: string | null
+  /** Local time, `HH:mm`. Only set with `dueDate`; without it the task is due at the end of that day. */
+  dueTime: string | null
   createdAt: number
   updatedAt: number
 }
@@ -52,8 +56,13 @@ export interface NewTaskInput {
   source?: TaskSource
   jiraIssue?: JiraIssueLink | null
   seriesId?: string | null
+  dueDate?: string | null
+  dueTime?: string | null
 }
 
 export type TaskPatch = Partial<
-  Pick<Task, 'title' | 'notes' | 'companyId' | 'startTime' | 'durationMinutes' | 'jiraIssue'>
+  Pick<
+    Task,
+    'title' | 'notes' | 'companyId' | 'startTime' | 'durationMinutes' | 'jiraIssue' | 'dueDate' | 'dueTime'
+  >
 >

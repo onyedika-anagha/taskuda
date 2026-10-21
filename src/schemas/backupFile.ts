@@ -29,6 +29,9 @@ const task = z
     jiraIssue: z.object({ key: z.string(), title: z.string(), status: z.string() }).nullable(),
     // Version 1 files have no series (PRD AC20.7).
     seriesId: z.string().nullable().default(null),
+    // Version 1 and 2 files have no due dates (PRD AC30.6).
+    dueDate: z.string().nullable().default(null),
+    dueTime: z.string().nullable().default(null),
     createdAt: z.number(),
     updatedAt: z.number(),
   })
@@ -110,13 +113,16 @@ const vault = z
   })
   .nullable()
 
-/** Format written today. Version 2 adds repeating series (PRD FR20); version 1 files still restore. */
-export const BACKUP_VERSION = 2
+/**
+ * Format written today. Version 2 adds repeating series (PRD FR20), version 3 adds due dates
+ * (PRD FR30); older files still restore.
+ */
+export const BACKUP_VERSION = 3
 
-/** Taskuda backup file, version 1 or 2. Validated before anything is restored (design F8.6). */
+/** Taskuda backup file, version 1, 2 or 3. Validated before anything is restored (design F8.6). */
 export const backupFileSchema = z.object({
   format: z.literal('taskuda-backup'),
-  version: z.union([z.literal(1), z.literal(2)]),
+  version: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   createdAt: z.number(),
   deviceId: z.string(),
   deviceName: z.string(),
@@ -135,8 +141,8 @@ export const backupFileSchema = z.object({
 /** What a valid backup contains, in the app's own types. `backupFileSchema` checks it at runtime. */
 export interface BackupFile {
   format: 'taskuda-backup'
-  /** 1 for files made before repeating tasks; they read as version 2 with no series. */
-  version: 1 | 2
+  /** 1: before repeating tasks (no series); 2: before due dates (none on its tasks). */
+  version: 1 | 2 | 3
   createdAt: number
   deviceId: string
   deviceName: string

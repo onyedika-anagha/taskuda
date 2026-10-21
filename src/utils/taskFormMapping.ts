@@ -32,6 +32,8 @@ export function emptyTaskForm(block: TimeBlock, dayKey = todayKey()): TaskFormVa
     durationMinutes: '',
     notes: '',
     jiraIssue: null,
+    dueDate: '',
+    dueTime: '',
     ...repeatDefaults(dayKey),
   }
 }
@@ -46,6 +48,8 @@ export function taskToForm(task: Task, series?: RecurringSeries): TaskFormValues
     durationMinutes: task.durationMinutes ? String(task.durationMinutes) : '',
     notes: task.notes,
     jiraIssue: task.jiraIssue,
+    dueDate: task.dueDate ?? '',
+    dueTime: task.dueTime ?? '',
     ...(series ? repeatFields(series.pattern, task.dayKey) : repeatDefaults(task.dayKey)),
   }
 }
@@ -65,6 +69,8 @@ export function formToPattern(values: TaskFormValues): RepeatPattern | null {
 }
 
 export function formToPatch(values: TaskFormValues): TaskPatch {
+  // Repeating tasks never have a due date (PRD AC30.5), and a time needs a date (AC30.1).
+  const dueDate = values.repeat === 'none' && values.dueDate ? values.dueDate : null
   return {
     title: values.title,
     companyId: values.companyId === NO_COMPANY ? null : values.companyId,
@@ -72,6 +78,8 @@ export function formToPatch(values: TaskFormValues): TaskPatch {
     durationMinutes: values.durationMinutes ? Number(values.durationMinutes) : null,
     notes: values.notes,
     jiraIssue: values.jiraIssue,
+    dueDate,
+    dueTime: dueDate && values.dueTime ? values.dueTime : null,
   }
 }
 
@@ -86,5 +94,7 @@ export function formToNewTask(values: TaskFormValues, dayKey: string): NewTaskIn
     durationMinutes: patch.durationMinutes,
     notes: patch.notes,
     jiraIssue: patch.jiraIssue,
+    dueDate: patch.dueDate,
+    dueTime: patch.dueTime,
   }
 }

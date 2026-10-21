@@ -37,10 +37,17 @@ export const taskFormSchema = z
     repeat: z.enum(REPEAT_OPTIONS),
     repeatWeekdays: z.array(z.number().int().min(0).max(6)),
     repeatDay: z.string().regex(/^([1-9]|[12]\d|3[01])$/, 'Pick a day of the month.'),
+    /** PRD FR30. `yyyy-MM-dd` and `HH:mm`; empty when not set. */
+    dueDate: z.union([z.literal(''), z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a valid due date.')]),
+    dueTime: z.union([z.literal(''), z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Use a valid due time.')]),
   })
   .refine((v) => v.repeat !== 'weekly' || v.repeatWeekdays.length > 0, {
     message: 'Pick at least one day.',
     path: ['repeatWeekdays'],
+  })
+  .refine((v) => !v.dueTime || !!v.dueDate, {
+    message: 'Pick a due date for this time.',
+    path: ['dueTime'],
   })
 
 export type TaskFormValues = z.infer<typeof taskFormSchema>
