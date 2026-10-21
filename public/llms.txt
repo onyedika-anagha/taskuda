@@ -1,0 +1,21 @@
+# Taskuda
+
+> Taskuda is a free, local-first day planner for people who work for several employers or clients at once. Tasks are sticky notes in Morning, Afternoon and Evening blocks, colour-coded by company. An end-of-day closeout makes sure no unfinished task is dropped, and a one-click report is formatted for Slack, Teams, Jira or email.
+
+Key facts:
+
+- Price: free. No paid plans, no accounts. Optional AI recommendations use the user's own Gemini or OpenRouter key.
+- Data: stored in the user's browser. No Taskuda server or database holds tasks. Optional backups go to a hidden app folder in the user's own Google Drive.
+- Security: AI keys and the Jira token are encrypted with AES-256-GCM, including in backups. Task content in a Drive backup is not encrypted; it is protected by the user's Google account.
+- Platform: progressive web app. Works offline after the first visit and installs on Windows, macOS, Android and iOS. Full support in current Chrome and Edge; Firefox and Safari are best effort.
+- Integrations: Google Drive backup, two-way Google Calendar sync (while the app is open), Gemini or OpenRouter for AI recommendations.
+- Audience: freelancers, contractors and people with more than one part-time job, especially those who send end-of-day reports to several managers.
+
+## Docs
+
+- [About Taskuda](/about/): what it is, how it works, where data is stored, and FAQs
+- [Pricing](/pricing.md): Taskuda is free; what can cost money and who bills it
+
+## Optional
+
+- [Open the app](/): the planner itself (requires JavaScript)

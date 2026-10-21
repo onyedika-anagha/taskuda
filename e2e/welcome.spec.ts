@@ -64,7 +64,12 @@ test('AC34.5 reloading mid-setup resumes at the same step, without the intro', a
 
 test('AC33.3 “I already use Taskuda” goes straight to the backup step', async ({ page }) => {
   await page.goto('/')
-  for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Next' }).click()
+  await expect(page.getByRole('group', { name: 'Slide 1 of 4' })).toBeVisible()
+  // Wait for each slide, so a click never lands while the previous one is still settling.
+  for (let slide = 2; slide <= 4; slide++) {
+    await page.getByRole('button', { name: 'Next' }).click()
+    await expect(page.getByRole('group', { name: `Slide ${slide} of 4` })).toBeVisible()
+  }
   await expectNoA11yViolations(page)
   await page.getByRole('button', { name: 'I already use Taskuda' }).click()
   await expect(page.getByRole('heading', { name: 'Step 3 of 3 · Backup' })).toBeVisible()

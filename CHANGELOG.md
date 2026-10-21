@@ -14,6 +14,9 @@ Adds PRD FR30–FR34. Not yet deployed. Export a backup before deploying.
 - **Intro slides** on first run, with Skip on every slide, and "Show intro again" in Settings → About.
 - **First-run setup** with three skippable steps: add several companies, set working days and the close-out reminder, then Drive backup. Setup resumes at its step after a closed tab. "I already use Taskuda" goes straight to restore.
 
+- **Installable icons:** PNG app icons (192 and 512, also maskable), an iPhone home-screen icon, `favicon.ico`, and light and dark theme colours.
+- **Search and AI visibility:** a static `/about/` page with FAQ and structured data, `llms.txt`, `pricing.md`, a social card image, and generated `robots.txt` and `sitemap.xml`. Indexing stays off until `SITE_INDEXING=on`.
+
 ### Security
 - Restore and import now reject backups with malformed dates or times, which could crash Today, and vaults with an unsafe PBKDF2 iteration count.
 - The Jira proxy logs refused requests (reason only, never the body or credentials) and refuses a declared oversized body before reading it.

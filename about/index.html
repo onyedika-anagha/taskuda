@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Taskuda — a free day planner for people with more than one job</title>
+    <meta
+      name="description"
+      content="Taskuda is a free, local-first day planner for people who work for several employers or clients. How it works, what it costs, and where your data is stored."
+    />
+    <!-- seo:head -->
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1f1c18" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Taskuda" />
+    <meta
+      property="og:title"
+      content="About Taskuda — a free day planner for people with more than one job"
+    />
+    <meta
+      property="og:description"
+      content="Plan each day as sticky notes per employer, close out what's unfinished, and copy a ready-made end-of-day report. Free, and your tasks stay on your device."
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Taskuda: colour-coded sticky notes for each employer, planned by time of day."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="stylesheet" href="/src/index.css" />
+    <script type="module" src="/src/about/theme.ts"></script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "%SITE_URL%/#app",
+            "name": "Taskuda",
+            "url": "%SITE_URL%/",
+            "description": "A free, local-first day planner for people who work for several employers or clients at once. Tasks are sticky notes in Morning, Afternoon and Evening blocks, colour-coded by company, with an end-of-day closeout and a ready-to-send report.",
+            "applicationCategory": "ProductivityApplication",
+            "operatingSystem": "Any (web browser; installable on Windows, macOS, Android and iOS)",
+            "browserRequirements": "Requires JavaScript. Full support in current Chrome and Edge; Firefox and Safari are best effort.",
+            "isAccessibleForFree": true,
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "featureList": [
+              "Sticky-note tasks grouped into Morning, Afternoon and Evening",
+              "Colour-coded companies and clients",
+              "Optional due dates and at-risk markers for slipping work",
+              "End-of-day closeout so unfinished work carries over instead of being dropped",
+              "End-of-day report formatted for Slack, Teams, Jira or email",
+              "Spoken reminders, eye-break reminders and a daily time budget",
+              "Repeating tasks",
+              "Works offline and installs like an app",
+              "Optional Google Drive backup and Google Calendar sync"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is Taskuda free?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Taskuda is free and has no paid plans or accounts. The only possible cost is AI recommendations, which use your own Gemini or OpenRouter key, so any usage cost is between you and that provider. Everything else works without an AI key."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Where does Taskuda store my tasks?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "In your browser, on your device. There is no Taskuda server or database that holds your tasks. If you connect Google Drive, Taskuda also keeps backups in a hidden app folder in your own Drive. Your AI key and Jira token are encrypted in those backups; task content is protected by your Google account."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does Taskuda work offline?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. After the first visit, you can create, edit and complete tasks, close out your day and copy your report with no connection. Drive backup, Calendar sync and AI recommendations need a connection."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Who is Taskuda for?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "People who work for more than one employer or client at the same time, such as freelancers, contractors and people with two part-time jobs, especially if they send end-of-day reports to more than one manager."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I install Taskuda on my phone or computer?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Taskuda is a progressive web app. In Chrome or Edge, choose Install from the address bar or from Settings, About in Taskuda. On iPhone, open it in Safari and choose Add to Home Screen."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What happens to tasks I don't finish?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "At the end of the day, the closeout asks you to decide what happens to every unfinished task: carry it over to your next working day, or delete it. Nothing is dropped without a decision, and tasks carried over several times are flagged as stuck."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body class="bg-background text-foreground antialiased">
+    <div class="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-12 px-4 py-8 sm:px-6 sm:py-12">
+      <header class="flex items-center justify-between gap-4">
+        <a
+          href="/"
+          class="flex items-center gap-2 rounded-md font-bold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <img src="/favicon.svg" alt="" width="28" height="28" />
+          Taskuda
+        </a>
+        <a
+          href="/"
+          class="inline-flex min-h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground outline-none hover:bg-primary/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          Open Taskuda
+        </a>
+      </header>
+
+      <main class="grid gap-12">
+        <section aria-labelledby="what" class="grid gap-4">
+          <h1 id="what" class="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+            Taskuda is a free day planner for people with more than one job.
+          </h1>
+          <p class="text-lg text-muted-foreground">
+            Taskuda lays out each day as sticky notes in Morning, Afternoon and Evening, colour-coded by
+            employer or client. At the end of the day it walks you through what's unfinished, carries it over,
+            and gives you an end-of-day report ready to paste into Slack, Teams, Jira or email. It's free,
+            works offline, and keeps your tasks on your device.
+          </p>
+          <p class="text-sm text-muted-foreground">
+            Last updated <time datetime="2026-10-22">October 22, 2026</time>
+          </p>
+        </section>
+
+        <section aria-labelledby="who" class="grid gap-3">
+          <h2 id="who" class="text-2xl font-semibold tracking-tight">Who Taskuda is for</h2>
+          <p>
+            Taskuda is built for people who work for several employers or clients at the same time:
+            freelancers, contractors, and people holding two part-time jobs. They often send a separate
+            end-of-day report to each manager, and their tasks live in different places, so unfinished work
+            gets dropped without anyone noticing. General to-do apps don't know which job a task belongs to,
+            and team project tools are too heavy for one person.
+          </p>
+        </section>
+
+        <section aria-labelledby="how" class="grid gap-4">
+          <h2 id="how" class="text-2xl font-semibold tracking-tight">How Taskuda works</h2>
+          <ol class="grid list-decimal gap-3 pl-6 marker:font-semibold">
+            <li><strong>Add your companies.</strong> Each employer or client gets a name and a colour.</li>
+            <li>
+              <strong>Plan the day as sticky notes.</strong> Put each task in Morning, Afternoon or Evening,
+              with an optional start time, duration and due date.
+            </li>
+            <li>
+              <strong>Work through it.</strong> Move each task from To Do to In Progress to Done. Spoken
+              reminders tell you when a timed task is about to start, and notes are marked Running late,
+              Overran, Overdue or Stuck when work slips.
+            </li>
+            <li>
+              <strong>Close out the day.</strong> Decide what happens to each unfinished task (carry it over
+              or delete it), rate the day, and add a short reflection.
+            </li>
+            <li>
+              <strong>Copy your report.</strong> One click copies an end-of-day report for all your companies
+              or just one, formatted for Slack, Teams, Jira or email.
+            </li>
+          </ol>
+        </section>
+
+        <section aria-labelledby="features" class="grid gap-4">
+          <h2 id="features" class="text-2xl font-semibold tracking-tight">What's included</h2>
+          <ul class="grid gap-2 pl-6 [&>li]:list-disc">
+            <li>Colour-coded sticky notes for each company, with drag-and-drop and full keyboard support</li>
+            <li>Due dates, at-risk markers, and a "4 of 9 done" progress line for the day</li>
+            <li>Repeating tasks: every day, every working day, weekly, or monthly</li>
+            <li>Overlap warnings when timed tasks clash</li>
+            <li>A close-out reminder, quiet hours, eye-break reminders and a daily time budget</li>
+            <li>
+              Stats: tasks dropped without a decision, your closeout streak, deadlines met, and carry-over
+              rate per company
+            </li>
+            <li>Optional backup to your own Google Drive, and two-way Google Calendar sync</li>
+            <li>Optional AI recommendations at closeout, using your own Gemini or OpenRouter key</li>
+            <li>Works offline, installs like an app, and supports light and dark themes</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="privacy" class="grid gap-3">
+          <h2 id="privacy" class="text-2xl font-semibold tracking-tight">Where your data lives</h2>
+          <p>
+            Your tasks are stored in your browser on your device. Taskuda has no server or database that holds
+            your tasks, and no account to sign up for. If you connect Google Drive, backups go to a hidden app
+            folder in your own Drive that other apps can't see. Your AI key and Jira token are encrypted with
+            AES-256-GCM before they're saved, including in backups; task content in a backup is protected by
+            your Google account. AI recommendations are only sent to the provider you choose, after you
+            confirm what will be sent.
+          </p>
+        </section>
+
+        <section aria-labelledby="faq" class="grid gap-6">
+          <h2 id="faq" class="text-2xl font-semibold tracking-tight">Frequently asked questions</h2>
+          <div class="grid gap-2">
+            <h3 class="text-lg font-semibold">Is Taskuda free?</h3>
+            <p>
+              Yes. Taskuda is free and has no paid plans or accounts. The only possible cost is AI
+              recommendations, which use your own Gemini or OpenRouter key, so any usage cost is between you
+              and that provider. Everything else works without an AI key.
+            </p>
+          </div>
+          <div class="grid gap-2">
+            <h3 class="text-lg font-semibold">Where does Taskuda store my tasks?</h3>
+            <p>
+              In your browser, on your device. There is no Taskuda server or database that holds your tasks.
+              If you connect Google Drive, Taskuda also keeps backups in a hidden app folder in your own
+              Drive. Your AI key and Jira token are encrypted in those backups; task content is protected by
+              your Google account.
+            </p>
+          </div>
+          <div class="grid gap-2">
+            <h3 class="text-lg font-semibold">Does Taskuda work offline?</h3>
+            <p>
+              Yes. After the first visit, you can create, edit and complete tasks, close out your day and copy
+              your report with no connection. Drive backup, Calendar sync and AI recommendations need a
+              connection.
+            </p>
+          </div>
+          <div class="grid gap-2">
+            <h3 class="text-lg font-semibold">Who is Taskuda for?</h3>
+            <p>
+              People who work for more than one employer or client at the same time, such as freelancers,
+              contractors and people with two part-time jobs, especially if they send end-of-day reports to
+              more than one manager.
+            </p>
+          </div>
+          <div class="grid gap-2">
+            <h3 class="text-lg font-semibold">Can I install Taskuda on my phone or computer?</h3>
+            <p>
+              Yes. Taskuda is a progressive web app. In Chrome or Edge, choose Install from the address bar or
+              from Settings, About in Taskuda. On iPhone, open it in Safari and choose Add to Home Screen.
+            </p>
+          </div>
+          <div class="grid gap-2">
+            <h3 class="text-lg font-semibold">What happens to tasks I don't finish?</h3>
+            <p>
+              At the end of the day, the closeout asks you to decide what happens to every unfinished task:
+              carry it over to your next working day, or delete it. Nothing is dropped without a decision, and
+              tasks carried over several times are flagged as stuck.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer
+        class="flex flex-wrap items-center justify-between gap-4 border-t pt-6 text-sm text-muted-foreground"
+      >
+        <p>Taskuda is free and non-commercial.</p>
+        <a
+          href="/"
+          class="rounded-sm font-medium text-foreground underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Open Taskuda
+        </a>
+      </footer>
+    </div>
+  </body>
+</html>

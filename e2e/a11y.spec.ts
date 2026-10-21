@@ -191,6 +191,8 @@ for (const scheme of ['light', 'dark'] as const) {
     })
 
     test('DAC8 / DAC10 every screen: no horizontal scroll, no WCAG 2.1 AA violations', async ({ page }) => {
+      // Every screen and all 8 settings sections, each scanned by axe.
+      test.slow()
       await page.goto('/')
       await addTask(page, 'A task with a fairly long title that has to wrap on small phones', 'Morning')
       await blockArea(page, 'Morning')

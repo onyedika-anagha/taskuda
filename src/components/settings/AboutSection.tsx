@@ -36,9 +36,15 @@ export function AboutSection() {
             Taskuda is installed on this device.
           </p>
         ) : null}
-        <Button variant="outline" className="min-h-11 justify-self-start" onClick={() => navigate('/intro')}>
-          Show intro again
-        </Button>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Button variant="outline" className="min-h-11" onClick={() => navigate('/intro')}>
+            Show intro again
+          </Button>
+          {/* A full page load: /about is a static page outside the app. */}
+          <a href="/about/" className="font-medium underline underline-offset-4">
+            About Taskuda
+          </a>
+        </div>
       </div>
     </section>
   )

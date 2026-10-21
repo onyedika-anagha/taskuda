@@ -61,6 +61,8 @@ npm run dev            # http://localhost:5173
 |---|---|---|
 | `VITE_GOOGLE_CLIENT_ID` | Browser (build time) | Google OAuth client ID. Public by design (it identifies the app, it isn't a secret). Without it, Drive backup and Calendar sync show "Google sign-in isn't set up". |
 | `ALLOWED_ORIGIN` | `api/jira.ts` (server) | The only origin allowed to call the Jira proxy, e.g. `https://taskuda.example.com`. Without it the proxy refuses every request. |
+| `SITE_URL` | Build (`config/seoPlugin.ts`) | Public address for canonical links, the sitemap and social cards. Optional on Vercel, which supplies the production domain. |
+| `SITE_INDEXING` | Build (`config/seoPlugin.ts`) | `on` lets search engines and AI crawlers in. Anything else keeps them out. Off by default. |
 
 Never put an AI key, Jira token or any other secret in `.env`: users add their own in the app, where they're encrypted.
 
@@ -78,6 +80,19 @@ Never put an AI key, Jira token or any other secret in `.env`: users add their o
 Going public later needs Google's (free) app verification for the Calendar scopes: privacy policy page, homepage, demo video, and the domain verified in Search Console (see PRD RK5).
 
 People can also use **their own** client ID: Settings → Integrations → Advanced.
+
+## Search and AI visibility (SEO / AEO)
+
+The app itself is JavaScript, which most AI crawlers don't run, so the public facts live in plain files:
+
+- **`/about/`**: a static page (no React) with what Taskuda is, who it's for, how it works, where data lives and an FAQ, plus `WebApplication` and `FAQPage` structured data. Built from `about/index.html` with the app's own styles.
+- **`/llms.txt`** and **`/pricing.md`**: short summaries for AI assistants and agents.
+- **`/robots.txt`** and **`/sitemap.xml`**: generated at build time. While indexing is off, robots blocks everything and every page carries `noindex`. When on, the AI search bots (GPTBot, ClaudeBot, PerplexityBot, Google-Extended and others) are allowed by name, and app screens (`/settings`, `/report`, `/day/`, `/welcome`, `/api/`) stay out.
+- **Head tags**: description, canonical, Open Graph and Twitter cards with `og-image.png` (1200 × 630).
+
+**Turning indexing on** (set `SITE_INDEXING=on` in Vercel and redeploy) makes Taskuda findable by anyone. The security review asks for that to wait until waivers S1 (infrastructure checks) and S3 (Jira API tokens) are closed.
+
+Keep the copy on `/about/`, `llms.txt` and `pricing.md` in step with the app. Every claim there must match what the security review verified; for example, Drive backups are not end-to-end encrypted.
 
 ## Deploying to Vercel
 
