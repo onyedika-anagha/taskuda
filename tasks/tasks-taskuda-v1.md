@@ -320,11 +320,11 @@ Adopted from the My Work Day PRD. These are Should items in v1 scope, built on `
   - [x] 19.11 Backup format v2: include series (and any 18.2 tables marked backed up); `backupFile` schema accepts versions 1 and 2; restoring and importing a v1 file still works (AC20.7, RK16)
   - [x] 19.12 Tests: `matchesDay` table (Feb 28/29, 31st, working days); occurrence service (past day, carried copy, run twice); scope edits; carryover keeps the series; backup v1 and v2 restore; calendar no-duplicates; e2e `recurring.spec.ts` for F14 (DAC17). Also fixed: the editor could briefly read "no series" for a repeating task (stale `useLiveQuery` result), which stopped the series on save
 
-- [ ] 20.0 Final pass for the additions: accessibility, responsive checks, docs, implementation notes, all checks green, commit
-  - [ ] 20.1 `a11y.spec.ts`: add S7h, D8, the D1 repeating variant, action toasts, and both banners (DAC10)
-  - [ ] 20.2 `responsive.spec.ts`: S7h, banners, Repeat field and Stats at 320px, 768px and 1280px with no horizontal scrolling (DAC8)
-  - [ ] 20.3 User-relevance review of the new UI: no raw ids, enum values (`working_days`), milliseconds or ISO times shown
-  - [ ] 20.4 `npm audit` after adding ToggleGroup; resolve critical/high issues
-  - [ ] 20.5 Update `docs/engineering/taskuda-impl-notes.md`: new tables and versions, backup v2, the decisions from 18.2 and 19.1, the test mapping for AC17.2–AC29.5 and DAC15–DAC21, Definition of Done re-check
-  - [ ] 20.6 Update `README.md` (Workday settings) and `CHANGELOG.md`
-  - [ ] 20.7 Lint, typecheck, unit tests, e2e and build all pass; commit
+- [x] 20.0 Final pass for the additions: accessibility, responsive checks, docs, implementation notes, all checks green, commit
+  - [x] 20.1 `a11y.spec.ts`: add S7h, D8, the D1 repeating variant, action toasts, and both banners (DAC10). Done as one test per theme that walks through every new screen and state
+  - [x] 20.2 `responsive.spec.ts`: S7h, banners, Repeat field and Stats at 320px, 768px and 1280px with no horizontal scrolling (DAC8). There is no separate `responsive.spec.ts`: the Playwright projects run every spec at 320, 768 and 1280 px, and the a11y tests check horizontal scroll
+  - [x] 20.3 User-relevance review of the new UI: no raw ids, enum values (`working_days`), milliseconds or ISO times shown
+  - [x] 20.4 `npm audit` after adding ToggleGroup; resolve critical/high issues. No dependencies changed this cycle. Production: 0 vulnerabilities; dev-only: the same `braces` chain under waiver E3
+  - [x] 20.5 Update `docs/engineering/taskuda-impl-notes.md`: new tables and versions, backup v2, the decisions from 18.2 and 19.1, the test mapping for AC17.2–AC29.5 and DAC15–DAC21, Definition of Done re-check
+  - [x] 20.6 Update `README.md` (Workday settings) and `CHANGELOG.md`
+  - [x] 20.7 Lint, typecheck, unit tests, e2e and build all pass; commit

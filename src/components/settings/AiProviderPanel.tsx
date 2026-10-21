@@ -69,7 +69,7 @@ export function AiProviderPanel() {
             <span className="sr-only">(opens in a new tab)</span>
           </a>
           <AiModelField
-            key={`${provider}-${settings.models[provider]}`}
+            key={provider}
             provider={provider}
             value={settings.models[provider]}
           />

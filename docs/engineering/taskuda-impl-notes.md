@@ -146,7 +146,7 @@ These are recorded in the design spec where they change it.
   - **Stats layout:** Carry-over shows even before the first closeout, since it has its own empty state.
 - **Voice e2e race fixed (2026-10-20):** the nudge banner and the spoken nudge come from separate ticks, so the test now polls for the spoken line instead of reading it once. On 2026-10-21 the wait went up to 20 s: a tick is skipped while the previous one still runs, so under load the next one is a full tick (15 s) later.
 - **Eye breaks and the time budget (FR28, FR29, added 2026-10-21):**
-  - **Backup decision (task 18.2):** `eyeBreakLog` and `screenTime` stay on this device and are **not** in backups, so the backup format stays at version 1 for now. Reasons: in-app time is per device by definition (AC29.5). Both tables change every minute or so, and `trackBackedUpChanges` would mark the backup as changed each time, which would keep Drive syncing. The cost: M4 and M5 start over on a new device or after a restore. Their settings (`workday.eyeBreaks`, `workday.dailyBudgetHours`) *are* backed up.
+  - **Backup decision (task 18.2):** `eyeBreakLog` and `screenTime` stay on this device and are **not** in backups, and backup format version 2 (FR20) leaves them out too. Reasons: in-app time is per device by definition (AC29.5). Both tables change every minute or so, and `trackBackedUpChanges` would mark the backup as changed each time, which would keep Drive syncing. The cost: M4 and M5 start over on a new device or after a restore. Their settings (`workday.eyeBreaks`, `workday.dailyBudgetHours`) *are* backed up.
   - **Interval anchor:** the next prompt is one interval after the latest of the last prompt, the start of today's eye-break hours, and when this tab opened Taskuda. Prompts only count time while Taskuda is open (AC28.2), so opening it mid-morning doesn't fire one straight away. A reload restarts the interval. The last-prompt time and a pending snooze are kept in `localStorage`, like reminder snoozes.
   - **Outcomes:** Done, Close (dismissed) and Snooze (snoozed) are logged from the toast. A prompt that came due in the background is logged as missed when it shows on return, and its buttons don't log it again. A prompt replaced by the next one is logged as missed (F15.5). Prompts skipped during quiet hours aren't logged (AC23.3), and missed prompts aren't spoken.
   - **M4** = Done ÷ (Done + dismissed + missed) over the window. A snooze isn't an ending: the prompt comes back and gets its own outcome. Without this, snooze-then-Done would count as 50%.
@@ -167,6 +167,7 @@ These are recorded in the design spec where they change it.
   - **Repeats marker:** shown while the series still runs on the task's day ("Repeats daily", "Repeats on working days", "Repeats weekly", "Repeats monthly"), and part of the note's `aria-label`.
   - **Editor bug found by e2e:** `useLiveQuery` keeps returning the previous query's result after its dependencies change. The editor briefly saw "no series" for a repeating task, so the form started at "Doesn't repeat", and saving stopped the series. `useSeries` now tags its result with the id it was read for (unit test added).
   - **Default block:** `openCreate` now picks the block for the current time when the editor opens, instead of the editor calling `new Date()` during render (lint purity rule).
+- **AI model field flake was a real bug (2026-10-21):** the field was keyed on the stored model, so a save that landed after the user had started editing again remounted it and dropped the edit. It also skipped a save when the new value matched a stale `value` prop. The field now keeps the value it last saved, adopts only changes made elsewhere (a restore), and is keyed on the provider only (`AiModelField.test.tsx`). The other intermittent failures seen this cycle were test timing (the reminder-tick waits in `voice.spec.ts`, and the budget toast matched in `BudgetBanner.test.tsx`), and were fixed in the tests.
 - **Past days that were never closed out can still be closed out.**
 - **Voice lines say "2:00 PM".**
 - **First-run Drive connect** checks for an existing backup before uploading a new one.
@@ -240,6 +241,58 @@ Paths are under `src/` unless they start with `e2e/` or `server/`.
 | AC16.1 | `components/layout/InstallPrompt.test.tsx` |
 | AC16.2 | `components/layout/UpdatePrompt.test.tsx` |
 | AC17.1 | `components/settings/StatsSection.test.tsx`, `utils/metrics.test.ts` |
+| AC17.2 | `components/settings/StatsSection.test.tsx` |
+| AC18.1 | `components/common/UndoToast.test.tsx`, `e2e/tasks.spec.ts`, `pages/TodayPage.test.tsx` |
+| AC18.2 | `services/db/taskRepository.test.ts` |
+| AC18.3 | `services/db/taskRepository.test.ts` |
+| AC18.4 | `services/calendar/calendarSync.test.ts`, `services/db/taskRepository.test.ts` |
+| AC18.5 | `components/common/UndoToast.test.tsx`, `e2e/tasks.spec.ts` |
+| AC19.1 | `components/common/WeekdayPicker.test.tsx`, `e2e/workday.spec.ts`, `services/workday/workdaySettings.test.ts`, `utils/dates.test.ts` |
+| AC19.2 | `utils/metrics.test.ts` |
+| AC19.3 | `e2e/workday.spec.ts`, `services/closeout/closeoutService.test.ts`, `utils/dates.test.ts` |
+| AC19.4 | `services/eyeBreaks/eyeBreakPlan.test.ts`, `services/workday/closeoutNudge.test.ts`, `utils/recurrence.test.ts` |
+| AC20.1 | `components/task/TaskEditorForm.test.tsx`, `utils/recurrence.test.ts`, `utils/taskFormMapping.test.ts` |
+| AC20.2 | `components/task/StickyNote.test.tsx`, `services/db/seriesRepository.test.ts` |
+| AC20.3 | `services/db/seriesRepository.test.ts` |
+| AC20.4 | `services/db/seriesRepository.test.ts` |
+| AC20.5 | `e2e/recurring.spec.ts`, `services/db/seriesRepository.test.ts` |
+| AC20.6 | `services/calendar/calendarSync.test.ts` |
+| AC20.7 | `services/backup/backupSnapshot.test.ts` |
+| AC21.1 | `components/canvas/CloseoutNudgeBanner.test.tsx`, `e2e/workday.spec.ts`, `services/workday/closeoutNudge.test.ts`, `services/workday/workdaySettings.test.ts` |
+| AC21.2 | `components/canvas/CloseoutNudgeBanner.test.tsx`, `e2e/voice.spec.ts`, `hooks/useReminderTicks.test.tsx`, `services/workday/closeoutNudge.test.ts` |
+| AC21.3 | `components/canvas/CloseoutNudgeBanner.test.tsx`, `hooks/useReminderTicks.test.tsx`, `services/workday/closeoutNudge.test.ts` |
+| AC21.4 | `hooks/useReminderTicks.test.tsx`, `services/workday/closeoutNudge.test.ts` |
+| AC22.1 | `hooks/useReminderTicks.test.tsx` |
+| AC22.2 | `e2e/voice.spec.ts`, `hooks/useReminderTicks.test.tsx` |
+| AC22.3 | `e2e/voice.spec.ts`, `hooks/useReminderTicks.test.tsx` |
+| AC22.4 | `hooks/useReminderTicks.test.tsx` |
+| AC23.1 | `components/common/TimeRangeField.test.tsx`, `e2e/workday.spec.ts`, `services/workday/workdaySettings.test.ts`, `utils/quietHours.test.ts` |
+| AC23.2 | `hooks/useReminderTicks.test.tsx` |
+| AC23.3 | `services/eyeBreaks/eyeBreakAlerts.test.ts`, `services/eyeBreaks/eyeBreakPlan.test.ts` |
+| AC24.1 | `e2e/report.spec.ts`, `utils/reportFormatters.test.ts` |
+| AC24.2 | `utils/reportFormatters.test.ts` |
+| AC24.3 | `e2e/report.spec.ts`, `utils/reportFormatters.test.ts` |
+| AC25.1 | `utils/overlaps.test.ts` |
+| AC25.2 | `components/task/StickyNote.test.tsx` |
+| AC25.3 | `components/task/TaskEditorForm.test.tsx` |
+| AC25.4 | `utils/overlaps.test.ts` |
+| AC26.1 | `components/settings/StatsSection.test.tsx`, `utils/carryoverInsights.test.ts` |
+| AC26.2 | `utils/carryoverInsights.test.ts` |
+| AC26.3 | `components/settings/StatsSection.test.tsx`, `utils/carryoverInsights.test.ts` |
+| AC26.4 | `components/settings/StatsSection.test.tsx`, `utils/carryoverInsights.test.ts` |
+| AC27.1 | `components/canvas/BlockTimeLeft.test.tsx`, `utils/timeBlocks.test.ts` |
+| AC27.2 | `components/canvas/BlockTimeLeft.test.tsx`, `utils/timeBlocks.test.ts` |
+| AC27.3 | `components/canvas/BlockTimeLeft.test.tsx` |
+| AC28.1 | `services/eyeBreaks/eyeBreakPlan.test.ts`, `services/workday/workdaySettings.test.ts` |
+| AC28.2 | `e2e/voice.spec.ts`, `services/eyeBreaks/eyeBreakAlerts.test.ts`, `services/eyeBreaks/eyeBreakPlan.test.ts` |
+| AC28.3 | `e2e/voice.spec.ts`, `services/eyeBreaks/eyeBreakAlerts.test.ts` |
+| AC28.4 | `services/eyeBreaks/eyeBreakAlerts.test.ts`, `services/eyeBreaks/eyeBreakPlan.test.ts` |
+| AC28.5 | `services/eyeBreaks/eyeBreakAlerts.test.ts`, `services/eyeBreaks/eyeBreakPlan.test.ts` |
+| AC29.1 | `services/screenTime/screenTimeTracker.test.ts` |
+| AC29.2 | `services/workday/workdaySettings.test.ts` |
+| AC29.3 | `components/canvas/BudgetBanner.test.tsx`, `services/screenTime/budgetAlerts.test.ts`, `services/screenTime/budgetWarning.test.ts` |
+| AC29.4 | `components/settings/StatsSection.test.tsx`, `utils/metrics.test.ts` |
+| AC29.5 | `components/settings/StatsSection.test.tsx` |
 | CR1 | `services/google/googleAuth.test.ts`, `components/settings/CalendarCard.test.tsx` |
 | CR2 | `components/settings/BackupSection.test.tsx`, `e2e/backup.spec.ts` |
 | NFR1 | `e2e/offline.spec.ts` |
@@ -257,12 +310,19 @@ Paths are under `src/` unless they start with `e2e/` or `server/`.
 | DAC5 | `components/report/ReportBuilder.test.tsx` |
 | DAC6 | `components/task/TaskEditorForm.test.tsx` |
 | DAC7 | Manual copy review against design spec Section 8 (self-review, Section 4) |
-| DAC8, DAC10 | `e2e/a11y.spec.ts` (every screen, 3 sizes, light + dark) |
+| DAC8, DAC10 | `e2e/a11y.spec.ts` (every screen, 3 sizes, light + dark; a separate test covers the FR18–FR29 additions: S7h expanded, the Repeat field, D8, the D1 repeating variant, reminder and eye-break toasts, both banners, and Stats with all five tiles) |
 | DAC9 | `e2e/a11y.spec.ts` (Tab order), `e2e/tasks.spec.ts` (keyboard reorder) |
 | DAC11 | `utils/companyPalette.test.ts` |
 | DAC12 | `hooks/useReminderTicks.test.tsx`, `components/settings/VoiceSection.test.tsx`, `e2e/voice.spec.ts` |
 | DAC13 | `components/closeout/CloseoutDialog.test.tsx`, `e2e/closeout.spec.ts` (survives reload) |
 | DAC14 | `components/security/SecretField.test.tsx` |
+| DAC15 | `e2e/tasks.spec.ts` |
+| DAC16 | `e2e/voice.spec.ts`, `hooks/useReminderTicks.test.tsx` |
+| DAC17 | `components/task/TaskEditorForm.test.tsx`, `e2e/recurring.spec.ts` |
+| DAC18 | `e2e/voice.spec.ts`, `hooks/useReminderTicks.test.tsx` |
+| DAC19 | `components/canvas/CloseoutNudgeBanner.test.tsx`, `e2e/voice.spec.ts` |
+| DAC20 | `components/canvas/BlockTimeLeft.test.tsx` |
+| DAC21 | `components/settings/StatsSection.test.tsx` |
 
 ---
 
@@ -309,10 +369,13 @@ The diff was re-read stage by stage. Checks against the Definition of Done (Sect
 - Design spec: build decisions marked "changed during build" or "Decided".
 - PRD: risk RK11 added (Atlassian guidance on API tokens).
 - Task list: all tasks checked.
+- FR18–FR29 (2026-10-21): README (Workday settings, repeating tasks, what stays on this device), CHANGELOG 0.2.0, data model and backup format above, and the test mapping in Section 2.1.
 
 ---
 
 ## 6. Definition of Done
+
+Re-checked on 2026-10-21 after FR18–FR29. Every box still holds: each new criterion maps to a test in Section 2.1, and the full suite, lint, typecheck and build pass. A secrets search over the new files found nothing, and there are no new endpoints (all new data is local). Schema v3 and v4 are additive (Section 1.2), with no new `TODO`/`FIXME`.
 
 - [x] Every acceptance criterion from the PRD and design spec is implemented and has a passing test (Section 2.1). Exceptions are manual checks: DAC7 (copy review) and NFR10 (cost), see waiver E2.
 - [x] The full test suite passes (unit/component and Playwright at three sizes).
@@ -340,6 +403,7 @@ The diff was re-read stage by stage. Checks against the Definition of Done (Sect
   - Tooling: oxlint, prettier, shadcn (CLI)
 - **`npm audit --omit=dev`:** 0 vulnerabilities.
 - **`npm audit` including dev dependencies:** 7 high, all one advisory (`braces`, GHSA-vfj7-8cjw-p6xm), through the `shadcn` CLI. See waiver E3.
+- **FR18–FR29 cycle (re-checked 2026-10-21):** no dependencies were added or changed (`package.json` is unchanged since FR18 was adopted). `npm audit --omit=dev`: 0 vulnerabilities. The dev-only findings are the same `braces` chain under waiver E3.
 
 ---
 

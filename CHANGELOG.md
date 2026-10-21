@@ -2,6 +2,29 @@
 
 All notable changes to Taskuda. Dates are UTC.
 
+## [0.2.0] — 2026-10-21
+
+Adds PRD FR18–FR29 (the "My Work Day" additions). Not yet deployed. Export a backup before deploying (PRD RK16).
+
+### Added
+- **Undo delete** for 10 seconds, including the task's calendar event.
+- **Working days** setting; carryover goes to the next working day, and the streak counts working days.
+- **Report summary line** for all-company reports, and **time left** in the current block on today.
+- **Close-out reminder** banner (5:30 PM by default), with a toast and spoken line when Taskuda is open.
+- **Reminder actions:** Snooze 5 min, Snooze 15 min and Mark done on reminder toasts; Alt+T focuses the newest toast.
+- **Quiet hours** for spoken alerts and eye-break prompts.
+- **Overlap warnings** on notes and in the task editor.
+- **Carry-over insights** in Stats: rate per company and overall, "Needs attention" callouts, tasks carried over 3+ times.
+- **Eye-break reminders** with Done / Snooze 5 min, and a missed prompt shown once on return.
+- **Daily time budget** with a gentle toast and banner; time in Taskuda on this device in Stats.
+- **Stats M4 and M5:** eye breaks taken and days within the time budget.
+- **Repeating tasks:** every day, every working day, weekly on chosen days, monthly on a date; "This task only" / "This and future tasks" for edits and deletes; repeats marker on notes.
+
+### Changed
+- **Database** versions 3 and 4 (additive): eye-break log and daily time in Taskuda (kept on this device only), repeating series, and `seriesId` on tasks.
+- **Backup format version 2** adds repeating series. Version 1 backups and export files still restore and import.
+- Toasts sit below the app bar so they no longer cover the day navigator.
+
 ## [0.1.0] — 2026-10-20
 
 First complete build of v1 (PRD `docs/pm/taskuda-prd.md`). Not yet deployed.

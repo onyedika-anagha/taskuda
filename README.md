@@ -9,6 +9,24 @@ A free, local-first planner for people who work for several employers or clients
 
 Product and design docs: [PRD](docs/pm/taskuda-prd.md) · [Design spec](docs/design/taskuda-design-spec.md) · [Implementation notes](docs/engineering/taskuda-impl-notes.md) · [Task list](tasks/tasks-taskuda-v1.md)
 
+## Planning your workday
+
+- **Repeating tasks:** in the task editor, set Repeat to every day, every working day, weekly on chosen days, or monthly on a date. Each day you open gets its own copy, so repeats work with carryover, reminders, calendar sync and reports. Editing or deleting a repeat asks whether to change only that task or that one and all later ones; past days never change.
+- **Overlap warnings:** notes and the editor flag timed tasks that clash, including imported meetings. Saving is never blocked.
+- **Undo:** deleting a task shows Undo for 10 seconds.
+
+### Workday settings (Settings → Workday)
+
+| Setting | Default | What it does |
+|---|---|---|
+| Working days | Mon–Fri | Carryover goes to the next working day; the streak, the close-out reminder, eye breaks and "every working day" repeats skip other days. |
+| Close-out reminder | 5:30 PM | A banner (and, if Taskuda is open, a toast and spoken line) until you close out or choose Not today. |
+| Quiet hours | Off | No spoken alerts or eye-break prompts in this range; reminders still show on screen. |
+| Eye breaks | Off | Every 20, 30, 45 or 60 minutes within set hours on working days, with Done and Snooze 5 min. |
+| Daily time budget | Off | A gentle warning after 1–4 hours of time in Taskuda, then at most once per extra hour. Nothing is locked. |
+
+Every alert runs only while Taskuda is open in the browser. Stats shows the carry-over rate per company, eye breaks taken, days within your time budget, and today's time in Taskuda. That time counts only while Taskuda is on screen on this device, so it isn't your total screen time.
+
 ## Stack
 
 React 19 + TypeScript (strict) + Vite 8, Tailwind CSS v4 + shadcn/ui, @dnd-kit, Zustand (UI state), Dexie (IndexedDB), React Hook Form + Zod, date-fns, vite-plugin-pwa (Workbox). Tests: Vitest + Testing Library, Playwright + axe. Hosting: Vercel (static app + one serverless function for Jira).
@@ -78,7 +96,7 @@ src/
   components/            UI by area (canvas, task, closeout, report, settings, backup, …) + ui/ (shadcn)
   hooks/                 Hooks that connect components to stores and services
   stores/                Zustand UI state
-  services/              Data and integrations: db (Dexie), crypto (vault), google, backup, calendar, ai, jira, voice, reminders, pwa
+  services/              Data and integrations: db (Dexie), crypto (vault), google, backup, calendar, ai, jira, voice, reminders, workday, eyeBreaks, screenTime, tasks, pwa
   utils/                 Pure helpers (dates, time blocks, report formatting, metrics, …)
   schemas/               Zod schemas for forms and the backup file
   types/                 Shared types
@@ -88,7 +106,8 @@ docs/                    PRD, design spec, implementation notes
 
 ## Privacy and security in short
 
-- Tasks, companies, closeouts and settings live in IndexedDB on the device; Drive holds an encrypted-keys backup in the app-data folder only Taskuda can see.
+- Tasks, repeating series, companies, closeouts and settings live in IndexedDB on the device; Drive holds an encrypted-keys backup in the app-data folder only Taskuda can see.
+- The eye-break log and time in Taskuda never leave the device: they are not in backups or export files.
 - AI keys and the Jira token are encrypted with AES-256-GCM. The data key is wrapped by a PBKDF2 (600k) passphrase key for backups and by a non-extractable device key, so the passphrase is needed once per device.
 - AI requests contain only task titles, statuses, time blocks, companies, carryovers, the day rating and reflection — never notes or Jira details — and go straight to the chosen provider.
 - Google access tokens stay in memory (no refresh tokens in a browser-only app).

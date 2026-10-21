@@ -46,7 +46,8 @@ describe('Budget banner (PRD AC29.3, design F17)', () => {
     await setCloseoutReminder('17:30')
     renderWithApp('/')
     await screen.findByRole('button', { name: 'Not today' })
+    // Only the nudge banner; the budget message may still show as a toast, which isn't a banner.
     expect(banners()).toHaveLength(1)
-    expect(screen.queryByText(MESSAGE)).not.toBeInTheDocument()
+    expect(banners()[0]).not.toHaveTextContent(MESSAGE)
   })
 })
