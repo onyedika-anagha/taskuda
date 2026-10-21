@@ -96,4 +96,54 @@ describe('StickyNote', () => {
     )
     expect(screen.getByRole('button', { name: 'Edit Client call' })).toBeDisabled()
   })
+
+  describe('due dates and at-risk markers (PRD FR30, FR31)', () => {
+    const TODAY = '2026-10-21'
+    function renderWithRisk(task: Task, risk: Parameters<typeof StickyNote>[0]['risk'] = null) {
+      return render(
+        <StickyNote
+          task={task}
+          company={undefined}
+          readOnly={false}
+          risk={risk}
+          today={TODAY}
+          onOpen={() => {}}
+          onCycleStatus={() => {}}
+        />,
+      )
+    }
+
+    it('AC30.2 shows the due date when nothing is at risk', () => {
+      renderWithRisk(makeTask({ dueDate: '2026-10-23', dueTime: '17:00' }))
+      expect(screen.getByText('Due Fri, Oct 23, 5:00 PM')).toBeInTheDocument()
+      expect(
+        screen.getByRole('article', { name: 'Client call, To Do, due Friday, October 23 at 5:00 PM' }),
+      ).toBeInTheDocument()
+    })
+
+    it('AC31.2 Overdue replaces the due text and is part of the label (AC31.4)', () => {
+      const { container } = renderWithRisk(makeTask({ dueDate: '2026-10-20' }), 'overdue')
+      expect(screen.getByText('Overdue · due Oct 20')).toBeInTheDocument()
+      expect(screen.queryByText(/^Due /)).not.toBeInTheDocument()
+      expect(container.querySelectorAll('[data-risk]')).toHaveLength(1)
+      expect(
+        screen.getByRole('article', { name: 'Client call, To Do, overdue, due October 20' }),
+      ).toBeInTheDocument()
+    })
+
+    it('Stuck replaces the carried-over marker, so the count shows once', () => {
+      renderWithRisk(makeTask({ carriedOverCount: 4 }), 'stuck')
+      expect(screen.getByText('Stuck · carried over ×4')).toBeInTheDocument()
+      expect(screen.queryByText('Carried over ×4')).not.toBeInTheDocument()
+      expect(
+        screen.getByRole('article', { name: 'Client call, To Do, stuck, carried over 4 times' }),
+      ).toBeInTheDocument()
+    })
+
+    it('a timing marker keeps the due text for a later due date', () => {
+      renderWithRisk(makeTask({ startTime: '10:00', dueDate: '2026-10-23' }), 'running_late')
+      expect(screen.getByText('Running late · 10:00 AM')).toBeInTheDocument()
+      expect(screen.getByText('Due Fri, Oct 23')).toBeInTheDocument()
+    })
+  })
 })

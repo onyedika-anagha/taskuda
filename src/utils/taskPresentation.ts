@@ -64,12 +64,16 @@ export function taskAriaLabel(
   company: Company | undefined,
   overlaps: Task[] = [],
   repeatKind: RepeatKind | null = null,
+  /** Spoken risk and due text (PRD FR30, FR31), worked out by the caller. */
+  extra: { risk?: string | null; due?: string | null; omitCarried?: boolean } = {},
 ): string {
   const parts = [task.title]
   if (company) parts.push(company.name)
   if (task.startTime) parts.push(formatTime(task.startTime))
   parts.push(STATUS_LABELS[task.status])
-  if (task.carriedOverCount > 0) {
+  if (extra.risk) parts.push(extra.risk)
+  if (extra.due) parts.push(extra.due)
+  if (task.carriedOverCount > 0 && !extra.omitCarried) {
     parts.push(task.carriedOverCount > 1 ? `carried over ${task.carriedOverCount} times` : 'carried over')
   }
   if (task.source === 'calendar') parts.push('from Google Calendar')

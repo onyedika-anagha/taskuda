@@ -5,6 +5,7 @@ import { useTaskActions } from '@/hooks/useTaskActions'
 import { useCanvasUiStore } from '@/stores/canvasUiStore'
 import type { Company } from '@/types/company'
 import type { RepeatKind } from '@/types/recurring'
+import type { RiskKind } from '@/types/risk'
 import type { Task } from '@/types/task'
 import { StickyNote } from './StickyNote'
 import { TaskMenu } from './TaskMenu'
@@ -17,6 +18,8 @@ interface SortableStickyNoteProps {
   readOnly: boolean
   overlaps?: Task[]
   repeatKind?: RepeatKind | null
+  risk?: RiskKind | null
+  today?: string
 }
 
 /** A sticky note wired to drag-and-drop, its menu and task actions. */
@@ -28,6 +31,8 @@ export function SortableStickyNote({
   readOnly,
   overlaps,
   repeatKind,
+  risk,
+  today,
 }: SortableStickyNoteProps) {
   const actions = useTaskActions()
   const openEdit = useCanvasUiStore((s) => s.openEdit)
@@ -47,6 +52,8 @@ export function SortableStickyNote({
         readOnly={readOnly}
         overlaps={overlaps}
         repeatKind={repeatKind}
+        risk={risk}
+        today={today}
         isDragging={isDragging}
         style={{ transform: CSS.Translate.toString(transform), transition }}
         onOpen={() => openEdit(task.id)}

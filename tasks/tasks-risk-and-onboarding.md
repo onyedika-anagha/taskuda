@@ -119,18 +119,18 @@ Update the file after completing each sub-task, not just after completing an ent
   - [x] 1.8 Add `DueDateField` to `TaskEditorForm` after Duration; editor tests for add, remove, past date and repeating
   - [x] 1.9 Confirm Calendar sync and Jira ignore the due fields (Out of Scope item 24); add one assertion to the calendar mapping test
 
-- [ ] 2.0 At-risk rules and markers (FR31)
-  - [ ] 2.1 Add `types/risk.ts` (`RiskKind`, `TaskRisk` with kind and the time it refers to)
-  - [ ] 2.2 Write `utils/taskRisk.ts`: the AC31.1 rules (10-minute grace, 30-minute default duration from `effectiveMinutes`, Done and past days give no risk) and the AC31.2 priority
-  - [ ] 2.3 Test `taskRisk` for every rule, every combination of rules (DAC24), and boundary clocks: 23:59 → 00:00, the Evening block after midnight, exactly 10 minutes late, exactly at the end time (RK19)
-  - [ ] 2.4 Write `utils/riskLabels.ts` for the visible and spoken marker text in design Section 8, with tests
-  - [ ] 2.5 Add `useRiskClock` (one-minute tick plus `visibilitychange`) and `useTaskRisks(tasks, dayKey)`, with fake-timer tests (AC31.6, DAC23)
-  - [ ] 2.6 Build `RiskMarker` (strong and standard styles, lucide icons from design Section 10, wraps rather than truncates), with component tests
-  - [ ] 2.7 Update `StickyNote`: the RiskMarker comes first in the marker row; due text shows when there is no Overdue or Due today marker; Stuck replaces the carried-over marker; extend `taskAriaLabel`; update the note tests
-  - [ ] 2.8 Pass each note's risk from `TaskCanvas` through the columns, the mobile tabs and `SortableStickyNote`
-  - [ ] 2.9 Show the RiskMarker after each title in `UnfinishedStep` (AC31.5), with a closeout test
-  - [ ] 2.10 Extend the contrast check so both marker styles reach ≥ 4.5:1 in light and dark (DAC28); adjust the tokens in `index.css` if not
-  - [ ] 2.11 Confirm no sound, speech, toast or notification is ever triggered by a risk change (AC31.7): a test with the speech and toast fakes
+- [x] 2.0 At-risk rules and markers (FR31)
+  - [x] 2.1 Add `types/risk.ts` (`RiskKind`, `TaskRisk` with kind and the time it refers to)
+  - [x] 2.2 Write `utils/taskRisk.ts`: the AC31.1 rules (10-minute grace, 30-minute default duration from `effectiveMinutes`, Done and past days give no risk) and the AC31.2 priority
+  - [x] 2.3 Test `taskRisk` for every rule, every combination of rules (DAC24), and boundary clocks: 23:59 → 00:00, the Evening block after midnight, exactly 10 minutes late, exactly at the end time (RK19)
+  - [x] 2.4 Write `utils/riskLabels.ts` for the visible and spoken marker text in design Section 8, with tests
+  - [x] 2.5 Add `useRiskClock` (one-minute tick plus `visibilitychange`) and `useTaskRisks(tasks, dayKey)`, with fake-timer tests (AC31.6, DAC23)
+  - [x] 2.6 Build `RiskMarker` (strong and standard styles, lucide icons from design Section 10, wraps rather than truncates), with component tests
+  - [x] 2.7 Update `StickyNote`: the RiskMarker comes first in the marker row; due text shows when there is no Overdue or Due today marker; Stuck replaces the carried-over marker; extend `taskAriaLabel`; update the note tests
+  - [x] 2.8 Pass each note's risk from `TaskCanvas` through the columns, the mobile tabs and `SortableStickyNote`
+  - [x] 2.9 Show the RiskMarker after each title in `UnfinishedStep` (AC31.5), with a closeout test
+  - [x] 2.10 Extend the contrast check so both marker styles reach ≥ 4.5:1 in light and dark (DAC28); adjust the tokens in `index.css` if not
+  - [x] 2.11 Confirm no sound, speech, toast or notification is ever triggered by a risk change (AC31.7): a test with the speech and toast fakes
 
 - [ ] 3.0 Day progress, the at-risk list and M6 (FR32, AC17.3)
   - [ ] 3.1 Build `DayProgress` ("4 of 9 done", "All 9 done", bar `aria-hidden`, bar hidden under 360px)

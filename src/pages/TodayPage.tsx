@@ -21,11 +21,15 @@ import { useDayCloseout } from '@/hooks/useDayCloseout'
 import { useDayNavigation } from '@/hooks/useDayNavigation'
 import { useFirstRun } from '@/hooks/useFirstRun'
 import { TABLET_UP, useMediaQuery } from '@/hooks/useMediaQuery'
+import { useTaskRisks } from '@/hooks/useTaskRisks'
 import { useTasksForDay } from '@/hooks/useTasksForDay'
 import { useAppStatusStore } from '@/stores/appStatusStore'
 import { useCanvasUiStore } from '@/stores/canvasUiStore'
 import { useCloseoutStore } from '@/stores/closeoutStore'
+import type { Task } from '@/types/task'
 import { Navigate } from 'react-router'
+
+const NO_TASKS: Task[] = []
 
 /** S2 Today: composes the canvas and its overlays. */
 export function TodayPage() {
@@ -48,6 +52,7 @@ export function TodayPage() {
   const onAddTask = readOnly ? undefined : () => openCreate()
   useCanvasShortcuts(nav, readOnly)
   const firstRun = useFirstRun()
+  const risks = useTaskRisks(tasks ?? NO_TASKS)
 
   if (firstRun === 'show-welcome') return <Navigate to="/welcome" replace />
 
@@ -80,6 +85,8 @@ export function TodayPage() {
           companiesById={companiesById}
           readOnly={readOnly}
           isToday={nav.isToday}
+          risksById={risks.byId}
+          today={risks.today}
           onAdd={openCreate}
         />
       )}

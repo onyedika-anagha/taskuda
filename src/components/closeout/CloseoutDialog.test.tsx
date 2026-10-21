@@ -75,6 +75,13 @@ describe('Closeout (S5)', () => {
     expect(a.id).toBeTruthy()
   })
 
+  it('AC31.5 unfinished tasks show their at-risk marker', async () => {
+    await createTask({ title: 'Invoice', dayKey: today, block: 'morning', dueDate: yesterday })
+    const { dialog } = await openCloseout()
+    expect(within(dialog).getByText(/^Overdue · due /)).toBeInTheDocument()
+    expect(within(dialog).getByRole('group', { name: /^Invoice, overdue, due / })).toBeInTheDocument()
+  })
+
   it('shows “Everything’s done” when nothing is unfinished', async () => {
     const task = await createTask({ title: 'A', dayKey: today, block: 'morning' })
     await setTaskStatus(task.id, 'done')

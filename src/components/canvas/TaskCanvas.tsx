@@ -11,6 +11,7 @@ import { screenReaderInstructions, useCanvasDragAndDrop } from '@/hooks/useCanva
 import { TABLET_UP, useMediaQuery } from '@/hooks/useMediaQuery'
 import { useSeriesById } from '@/hooks/useSeries'
 import type { Company } from '@/types/company'
+import type { RiskKind } from '@/types/risk'
 import type { Task, TimeBlock } from '@/types/task'
 import { TIME_BLOCKS } from '@/types/task'
 import { overlapMap } from '@/utils/overlaps'
@@ -43,11 +44,22 @@ interface TaskCanvasProps {
   readOnly: boolean
   /** Today shows the time left in the current block (PRD FR27). */
   isToday: boolean
+  /** Task id → its at-risk marker (PRD FR31). */
+  risksById: ReadonlyMap<string, RiskKind>
+  today: string
   onAdd: (block: TimeBlock) => void
 }
 
 /** S2 canvas: three columns on tablet and up, tabs on phones, with drag-and-drop across blocks. */
-export function TaskCanvas({ tasks, companiesById, readOnly, isToday, onAdd }: TaskCanvasProps) {
+export function TaskCanvas({
+  tasks,
+  companiesById,
+  readOnly,
+  isToday,
+  risksById,
+  today,
+  onAdd,
+}: TaskCanvasProps) {
   const isTabletUp = useMediaQuery(TABLET_UP)
   const dnd = useCanvasDragAndDrop(tasks)
   const timeLeft = useBlockTimeLeft(isToday)
@@ -64,6 +76,8 @@ export function TaskCanvas({ tasks, companiesById, readOnly, isToday, onAdd }: T
       readOnly={readOnly}
       overlapsById={overlapsById}
       seriesById={seriesById}
+      risksById={risksById}
+      today={today}
       showHeader={showHeader}
       minutesLeft={timeLeft?.block === block ? timeLeft.minutesLeft : null}
       onAdd={onAdd}

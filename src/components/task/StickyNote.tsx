@@ -1,14 +1,19 @@
-import { CalendarIcon, IterationCwIcon, RepeatIcon, TriangleAlertIcon } from 'lucide-react'
+import { CalendarClockIcon, CalendarIcon, IterationCwIcon, RepeatIcon, TriangleAlertIcon } from 'lucide-react'
 import { forwardRef, type CSSProperties, type ReactNode } from 'react'
 import { CompanyChip } from '@/components/company/CompanyChip'
 import { cn } from '@/lib/utils'
 import type { Company } from '@/types/company'
 import type { RepeatKind } from '@/types/recurring'
+import type { RiskKind } from '@/types/risk'
 import type { Task } from '@/types/task'
+import { todayKey } from '@/utils/dates'
+import { dueLabel, dueSpokenLabel } from '@/utils/dueDates'
 import { noteColorVariables } from '@/utils/noteColors'
 import { overlapMarkerLabel } from '@/utils/overlapLabels'
 import { REPEAT_MARKER } from '@/utils/recurrence'
+import { riskLabel, riskSpokenLabel } from '@/utils/riskLabels'
 import { carriedOverLabel, formatDuration, formatTime, taskAriaLabel } from '@/utils/taskPresentation'
+import { RiskMarker } from './RiskMarker'
 import { StatusToggle } from './StatusToggle'
 
 interface StickyNoteProps {
@@ -19,6 +24,10 @@ interface StickyNoteProps {
   overlaps?: Task[]
   /** The task repeats (PRD AC20.2). */
   repeatKind?: RepeatKind | null
+  /** The note's at-risk marker (PRD FR31), from `taskRisk`. */
+  risk?: RiskKind | null
+  /** Today's day key, for "Due today" (defaults to the current day). */
+  today?: string
   isDragging?: boolean
   style?: CSSProperties
   onOpen: () => void
@@ -35,6 +44,8 @@ export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function Stic
     readOnly,
     overlaps = [],
     repeatKind = null,
+    risk = null,
+    today = todayKey(),
     isDragging = false,
     style,
     onOpen,
@@ -44,7 +55,14 @@ export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function Stic
   },
   ref,
 ) {
-  const label = taskAriaLabel(task, company, overlaps, repeatKind)
+  // Overdue and Due today replace the plain due text; Stuck replaces the carried-over marker (design S2).
+  const showDue = !!task.dueDate && risk !== 'overdue' && risk !== 'due_today'
+  const showCarried = task.carriedOverCount > 0 && risk !== 'stuck'
+  const label = taskAriaLabel(task, company, overlaps, repeatKind, {
+    risk: risk ? riskSpokenLabel(risk, task, today) : null,
+    due: showDue ? dueSpokenLabel(task, today) : null,
+    omitCarried: !showCarried,
+  })
 
   return (
     <article
@@ -89,13 +107,22 @@ export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function Stic
           {task.title}
         </button>
 
-        {task.carriedOverCount > 0 ||
+        {risk ||
+        showDue ||
+        task.carriedOverCount > 0 ||
         task.source === 'calendar' ||
         task.jiraIssue ||
         overlaps.length ||
         repeatKind ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium">
-            {task.carriedOverCount > 0 ? (
+            {risk ? <RiskMarker kind={risk} label={riskLabel(risk, task, today)} /> : null}
+            {showDue ? (
+              <span className="inline-flex items-center gap-1">
+                <CalendarClockIcon aria-hidden="true" className="size-3.5" />
+                {dueLabel(task, today)}
+              </span>
+            ) : null}
+            {showCarried ? (
               <span className="inline-flex items-center gap-1">
                 <RepeatIcon aria-hidden="true" className="size-3.5" />
                 {carriedOverLabel(task.carriedOverCount)}

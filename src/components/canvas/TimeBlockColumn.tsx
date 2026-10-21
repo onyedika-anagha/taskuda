@@ -5,6 +5,7 @@ import { columnDropId } from '@/hooks/useCanvasDragAndDrop'
 import { cn } from '@/lib/utils'
 import type { Company } from '@/types/company'
 import type { RecurringSeries } from '@/types/recurring'
+import type { RiskKind } from '@/types/risk'
 import type { Task, TimeBlock } from '@/types/task'
 import { repeatKindFor } from '@/utils/recurrence'
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
@@ -20,6 +21,9 @@ interface TimeBlockColumnProps {
   /** Task id → the tasks it overlaps (PRD FR25). */
   overlapsById: Map<string, Task[]>
   seriesById: ReadonlyMap<string, RecurringSeries>
+  /** Task id → its at-risk marker (PRD FR31). */
+  risksById: ReadonlyMap<string, RiskKind>
+  today: string
   /** Mobile tabs already show the block name. */
   showHeader?: boolean
   /** Set on today's current block only (PRD FR27). */
@@ -36,6 +40,8 @@ export function TimeBlockColumn({
   readOnly,
   overlapsById,
   seriesById,
+  risksById,
+  today,
   showHeader = true,
   minutesLeft = null,
   onAdd,
@@ -81,6 +87,8 @@ export function TimeBlockColumn({
                 readOnly={readOnly}
                 overlaps={overlapsById.get(id)}
                 repeatKind={repeatKindFor(task, seriesById)}
+                risk={risksById.get(id)}
+                today={today}
               />
             )
           })}
