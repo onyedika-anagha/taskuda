@@ -1,4 +1,4 @@
-import { backupFileSchema, type BackupFile } from '@/schemas/backupFile'
+import { BACKUP_VERSION, backupFileSchema, type BackupFile } from '@/schemas/backupFile'
 import { lockVault } from '@/services/crypto/secretVault'
 import { db } from '@/services/db/database'
 import { getDeviceId, getDeviceName } from './deviceInfo'
@@ -13,7 +13,10 @@ export function isLocalOnlySetting(key: string): boolean {
   return LOCAL_ONLY_SETTING_PREFIXES.some((prefix) => key.startsWith(prefix))
 }
 
-/** Tables copied into a backup. `deviceKeys` is deliberately absent: it must never leave the device. */
+/**
+ * Tables copied into a backup. `deviceKeys` is deliberately absent: it must never leave the device.
+ * So are `eyeBreakLog` and `screenTime`, which describe this device (implementation notes, task 18.2).
+ */
 const BACKED_UP_TABLES = [
   db.tasks,
   db.companies,
@@ -22,6 +25,7 @@ const BACKED_UP_TABLES = [
   db.settings,
   db.calendarMappings,
   db.vault,
+  db.recurringSeries,
 ]
 
 export class BackupUnreadableError extends Error {
@@ -34,18 +38,20 @@ export class BackupUnreadableError extends Error {
 export async function createBackupFile(now = Date.now()): Promise<BackupFile> {
   const deviceId = await getDeviceId()
   return db.transaction('r', BACKED_UP_TABLES, async () => {
-    const [tasks, companies, closeouts, activityLog, settings, calendarMappings, vault] = await Promise.all([
-      db.tasks.toArray(),
-      db.companies.toArray(),
-      db.closeouts.toArray(),
-      db.activityLog.toArray(),
-      db.settings.toArray(),
-      db.calendarMappings.toArray(),
-      db.vault.get('vault'),
-    ])
+    const [tasks, companies, closeouts, activityLog, settings, calendarMappings, vault, recurringSeries] =
+      await Promise.all([
+        db.tasks.toArray(),
+        db.companies.toArray(),
+        db.closeouts.toArray(),
+        db.activityLog.toArray(),
+        db.settings.toArray(),
+        db.calendarMappings.toArray(),
+        db.vault.get('vault'),
+        db.recurringSeries.toArray(),
+      ])
     return {
       format: 'taskuda-backup',
-      version: 1,
+      version: BACKUP_VERSION,
       createdAt: now,
       deviceId,
       deviceName: getDeviceName(),
@@ -57,6 +63,7 @@ export async function createBackupFile(now = Date.now()): Promise<BackupFile> {
         settings: settings.filter((s) => !isLocalOnlySetting(s.key)),
         calendarMappings,
         vault: vault ?? null,
+        recurringSeries,
       },
     } satisfies BackupFile
   })
@@ -95,6 +102,7 @@ export async function restoreBackupFile(file: BackupFile): Promise<RestoreResult
     await db.settings.bulkAdd([...restoredSettings, ...localOnly])
     await db.calendarMappings.bulkAdd(data.calendarMappings)
     if (data.vault) await db.vault.put(data.vault)
+    await db.recurringSeries.bulkAdd(data.recurringSeries)
   })
   // The restored vault may not match this device's key; check again on next use.
   lockVault()

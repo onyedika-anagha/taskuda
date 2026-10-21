@@ -15,6 +15,7 @@ export function trackBackedUpChanges(onChange: () => void): () => void {
     db.activityLog,
     db.calendarMappings,
     db.vault,
+    db.recurringSeries,
   ]
   const notify = () => {
     // Run after the transaction, outside Dexie's hook context.

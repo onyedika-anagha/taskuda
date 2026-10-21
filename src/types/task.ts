@@ -35,6 +35,8 @@ export interface Task {
   carriedToTaskId: string | null
   source: TaskSource
   jiraIssue: JiraIssueLink | null
+  /** The repeating series this task is an occurrence of (PRD FR20); carried copies keep it. */
+  seriesId: string | null
   createdAt: number
   updatedAt: number
 }
@@ -49,6 +51,7 @@ export interface NewTaskInput {
   durationMinutes?: number | null
   source?: TaskSource
   jiraIssue?: JiraIssueLink | null
+  seriesId?: string | null
 }
 
 export type TaskPatch = Partial<

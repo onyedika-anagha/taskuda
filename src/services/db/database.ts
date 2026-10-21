@@ -5,6 +5,7 @@ import type { Closeout } from '@/types/closeout'
 import type { Company } from '@/types/company'
 import type { SettingRecord } from '@/types/settings'
 import type { Task } from '@/types/task'
+import type { RecurringSeries } from '@/types/recurring'
 import type { DeviceKeyRecord, VaultRecord } from '@/types/vault'
 import type { EyeBreakLogEntry, ScreenTimeDay } from '@/types/wellbeing'
 
@@ -21,6 +22,7 @@ export type TaskudaDatabase = Dexie & {
   deviceKeys: EntityTable<DeviceKeyRecord, 'id'>
   eyeBreakLog: EntityTable<EyeBreakLogEntry, 'id'>
   screenTime: EntityTable<ScreenTimeDay, 'dayKey'>
+  recurringSeries: EntityTable<RecurringSeries, 'id'>
 }
 
 export const db = new Dexie(DATABASE_NAME) as TaskudaDatabase
@@ -48,3 +50,19 @@ db.version(3).stores({
   eyeBreakLog: '++id, dayKey',
   screenTime: 'dayKey',
 })
+
+// v4 (PRD FR20): repeating series. Tasks get `seriesId` (null for every existing task) and an index
+// to find a series' task on a day. Backed up (backup format version 2).
+db.version(4)
+  .stores({
+    tasks: 'id, dayKey, companyId, [dayKey+block], carriedFromTaskId, [seriesId+dayKey]',
+    recurringSeries: 'id',
+  })
+  .upgrade((tx) =>
+    tx
+      .table('tasks')
+      .toCollection()
+      .modify((task: { seriesId?: string | null }) => {
+        task.seriesId ??= null
+      }),
+  )

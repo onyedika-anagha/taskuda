@@ -18,6 +18,7 @@ export function makeTask(overrides: Partial<Task> = {}): Task {
     carriedToTaskId: null,
     source: 'manual',
     jiraIssue: null,
+    seriesId: null,
     createdAt: 1,
     updatedAt: 1,
     ...overrides,

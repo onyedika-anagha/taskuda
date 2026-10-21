@@ -33,7 +33,7 @@ Layers (workspace code-separation rule): `pages/` compose components; `component
 
 | Table | Key | Backed up | Contents |
 |---|---|---|---|
-| `tasks` | `id` | Yes | Task (title, notes, companyId, dayKey, block, order, startTime, duration, status, carryover links, source, jiraIssue) |
+| `tasks` | `id` (`[seriesId+dayKey]`) | Yes | Task (title, notes, companyId, dayKey, block, order, startTime, duration, status, carryover links, source, jiraIssue, seriesId) |
 | `companies` | `id` | Yes | name, colorId |
 | `closeouts` | `dayKey` | Yes | started/finished/report-copied times, rating, reflection, outcomes |
 | `activityLog` | `++id` | Yes | created / updated / status / moved / carried / deleted events (metric M1) |
@@ -41,12 +41,13 @@ Layers (workspace code-separation rule): `pages/` compose components; `component
 | `calendarMappings` | `taskId` (`&eventId`) | Yes | task↔event links, sync times, tombstones |
 | `vault` | `'vault'` | Yes | PBKDF2 params, passphrase-wrapped data key, key check, encrypted secrets |
 | `deviceKeys` | `'device'` | **Never** | non-extractable AES key + device-wrapped data key |
+| `recurringSeries` | `id` | Yes (backup format v2) | repeating task template, pattern, start day, ended-from day, skipped days |
 | `eyeBreakLog` | `++id` (`dayKey`) | **No** (this device only) | eye-break prompt outcomes: done / snoozed / dismissed / missed (metric M4) |
 | `screenTime` | `dayKey` | **No** (this device only) | ms Taskuda was visible that day (metric M5, time in Taskuda) |
 
-Schema versions: **v1** (first six tables), **v2** (adds `vault`, `deviceKeys`) and **v3** (adds `eyeBreakLog`, `screenTime`). All are additive.
+Schema versions: **v1** (first six tables), **v2** (adds `vault`, `deviceKeys`), **v3** (adds `eyeBreakLog`, `screenTime`) and **v4** (adds `recurringSeries`, the `[seriesId+dayKey]` index, and `seriesId: null` on every existing task). All are additive.
 
-**Migration reversibility:** IndexedDB/Dexie can't be downgraded in place; a lower version number throws `VersionError`. Rollback path: export a backup file (Settings → Backup), deploy the older build, clear site data, then import. The backup format is versioned (`version: 1`) and validated with Zod.
+**Migration reversibility:** IndexedDB/Dexie can't be downgraded in place; a lower version number throws `VersionError`. Rollback path: export a backup file (Settings → Backup), deploy the older build, clear site data, then import. The backup format is versioned and validated with Zod. Version 2 (written since FR20) adds `recurringSeries`. Version 1 files still restore and import: their tasks get `seriesId: null` and there are no series (tested, RK16).
 
 ### 1.3 Endpoints and external calls (every network path)
 
@@ -155,6 +156,17 @@ These are recorded in the design spec where they change it.
   - **Budget warning:** the level is the whole hours spent once at or over the budget, so it warns at 2 h, then 3 h, then 4 h (AC29.3). The warned and dismissed levels are per-device, per-day `localStorage` marks. The banner shows the current level until it's dismissed and comes back at the next level.
   - **Banners:** `CanvasBanners` shows the nudge, then the budget banner. The budget banner waits while the offline notice and the nudge already show (at most two).
   - **Structure:** one `WellbeingScheduler` (eye-break ticks + screen-time tracking) is mounted next to `ReminderScheduler`, rather than separate `EyeBreakScheduler` and `ScreenTimeTracker` components. `ActionToast` is the shared shell of the reminder and eye-break toasts.
+- **Recurring tasks (FR20, added 2026-10-21):**
+  - **Storage decision (task 19.1):** occurrences are real tasks, created when today or a future day is shown (`useTasksForDay`) and on each reminder tick for today. The alternative, computing them from the series on the fly, was rejected: every task feature (status, move, carryover, reminders, calendar, reports, M1) would need a second code path. A day never opened has no occurrence, so nothing counts as dropped (AC20.3).
+  - **One per series per day:** `ensureOccurrences` skips a day that already has a task with the series' id, in one read-write transaction, so running it twice (or in two tabs) creates one. A carried copy keeps `seriesId`, so it stands in for that day's occurrence (AC20.4). If the occurrence already exists when a task is carried onto that day, `carryOverTask` links to it instead of copying (the original's `carriedToTaskId` points at the occurrence, whose carried-over count goes up), so a day never shows two.
+  - **"This task only" delete** adds the day to the series' `skippedDayKeys`, so the occurrence isn't created again.
+  - **"This and future tasks" edit:** the old series ends at this task's day, and a new series with the changes starts there. Later occurrences the user hasn't touched (still To Do, never edited or carried) are deleted and come back from the new series when their day is shown. Touched ones keep their changes and join the new series, or leave the series if the new pattern doesn't fall on their day. Days before this task never change.
+  - **"This and future tasks" delete** ends the series at this day and deletes this and every later task of the series. Undo restores the series as it was and every deleted task.
+  - **D8 is skipped when Repeat changes:** a different Repeat choice can only apply from this task on, so it saves as "This and future tasks" without asking. D8 is also skipped when nothing changed. Changing Repeat to "Doesn't repeat" stops the series from this day.
+  - **Calendar (AC20.6):** occurrences are normal timed tasks, so each gets its own event through the existing task↔event mapping, and repeated syncs add no duplicates (tested).
+  - **Repeats marker:** shown while the series still runs on the task's day ("Repeats daily", "Repeats on working days", "Repeats weekly", "Repeats monthly"), and part of the note's `aria-label`.
+  - **Editor bug found by e2e:** `useLiveQuery` keeps returning the previous query's result after its dependencies change. The editor briefly saw "no series" for a repeating task, so the form started at "Doesn't repeat", and saving stopped the series. `useSeries` now tags its result with the id it was read for (unit test added).
+  - **Default block:** `openCreate` now picks the block for the current time when the editor opens, instead of the editor calling `new Date()` during render (lint purity rule).
 - **Past days that were never closed out can still be closed out.**
 - **Voice lines say "2:00 PM".**
 - **First-run Drive connect** checks for an existing backup before uploading a new one.

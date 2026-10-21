@@ -306,19 +306,19 @@ Adopted from the My Work Day PRD. These are Should items in v1 scope, built on `
   - [x] 18.7 M4 and M5 in `utils/metrics.ts`; two new MetricTiles with "Off" states linking to Workday; "Time in Taskuda today / 7-day average (on this device, not total screen time)" (AC17.2, AC29.4, AC29.5, DAC21)
   - [x] 18.8 Tests: eye-break plan decision table with fake timers; tracker counts only visible time; budget warning repeats once per extra hour; metric unit tests; Stats labels (DAC21); e2e eye-break Done and Snooze. Also: the nudge voice e2e waits up to 20 s (a reminder tick can be skipped under load)
 
-- [ ] 19.0 Add recurring tasks, with a new database version and backup format v2 (FR20, F14, D8, DAC17)
-  - [ ] 19.1 Decide how occurrences are stored (created when a today/future day is opened vs computed) and record it in the implementation notes. Recommended: create real tasks, one per series per day, so every existing task feature just works
-  - [ ] 19.2 `types/recurring.ts`: RecurringSeries (title, notes, company, block, start time, duration, pattern, start day, ended-from day) and `Task.seriesId`; new database version with a `recurringSeries` table and a `[seriesId+dayKey]` index on tasks; existing tasks get `seriesId: null`
-  - [ ] 19.3 `utils/recurrence.ts`: `matchesDay(pattern, dayKey, workingDays)` for every day, every working day, weekly on weekdays, monthly on a date (last day of shorter months) (AC20.1)
-  - [ ] 19.4 `occurrenceService.ensureOccurrences(dayKey)`: never on past days; skip a series that already has a task on that day (including a carried copy); safe to run twice; called when today or a future day is shown (AC20.2–AC20.4)
-  - [ ] 19.5 `carryOverTask` keeps `seriesId` on the copy (AC20.4)
-  - [ ] 19.6 Edit and delete scopes: "This task only" changes only that task; "This and future tasks" updates the series from that day and the not-yet-touched future occurrences, or ends it; past days never change (AC20.5)
-  - [ ] 19.7 `RepeatField` in `TaskEditorForm` (Repeat select, WeekdayPicker for Weekly with the day preselected, "On day" for Monthly with the 29–31 hint, "Pick at least one day."); Zod schema and form mapping (AC20.1, DAC17)
-  - [ ] 19.8 D8 `EditRepeatingDialog` and the repeating variant of D1; undoing a series delete also restores the series (FR18)
-  - [ ] 19.9 `StickyNote` repeats marker and `aria-label` text, never the raw pattern value (AC20.2)
-  - [ ] 19.10 Calendar sync: each occurrence with a start time is its own event; repeated sync makes no duplicates (AC20.6)
-  - [ ] 19.11 Backup format v2: include series (and any 18.2 tables marked backed up); `backupFile` schema accepts versions 1 and 2; restoring and importing a v1 file still works (AC20.7, RK16)
-  - [ ] 19.12 Tests: `matchesDay` table (Feb 28/29, 31st, working days); occurrence service (past day, carried copy, run twice); scope edits; carryover keeps the series; backup v1 and v2 restore; calendar no-duplicates; e2e `recurring.spec.ts` for F14 (DAC17)
+- [x] 19.0 Add recurring tasks, with a new database version and backup format v2 (FR20, F14, D8, DAC17)
+  - [x] 19.1 Decide how occurrences are stored (created when a today/future day is opened vs computed) and record it in the implementation notes. Recommended: create real tasks, one per series per day, so every existing task feature just works. Decided: real tasks, created when today or a future day is shown and on each reminder tick for today
+  - [x] 19.2 `types/recurring.ts`: RecurringSeries (title, notes, company, block, start time, duration, pattern, start day, ended-from day) and `Task.seriesId`; new database version with a `recurringSeries` table and a `[seriesId+dayKey]` index on tasks; existing tasks get `seriesId: null`. Series also keep `skippedDayKeys` for "This task only" deletes (database v4)
+  - [x] 19.3 `utils/recurrence.ts`: `matchesDay(pattern, dayKey, workingDays)` for every day, every working day, weekly on weekdays, monthly on a date (last day of shorter months) (AC20.1)
+  - [x] 19.4 `occurrenceService.ensureOccurrences(dayKey)`: never on past days; skip a series that already has a task on that day (including a carried copy); safe to run twice; called when today or a future day is shown (AC20.2–AC20.4)
+  - [x] 19.5 `carryOverTask` keeps `seriesId` on the copy (AC20.4); carrying onto a day that already has the series' occurrence links to it instead of copying
+  - [x] 19.6 Edit and delete scopes: "This task only" changes only that task; "This and future tasks" updates the series from that day and the not-yet-touched future occurrences, or ends it; past days never change (AC20.5)
+  - [x] 19.7 `RepeatField` in `TaskEditorForm` (Repeat select, WeekdayPicker for Weekly with the day preselected, "On day" for Monthly with the 29–31 hint, "Pick at least one day."); Zod schema and form mapping (AC20.1, DAC17)
+  - [x] 19.8 D8 `EditRepeatingDialog` and the repeating variant of D1; undoing a series delete also restores the series (FR18)
+  - [x] 19.9 `StickyNote` repeats marker and `aria-label` text, never the raw pattern value (AC20.2)
+  - [x] 19.10 Calendar sync: each occurrence with a start time is its own event; repeated sync makes no duplicates (AC20.6)
+  - [x] 19.11 Backup format v2: include series (and any 18.2 tables marked backed up); `backupFile` schema accepts versions 1 and 2; restoring and importing a v1 file still works (AC20.7, RK16)
+  - [x] 19.12 Tests: `matchesDay` table (Feb 28/29, 31st, working days); occurrence service (past day, carried copy, run twice); scope edits; carryover keeps the series; backup v1 and v2 restore; calendar no-duplicates; e2e `recurring.spec.ts` for F14 (DAC17). Also fixed: the editor could briefly read "no series" for a repeating task (stale `useLiveQuery` result), which stopped the series on save
 
 - [ ] 20.0 Final pass for the additions: accessibility, responsive checks, docs, implementation notes, all checks green, commit
   - [ ] 20.1 `a11y.spec.ts`: add S7h, D8, the D1 repeating variant, action toasts, and both banners (DAC10)

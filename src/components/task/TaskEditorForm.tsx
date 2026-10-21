@@ -11,6 +11,7 @@ import type { Company } from '@/types/company'
 import { TIME_BLOCKS, type Task } from '@/types/task'
 import { JiraIssueField } from './JiraIssueField'
 import { OverlapWarning } from './OverlapWarning'
+import { RepeatField } from './RepeatField'
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
 import { fieldDescribedBy } from '@/utils/formAria'
 import { blockForTime, isValidTime } from '@/utils/timeBlocks'
@@ -108,6 +109,10 @@ export function TaskEditorForm({
             )}
           />
         </FormField>
+
+        <div className="sm:col-span-2">
+          <RepeatField control={control} weekdaysError={errors.repeatWeekdays?.message} />
+        </div>
 
         <FormField id="task-start" label="Start time (optional)" error={errors.startTime?.message}>
           <Input

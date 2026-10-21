@@ -10,6 +10,7 @@ import {
   restoreTask,
   updateTask,
 } from '@/services/db/taskRepository'
+import { ensureOccurrences, startSeries } from '@/services/db/seriesRepository'
 import { forgetAccessToken } from '@/services/google/googleAuth'
 import { installFakeCalendar } from '@/test/fakeCalendar'
 import { installFakeGis, removeFakeGis } from '@/test/fakeGoogle'
@@ -257,6 +258,19 @@ describe('calendarSync (PRD FR8)', () => {
     await runCalendarSync()
     expect(calendar.live()).toHaveLength(1)
     expect(await listTasksForDay(today)).toHaveLength(1)
+  })
+
+  it('AC20.6 each occurrence of a repeating task is its own event, and syncing twice adds no duplicates', async () => {
+    const task = await createTask({ title: 'Standup', dayKey: today, block: 'morning', startTime: '09:30' })
+    await startSeries(task.id, { kind: 'daily' })
+    await ensureOccurrences(tomorrow, today)
+    await runCalendarSync()
+    await ensureOccurrences(tomorrow, today)
+    await runCalendarSync()
+    const events = calendar.live()
+    expect(events).toHaveLength(2)
+    expect(events.map((e) => e.summary)).toEqual(['Standup', 'Standup'])
+    expect(new Set(events.map((e) => e.start?.dateTime?.slice(0, 10))).size).toBe(2)
   })
 
   it('a carried-over copy gets its own event on the next day', async () => {

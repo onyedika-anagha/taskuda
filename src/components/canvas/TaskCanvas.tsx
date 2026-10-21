@@ -9,6 +9,7 @@ import { useMemo } from 'react'
 import { useBlockTimeLeft } from '@/hooks/useBlockTimeLeft'
 import { screenReaderInstructions, useCanvasDragAndDrop } from '@/hooks/useCanvasDragAndDrop'
 import { TABLET_UP, useMediaQuery } from '@/hooks/useMediaQuery'
+import { useSeriesById } from '@/hooks/useSeries'
 import type { Company } from '@/types/company'
 import type { Task, TimeBlock } from '@/types/task'
 import { TIME_BLOCKS } from '@/types/task'
@@ -51,6 +52,7 @@ export function TaskCanvas({ tasks, companiesById, readOnly, isToday, onAdd }: T
   const dnd = useCanvasDragAndDrop(tasks)
   const timeLeft = useBlockTimeLeft(isToday)
   const overlapsById = useMemo(() => overlapMap(tasks), [tasks])
+  const seriesById = useSeriesById()
 
   const renderBlock = (block: TimeBlock, showHeader = true) => (
     <TimeBlockColumn
@@ -61,6 +63,7 @@ export function TaskCanvas({ tasks, companiesById, readOnly, isToday, onAdd }: T
       companiesById={companiesById}
       readOnly={readOnly}
       overlapsById={overlapsById}
+      seriesById={seriesById}
       showHeader={showHeader}
       minutesLeft={timeLeft?.block === block ? timeLeft.minutesLeft : null}
       onAdd={onAdd}

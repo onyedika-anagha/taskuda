@@ -4,6 +4,7 @@ import { GripVerticalIcon } from 'lucide-react'
 import { useTaskActions } from '@/hooks/useTaskActions'
 import { useCanvasUiStore } from '@/stores/canvasUiStore'
 import type { Company } from '@/types/company'
+import type { RepeatKind } from '@/types/recurring'
 import type { Task } from '@/types/task'
 import { StickyNote } from './StickyNote'
 import { TaskMenu } from './TaskMenu'
@@ -15,6 +16,7 @@ interface SortableStickyNoteProps {
   blockSize: number
   readOnly: boolean
   overlaps?: Task[]
+  repeatKind?: RepeatKind | null
 }
 
 /** A sticky note wired to drag-and-drop, its menu and task actions. */
@@ -25,6 +27,7 @@ export function SortableStickyNote({
   blockSize,
   readOnly,
   overlaps,
+  repeatKind,
 }: SortableStickyNoteProps) {
   const actions = useTaskActions()
   const openEdit = useCanvasUiStore((s) => s.openEdit)
@@ -43,6 +46,7 @@ export function SortableStickyNote({
         company={company}
         readOnly={readOnly}
         overlaps={overlaps}
+        repeatKind={repeatKind}
         isDragging={isDragging}
         style={{ transform: CSS.Translate.toString(transform), transition }}
         onOpen={() => openEdit(task.id)}

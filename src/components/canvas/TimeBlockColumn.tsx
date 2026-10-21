@@ -4,7 +4,9 @@ import { SortableStickyNote } from '@/components/task/SortableStickyNote'
 import { columnDropId } from '@/hooks/useCanvasDragAndDrop'
 import { cn } from '@/lib/utils'
 import type { Company } from '@/types/company'
+import type { RecurringSeries } from '@/types/recurring'
 import type { Task, TimeBlock } from '@/types/task'
+import { repeatKindFor } from '@/utils/recurrence'
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
 import { BlockTimeLeft } from './BlockTimeLeft'
 import { EmptyBlockState } from './EmptyBlockState'
@@ -17,6 +19,7 @@ interface TimeBlockColumnProps {
   readOnly: boolean
   /** Task id → the tasks it overlaps (PRD FR25). */
   overlapsById: Map<string, Task[]>
+  seriesById: ReadonlyMap<string, RecurringSeries>
   /** Mobile tabs already show the block name. */
   showHeader?: boolean
   /** Set on today's current block only (PRD FR27). */
@@ -32,6 +35,7 @@ export function TimeBlockColumn({
   companiesById,
   readOnly,
   overlapsById,
+  seriesById,
   showHeader = true,
   minutesLeft = null,
   onAdd,
@@ -76,6 +80,7 @@ export function TimeBlockColumn({
                 blockSize={taskIds.length}
                 readOnly={readOnly}
                 overlaps={overlapsById.get(id)}
+                repeatKind={repeatKindFor(task, seriesById)}
               />
             )
           })}

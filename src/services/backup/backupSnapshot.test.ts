@@ -3,6 +3,7 @@ import { createVault, getSecret, getVaultStatus, setSecret } from '@/services/cr
 import { createCompany, listCompanies } from '@/services/db/companyRepository'
 import { db } from '@/services/db/database'
 import { getSetting, setSetting } from '@/services/db/settingsRepository'
+import { getSeries, startSeries } from '@/services/db/seriesRepository'
 import { createTask, listTasksForDay } from '@/services/db/taskRepository'
 import { resetVaultState } from '@/test/resetVault'
 import { BackupUnreadableError, createBackupFile, parseBackupFile, restoreBackupFile } from './backupSnapshot'
@@ -26,7 +27,7 @@ describe('backup snapshot', () => {
     expect((await listTasksForDay(DAY)).map((t) => t.title)).toEqual(['Kept in backup'])
     expect((await listCompanies()).map((c) => c.name)).toEqual(['Acme'])
     expect(await getSetting('voice.leadMinutes', 0)).toBe(10)
-    expect(backup).toMatchObject({ format: 'taskuda-backup', version: 1, createdAt: 1000 })
+    expect(backup).toMatchObject({ format: 'taskuda-backup', version: 2, createdAt: 1000 })
   })
 
   it('never includes the device key, and keeps this device’s identity and Drive settings', async () => {
@@ -77,8 +78,58 @@ describe('backup snapshot', () => {
     '{}',
     JSON.stringify({ format: 'something-else', version: 1 }),
     JSON.stringify({ format: 'taskuda-backup', version: 2 }),
+    JSON.stringify({ format: 'taskuda-backup', version: 3, data: {} }),
   ])('F8.6 rejects unreadable backups: %s', (text) => {
     expect(() => parseBackupFile(text)).toThrow(BackupUnreadableError)
+  })
+
+  it('AC20.7 backs up repeating series and restores them with their tasks', async () => {
+    const task = await createTask({ title: 'Standup', dayKey: DAY, block: 'morning' })
+    const series = await startSeries(task.id, { kind: 'weekly', weekdays: [1, 3] })
+    const backup = parseBackupFile(JSON.stringify(await createBackupFile()))
+    await db.recurringSeries.clear()
+    await db.tasks.clear()
+
+    await restoreBackupFile(backup)
+    expect(await getSeries(series.id)).toMatchObject({ pattern: { kind: 'weekly', weekdays: [1, 3] } })
+    expect((await listTasksForDay(DAY))[0].seriesId).toBe(series.id)
+  })
+
+  it('AC20.7 / RK16 still restores a version 1 file made before repeating tasks', async () => {
+    const current = await createBackupFile(1000)
+    const { recurringSeries: _none, ...v1Data } = current.data
+    const v1 = {
+      ...current,
+      version: 1,
+      data: {
+        ...v1Data,
+        tasks: [
+          {
+            id: 'old',
+            title: 'From before',
+            notes: '',
+            companyId: null,
+            dayKey: DAY,
+            block: 'morning',
+            order: 1000,
+            startTime: null,
+            durationMinutes: null,
+            status: 'todo',
+            carriedOverCount: 0,
+            carriedFromTaskId: null,
+            carriedToTaskId: null,
+            source: 'manual',
+            jiraIssue: null,
+            createdAt: 1,
+            updatedAt: 1,
+          },
+        ],
+      },
+    }
+    const parsed = parseBackupFile(JSON.stringify(v1))
+    await restoreBackupFile(parsed)
+    expect(await listTasksForDay(DAY)).toEqual([expect.objectContaining({ id: 'old', seriesId: null })])
+    expect(await db.recurringSeries.count()).toBe(0)
   })
 
   it('leaves the eye-break log and time in Taskuda on this device (task 18.2)', async () => {

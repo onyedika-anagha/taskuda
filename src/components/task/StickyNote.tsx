@@ -1,11 +1,13 @@
-import { CalendarIcon, RepeatIcon, TriangleAlertIcon } from 'lucide-react'
+import { CalendarIcon, IterationCwIcon, RepeatIcon, TriangleAlertIcon } from 'lucide-react'
 import { forwardRef, type CSSProperties, type ReactNode } from 'react'
 import { CompanyChip } from '@/components/company/CompanyChip'
 import { cn } from '@/lib/utils'
 import type { Company } from '@/types/company'
+import type { RepeatKind } from '@/types/recurring'
 import type { Task } from '@/types/task'
 import { noteColorVariables } from '@/utils/noteColors'
 import { overlapMarkerLabel } from '@/utils/overlapLabels'
+import { REPEAT_MARKER } from '@/utils/recurrence'
 import { carriedOverLabel, formatDuration, formatTime, taskAriaLabel } from '@/utils/taskPresentation'
 import { StatusToggle } from './StatusToggle'
 
@@ -15,6 +17,8 @@ interface StickyNoteProps {
   readOnly: boolean
   /** Tasks this one clashes with on its day (PRD FR25). */
   overlaps?: Task[]
+  /** The task repeats (PRD AC20.2). */
+  repeatKind?: RepeatKind | null
   isDragging?: boolean
   style?: CSSProperties
   onOpen: () => void
@@ -30,6 +34,7 @@ export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function Stic
     company,
     readOnly,
     overlaps = [],
+    repeatKind = null,
     isDragging = false,
     style,
     onOpen,
@@ -39,7 +44,7 @@ export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function Stic
   },
   ref,
 ) {
-  const label = taskAriaLabel(task, company, overlaps)
+  const label = taskAriaLabel(task, company, overlaps, repeatKind)
 
   return (
     <article
@@ -84,12 +89,22 @@ export const StickyNote = forwardRef<HTMLElement, StickyNoteProps>(function Stic
           {task.title}
         </button>
 
-        {task.carriedOverCount > 0 || task.source === 'calendar' || task.jiraIssue || overlaps.length ? (
+        {task.carriedOverCount > 0 ||
+        task.source === 'calendar' ||
+        task.jiraIssue ||
+        overlaps.length ||
+        repeatKind ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium">
             {task.carriedOverCount > 0 ? (
               <span className="inline-flex items-center gap-1">
                 <RepeatIcon aria-hidden="true" className="size-3.5" />
                 {carriedOverLabel(task.carriedOverCount)}
+              </span>
+            ) : null}
+            {repeatKind ? (
+              <span className="inline-flex items-center gap-1">
+                <IterationCwIcon aria-hidden="true" className="size-3.5" />
+                {REPEAT_MARKER[repeatKind]}
               </span>
             ) : null}
             {task.source === 'calendar' ? (

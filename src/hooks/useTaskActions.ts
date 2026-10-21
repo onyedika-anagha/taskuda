@@ -1,6 +1,6 @@
-import { createElement, useMemo } from 'react'
+import { useMemo } from 'react'
 import { toast } from 'sonner'
-import { UndoToast } from '@/components/common/UndoToast'
+import { showUndoToast } from '@/components/common/showUndoToast'
 import * as tasks from '@/services/db/taskRepository'
 import { changeTaskStatus, reportSaveFailure as reportFailure } from '@/services/tasks/taskStatusActions'
 import { announce } from '@/stores/announcerStore'
@@ -9,13 +9,6 @@ import type { NewTaskInput, Task, TaskPatch, TaskStatus, TimeBlock } from '@/typ
 import { BLOCK_LABELS } from '@/utils/taskPresentation'
 import { nextStatus } from '@/utils/taskStatus'
 import { isTimeInBlock } from '@/utils/timeBlocks'
-
-/** `Infinity`: UndoToast closes itself when its own (pausable) timer runs out. */
-function showUndoToast(message: string, onUndo: () => void): void {
-  toast.custom((id) => createElement(UndoToast, { toastId: id, message, onUndo }), {
-    duration: Infinity,
-  })
-}
 
 export interface MoveOptions {
   /** User confirmed "Remove time and move" (design D2). */

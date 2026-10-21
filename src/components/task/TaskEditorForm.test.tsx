@@ -106,4 +106,33 @@ describe('TaskEditorForm', () => {
       expect(screen.queryByText(/^Overlaps with/)).not.toBeInTheDocument()
     })
   })
+
+  describe('Repeat (PRD AC20.1, design F14)', () => {
+    it('DAC17 Weekly preselects the task’s own weekday, so it saves in one extra choice', async () => {
+      const onSubmit = renderForm()
+      await userEvent.type(screen.getByLabelText('Title'), 'Client update')
+      await userEvent.click(screen.getByRole('combobox', { name: 'Repeat' }))
+      await userEvent.click(await screen.findByRole('option', { name: 'Weekly' }))
+      const picker = screen.getByRole('group', { name: 'Repeat on' })
+      const pressed = Array.from(picker.querySelectorAll('[aria-pressed="true"]'))
+      expect(pressed).toHaveLength(1)
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ repeat: 'weekly', repeatWeekdays: [expect.any(Number)] }),
+        expect.anything(),
+      )
+    })
+
+    it('Monthly shows On day, with the short-month hint for 29–31', async () => {
+      renderForm()
+      await userEvent.click(screen.getByRole('combobox', { name: 'Repeat' }))
+      await userEvent.click(await screen.findByRole('option', { name: 'Monthly' }))
+      await userEvent.click(screen.getByRole('combobox', { name: 'On day' }))
+      await userEvent.click(await screen.findByRole('option', { name: '31' }))
+      expect(screen.getByText('In shorter months, it moves to the last day.')).toBeInTheDocument()
+      await userEvent.click(screen.getByRole('combobox', { name: 'On day' }))
+      await userEvent.click(await screen.findByRole('option', { name: '15' }))
+      expect(screen.queryByText('In shorter months, it moves to the last day.')).not.toBeInTheDocument()
+    })
+  })
 })

@@ -56,6 +56,24 @@ describe('StickyNote', () => {
     expect(screen.getByRole('article', { name: /overlaps with 2 tasks$/ })).toBeInTheDocument()
   })
 
+  it('AC20.2 marks a repeating task in text and in the label, never with the raw value', () => {
+    render(
+      <StickyNote
+        task={makeTask({ startTime: '14:00' })}
+        company={makeCompany()}
+        readOnly={false}
+        repeatKind="working_days"
+        onOpen={() => {}}
+        onCycleStatus={() => {}}
+      />,
+    )
+    expect(screen.getByText('Repeats on working days')).toBeInTheDocument()
+    expect(
+      screen.getByRole('article', { name: 'Client call, Acme, 2:00 PM, To Do, repeats on working days' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/working_days/)).not.toBeInTheDocument()
+  })
+
   it('labels calendar-sourced tasks', () => {
     renderNote(makeTask({ source: 'calendar' }))
     expect(screen.getByText('From Google Calendar')).toBeInTheDocument()

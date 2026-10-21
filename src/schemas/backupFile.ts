@@ -3,6 +3,7 @@ import type { ActivityEvent } from '@/types/activity'
 import type { CalendarMapping } from '@/types/calendar'
 import type { Closeout } from '@/types/closeout'
 import type { Company } from '@/types/company'
+import type { RecurringSeries } from '@/types/recurring'
 import type { SettingRecord } from '@/types/settings'
 import type { Task } from '@/types/task'
 import type { VaultRecord } from '@/types/vault'
@@ -26,6 +27,35 @@ const task = z
     carriedToTaskId: z.string().nullable(),
     source: z.enum(['manual', 'calendar']),
     jiraIssue: z.object({ key: z.string(), title: z.string(), status: z.string() }).nullable(),
+    // Version 1 files have no series (PRD AC20.7).
+    seriesId: z.string().nullable().default(null),
+    createdAt: z.number(),
+    updatedAt: z.number(),
+  })
+  .passthrough()
+
+/** 0 = Sunday … 6 = Saturday. */
+const weekday = z.number().int().min(0).max(6)
+
+const series = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    notes: z.string(),
+    companyId: z.string().nullable(),
+    block: z.enum(['morning', 'afternoon', 'evening']),
+    startTime: z.string().nullable(),
+    durationMinutes: z.number().nullable(),
+    jiraIssue: z.object({ key: z.string(), title: z.string(), status: z.string() }).nullable(),
+    pattern: z.discriminatedUnion('kind', [
+      z.object({ kind: z.literal('daily') }),
+      z.object({ kind: z.literal('working_days') }),
+      z.object({ kind: z.literal('weekly'), weekdays: z.array(weekday).min(1) }),
+      z.object({ kind: z.literal('monthly'), dayOfMonth: z.number().int().min(1).max(31) }),
+    ]),
+    startDayKey: z.string(),
+    endedFromDayKey: z.string().nullable(),
+    skippedDayKeys: z.array(z.string()),
     createdAt: z.number(),
     updatedAt: z.number(),
   })
@@ -80,10 +110,13 @@ const vault = z
   })
   .nullable()
 
-/** Taskuda backup file, version 1. Validated before anything is restored (design F8.6). */
+/** Format written today. Version 2 adds repeating series (PRD FR20); version 1 files still restore. */
+export const BACKUP_VERSION = 2
+
+/** Taskuda backup file, version 1 or 2. Validated before anything is restored (design F8.6). */
 export const backupFileSchema = z.object({
   format: z.literal('taskuda-backup'),
-  version: z.literal(1),
+  version: z.union([z.literal(1), z.literal(2)]),
   createdAt: z.number(),
   deviceId: z.string(),
   deviceName: z.string(),
@@ -95,13 +128,15 @@ export const backupFileSchema = z.object({
     settings: z.array(z.object({ key: z.string(), value: z.unknown() })),
     calendarMappings: z.array(z.object({ taskId: z.string(), eventId: z.string() }).passthrough()),
     vault,
+    recurringSeries: z.array(series).default([]),
   }),
 })
 
 /** What a valid backup contains, in the app's own types. `backupFileSchema` checks it at runtime. */
 export interface BackupFile {
   format: 'taskuda-backup'
-  version: 1
+  /** 1 for files made before repeating tasks; they read as version 2 with no series. */
+  version: 1 | 2
   createdAt: number
   deviceId: string
   deviceName: string
@@ -113,5 +148,6 @@ export interface BackupFile {
     settings: SettingRecord[]
     calendarMappings: CalendarMapping[]
     vault: VaultRecord | null
+    recurringSeries: RecurringSeries[]
   }
 }

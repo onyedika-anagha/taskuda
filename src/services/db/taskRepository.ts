@@ -82,6 +82,7 @@ export async function createTask(input: NewTaskInput): Promise<Task> {
       carriedToTaskId: null,
       source: input.source ?? 'manual',
       jiraIssue: input.jiraIssue ?? null,
+      seriesId: input.seriesId ?? null,
       createdAt: now,
       updatedAt: now,
     }
@@ -248,6 +249,7 @@ export async function applyCalendarChange(id: string, change: CalendarTaskChange
 /**
  * Copies an unfinished task to `toDayKey` in the same block, keeping its status (PRD AC11.1).
  * The original stays on its day, linked to the copy, so that day's report can list it as carried over.
+ * The copy keeps `seriesId` (PRD AC20.4).
  */
 export async function carryOverTask(id: string, toDayKey: string): Promise<Task> {
   if (!isValidDayKey(toDayKey)) throw new ValidationError('Invalid day.')
@@ -258,6 +260,24 @@ export async function carryOverTask(id: string, toDayKey: string): Promise<Task>
     if (task.carriedToTaskId) return getTaskOrThrow(task.carriedToTaskId)
 
     const now = Date.now()
+    // A day never shows two tasks from one series (PRD AC20.4): if the next day already has its
+    // occurrence, the task is carried onto that occurrence instead of being copied.
+    const occurrence = task.seriesId
+      ? await db.tasks.where('[seriesId+dayKey]').equals([task.seriesId, toDayKey]).first()
+      : undefined
+    if (occurrence) {
+      const merged: Task = {
+        ...occurrence,
+        carriedOverCount: Math.max(occurrence.carriedOverCount, task.carriedOverCount + 1),
+        carriedFromTaskId: occurrence.carriedFromTaskId ?? task.id,
+        updatedAt: now,
+      }
+      await db.tasks.put(merged)
+      await db.tasks.put({ ...task, carriedToTaskId: occurrence.id, updatedAt: now })
+      await appendActivity('task_carried_over', task.id, task.dayKey, { toDayKey, newTaskId: occurrence.id })
+      return merged
+    }
+
     const copy: Task = {
       ...task,
       id: crypto.randomUUID(),

@@ -29,7 +29,12 @@ export async function backupToDrive(options: Interactive = {}, now = Date.now())
   await createAppDataFile(
     `${BACKUP_PREFIX}${new Date(now).toISOString().replace(/[:.]/g, '-')}.json`,
     JSON.stringify(file),
-    { deviceId: file.deviceId, deviceName: file.deviceName, createdAt: String(now), version: '1' },
+    {
+      deviceId: file.deviceId,
+      deviceName: file.deviceName,
+      createdAt: String(now),
+      version: String(file.version),
+    },
     options,
   )
   const versions = await listAppDataFiles(BACKUP_PREFIX)

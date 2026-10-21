@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { ReminderToast } from '@/components/reminders/ReminderToast'
 import { checkCloseoutNudge } from '@/services/workday/closeoutNudgeAlerts'
 import { ON_TIME_TOLERANCE_MS, dueReminders, planReminders } from '@/services/reminders/reminderPlan'
+import { ensureOccurrences } from '@/services/db/seriesRepository'
 import { getTask, listTasksForDay } from '@/services/db/taskRepository'
 import { changeTaskStatus } from '@/services/tasks/taskStatusActions'
 import { speakAlert } from '@/services/voice/voiceAlerts'
@@ -59,13 +60,17 @@ async function alertReminder(reminder: Reminder): Promise<void> {
 /** Snoozed reminders that are due again; ones for tasks done since then are dropped (AC22.2). */
 async function dueSnoozes(dayKey: string, now: number): Promise<Reminder[]> {
   const due = useReminderStore.getState().takeDueSnoozes(dayKey, now)
-  const live = await Promise.all(due.map(async (r) => ((await getTask(r.taskId))?.status === 'done' ? null : r)))
+  const live = await Promise.all(
+    due.map(async (r) => ((await getTask(r.taskId))?.status === 'done' ? null : r)),
+  )
   return live.filter((r): r is Reminder => r !== null)
 }
 
 /** One check: speak/show what's due now, list what was missed (PRD AC9.1, AC9.2, AC9.5, AC22.2). */
 export async function checkReminders(now = Date.now(), visible = document.visibilityState === 'visible') {
   const dayKey = todayKey(new Date(now))
+  // Today's repeating tasks get reminders even if the canvas hasn't been shown yet (PRD FR20).
+  await ensureOccurrences(dayKey, dayKey).catch(() => 0)
   const [tasks, settings] = await Promise.all([listTasksForDay(dayKey), getVoiceSettings()])
   const reminders = planReminders(tasks, settings.leadMinutes)
   const due = dueReminders(reminders, new Map(tasks.map((t) => [t.id, t])), loadHandled(dayKey), now, visible)
